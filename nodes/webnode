@@ -1,0 +1,68 @@
+#!/usr/bin/env python3
+import rospy
+import tf
+from tf.transformations import euler_from_quaternion
+from nav_msgs.msg import Odometry
+from flask import Flask, render_template, request
+import os
+import threading
+import sys
+import signal
+from werkzeug.serving import make_server
+
+port = 7777
+# host = os.environ["ROS_IP"]
+# host = "10.254.254.254"
+host = "0.0.0.0"
+
+class ServerThread(threading.Thread):
+
+    def __init__(self, app, host_ip, host_port):
+        threading.Thread.__init__(self)
+        self.server = make_server(host_ip, host_port, app)
+        self.ctx = app.app_context()
+        self.ctx.push()
+
+    def run(self):
+        self.server.serve_forever()
+
+    def shutdown(self):
+        self.server.shutdown()
+
+
+if __name__ == '__main__':
+
+    def signal_handler(signal, frame):
+        server.shutdown()
+        rospy.signal_shutdown("end")
+        sys.exit(0)
+
+    signal.signal(signal.SIGINT, signal_handler)
+
+    try:
+
+        rospy.init_node('webnode', anonymous=True)
+        app = Flask(__name__, static_url_path='/assets')
+
+        @app.route("/old")
+        def index():
+            return render_template('index.html', ros_ip=host)
+
+        @app.route("/navi")
+        def navi():
+            return render_template('nav.html', ros_ip=host)
+
+        @app.route("/")
+        def nav():
+            return render_template('maps.html', ros_ip=host)
+
+        server = ServerThread(app, host, port)
+        server.start()
+        rospy.loginfo("Initialising webnode node...")
+        rospy.loginfo("http://{}:{}".format(host, port))
+        rospy.spin()
+
+    except rospy.ROSInterruptException:
+        print("Webnode doesn't start!!!!!")
+
+
