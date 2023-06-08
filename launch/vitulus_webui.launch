@@ -5,6 +5,6 @@
   <node pkg="tf2_web_republisher" type="tf2_web_republisher" name="tf2_web_republisher" output="screen"/>
   <include file="$(find rosbridge_server)/launch/rosbridge_websocket.launch"></include>
 
-  <node pkg="vitulus_webUI" type="webnode" name="webnode" />
+  <node pkg="vitulus_webui" type="webnode" name="webnode" />
 
 </launch>
