@@ -44,6 +44,7 @@ if __name__ == '__main__':
         rospy.init_node('webnode', anonymous=True)
         app = Flask(__name__, static_url_path='/assets')
 
+
         @app.route("/old")
         def index():
             return render_template('index.html', ros_ip=host)
@@ -55,6 +56,11 @@ if __name__ == '__main__':
         @app.route("/")
         def nav():
             return render_template('maps.html', ros_ip=host)
+
+
+        @app.route("/mobjoy")
+        def mobjoy():
+            return render_template('mobJoyMow.html', ros_ip=host)
 
         server = ServerThread(app, host, port)
         server.start()

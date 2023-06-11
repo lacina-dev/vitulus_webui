@@ -293,14 +293,82 @@
                             </div>
                             <div class="tab-pane fade" role="tabpanel" id="tab-mower" style="padding-bottom: 3px;">
                                 <div class="text-center" style="margin-bottom: 5px;margin-top: 2px;"><span class="text-light" style="font-size: 15px;">Mower control</span></div>
+
+                                <div class="text-left d-inline-block" id="mower_tool" style="margin-right: 12px;border: 1px solid var(--blue);border-radius: 1px;">
+                                    <div style="background: #363739;border-top-width: 1px;border-top-color: var(--blue);border-right-width: 1px;border-right-color: var(--blue);border-left-width: 1px;border-left-color: var(--blue);">
+                                        <div class="d-xl-flex align-items-xl-center d-inline-block">
+                                            <i class="fa fa-square" id="motors_tool_dot" style="margin-right: 5px;margin-left: 4px;font-size: 10px;color: var(--blue);"></i>
+                                            <span style="color: var(--gray);">Control</span></div>
+                                    </div>
+                                    <div class="" style="border-width: 1px;border-color: var(--blue);">
+                                        <div class="btn-group btn-group-sm" role="group">
+                                            <button class="btn btn-primary" id="mower_on_btn" type="button">ON</button>
+                                            <button class="btn btn-primary" id="mower_off_btn" type="button">OFF</button>
+                                            <button class="btn btn-primary" id="mower_cali_btn" type="button">CALIBRATION</button>
+                                            <button class="btn btn-primary" id="mower_home_btn" type="button">HOME</button>
+                                            <button class="btn btn-primary" id="mower_dir_right_btn" type="button">RIGHT</button>
+                                            <button class="btn btn-primary" id="mower_dir_left_btn" type="button">LEFT</button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <hr>
+                                <div class="float-right"><span>Direction: </span><span id="mower_direction">RIGHT</span></div>
+                                <div><span>Status: </span><span id="mower_status">UNK</span></div>
+                                <div><span>&nbsp;</span></div>
                                 <div><span>Cut height</span></div>
-                                <div class="d-flex"><input class="flex-fill" type="range" id="cut_height_slider" min="20" max="60" step="5"><span class="text-right ml-auto" id="cut_height_slider_value" style="width: 22px;margin-right: 5px;">0</span><span class="text-right ml-auto" id="cut_height_slider_value-1" style="width: 22px;">mm</span></div>
-                                <div><span>Current cut height:&nbsp;</span><span id="current_cut_height">0</span></div>
-                                <div style="margin-top: 17px;"><span>Cut rpm</span></div>
-                                <div class="d-flex"><input class="flex-fill" type="range" id="cut_rpm_slider" min="0" max="7000" step="200"><span class="text-right ml-auto" id="cut_rpm_slider_value" style="width: 22px;margin-right: 5px;">0</span><span class="text-right ml-auto" id="cut_rpm_slider_value-1" style="width: 22px;">rpm</span></div>
-                                <div><span>Current cut rpm:&nbsp;</span><span id="current_cut_rpm">0</span></div>
-                                <div class="text-center d-flex justify-content-xl-center" style="margin-top: 13px;margin-bottom: 8px;"><button class="btn btn-success" id="mower_motor_start_btn" type="button">Start motor</button><button class="btn btn-danger flex-fill" id="mower_motor_stop_btn" type="button">Stop motor</button></div>
-                                <div class="text-center d-flex justify-content-xl-center" style="margin-top: 3px;"></div>
+                                <div class="d-flex"><input class="flex-fill" type="range" id="mower_height_slider" min="20" max="65" step="1"><span class="text-right ml-auto" id="mower_height_slider_value" style="width: 22px;margin-right: 5px;">0</span><span class="text-right ml-auto" id="mower_height_slider_value-1" style="width: 22px;">mm</span></div>
+                                <div><span>Current cut height:&nbsp;</span><span id="mower_current_height">0</span></div>
+                                <div style="margin-top: 17px;"><span>Cut rpm </span>(<span id="mower_motor_rpm_setpoint"></span>)</div>
+                                <div class="d-flex"><input class="flex-fill" type="range" id="mower_motor_rpm_slider" min="200" max="4000" step="200"><span class="text-right ml-auto" id="mower_motor_rpm_slider_value" style="width: 22px;margin-right: 5px;">0</span><span class="text-right ml-auto" id="mower_motor_rpm_slider_value-1" style="width: 22px;">rpm</span></div>
+                                <div><span>Current cut rpm:&nbsp;</span><span id="mower_current_motor_rpm">0</span></div>
+                                <div class="text-center d-flex justify-content-xl-center" style="margin-top: 13px;margin-bottom: 8px;">
+                                    <button class="btn btn-success" id="mower_motor_start_btn" type="button">Start motor</button>
+                                    <button class="btn btn-danger flex-fill" id="mower_motor_stop_btn" type="button">Stop motor</button>
+                                </div>
+                                <!--CMD1-->
+                                <div class="text-center d-flex justify-content-xl-center" style="margin-top: 3px;">&nbsp;</div>
+                                <div class="input-group input-group-sm">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text" style="height: 22.7969px;background: var(--primary);color: var(--light);font-size: 9.2px;border-color: var(--dark);">Command:</span>
+                                    </div>
+                                    <input class="form-control form-control-sm" type="text" id="mower_cmd_input"  name="mower_cmd_input" style="font-size: 9.2px;background: var(--dark);color: var(--white);padding-top: 2px;padding-bottom: 2px;border-color: #1f2021;text-align: left;" placeholder="PIDP0503">
+                                    <div class="input-group-append">
+                                        <button class="btn btn-primary" id="mower_set_cmd_btn" type="button" style="height: 24.7969px;padding-top: 2px;">Send</button>
+                                    </div>
+                                </div>
+                                <!--CMD2-->
+                                <div class="text-center d-flex justify-content-xl-center" style="margin-top: 3px;">&nbsp;</div>
+                                <div class="input-group input-group-sm">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text" style="height: 22.7969px;background: var(--primary);color: var(--light);font-size: 9.2px;border-color: var(--dark);">Command:</span>
+                                    </div>
+                                    <input class="form-control form-control-sm" type="text" id="mower_cmd2_input"  name="mower_cmd2_input" style="font-size: 9.2px;background: var(--dark);color: var(--white);padding-top: 2px;padding-bottom: 2px;border-color: #1f2021;text-align: left;" placeholder="PIDP0503">
+                                    <div class="input-group-append">
+                                        <button class="btn btn-primary" id="mower_set_cmd2_btn" type="button" style="height: 24.7969px;padding-top: 2px;">Send</button>
+                                    </div>
+                                </div>
+                                <!--CMD3-->
+                                <div class="text-center d-flex justify-content-xl-center" style="margin-top: 3px;">&nbsp;</div>
+                                <div class="input-group input-group-sm">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text" style="height: 22.7969px;background: var(--primary);color: var(--light);font-size: 9.2px;border-color: var(--dark);">Command:</span>
+                                    </div>
+                                    <input class="form-control form-control-sm" type="text" id="mower_cmd3_input"  name="mower_cmd3_input" style="font-size: 9.2px;background: var(--dark);color: var(--white);padding-top: 2px;padding-bottom: 2px;border-color: #1f2021;text-align: left;" placeholder="PIDP0503">
+                                    <div class="input-group-append">
+                                        <button class="btn btn-primary" id="mower_set_cmd3_btn" type="button" style="height: 24.7969px;padding-top: 2px;">Send</button>
+                                    </div>
+                                </div>
+                                <!--CMD4-->
+                                <div class="text-center d-flex justify-content-xl-center" style="margin-top: 3px;">&nbsp;</div>
+                                <div class="input-group input-group-sm">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text" style="height: 22.7969px;background: var(--primary);color: var(--light);font-size: 9.2px;border-color: var(--dark);">Command:</span>
+                                    </div>
+                                    <input class="form-control form-control-sm" type="text" id="mower_cmd4_input"  name="mower_cmd4_input" style="font-size: 9.2px;background: var(--dark);color: var(--white);padding-top: 2px;padding-bottom: 2px;border-color: #1f2021;text-align: left;" placeholder="PIDP0503">
+                                    <div class="input-group-append">
+                                        <button class="btn btn-primary" id="mower_set_cmd4_btn" type="button" style="height: 24.7969px;padding-top: 2px;">Send</button>
+                                    </div>
+                                </div>
                             </div>
                             <div class="tab-pane fade" role="tabpanel" id="tab-diag">
                                 <p>Diagnostic data:</p>

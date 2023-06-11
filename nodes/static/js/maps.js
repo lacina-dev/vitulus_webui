@@ -2074,73 +2074,224 @@ window.onload = function() {
 //////////////////////////////////////////   MOWER      /////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    cut_height_slider_value = document.getElementById("cut_height_slider_value");
-    cut_height_slider = document.getElementById("cut_height_slider");
-    current_cut_height = document.getElementById("current_cut_height");
+    mower_height_slider_value = document.getElementById("mower_height_slider_value");
+    mower_height_slider = document.getElementById("mower_height_slider");
+    mower_current_height = document.getElementById("mower_current_height");
     var init_cut_height = true;
-    cut_rpm_slider_value = document.getElementById("cut_rpm_slider_value");
-    cut_rpm_slider = document.getElementById("cut_rpm_slider");
-    current_cut_rpm = document.getElementById("current_cut_rpm");
+    mower_motor_rpm_slider_value = document.getElementById("mower_motor_rpm_slider_value");
+    mower_motor_rpm_slider = document.getElementById("mower_motor_rpm_slider");
+    mower_current_motor_rpm = document.getElementById("mower_current_motor_rpm");
+    mower_motor_rpm_setpoint = document.getElementById("mower_motor_rpm_setpoint");
     var init_cut_rpm = true;
     mower_motor_start_btn = document.getElementById("mower_motor_start_btn");
     mower_motor_stop_btn = document.getElementById("mower_motor_stop_btn");
+    mower_on_btn = document.getElementById("mower_on_btn");
+    mower_off_btn = document.getElementById("mower_off_btn");
+    mower_cali_btn = document.getElementById("mower_cali_btn");
+    mower_home_btn = document.getElementById("mower_home_btn");
+    mower_dir_right_btn = document.getElementById("mower_dir_right_btn");
+    mower_dir_left_btn = document.getElementById("mower_dir_left_btn");
+    mower_set_cmd_btn = document.getElementById("mower_set_cmd_btn");
+    mower_cmd_input = document.getElementById("mower_cmd_input");
+    mower_status_span = document.getElementById("mower_status");
+    mower_direction_span = document.getElementById("mower_direction");
 
 
-/////////////////////////////////////////////////  CUT HEIGHT SUBSCRIBER  //////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////  MOWER STATUS SUBSCRIBER  //////////////////////////////////////////////////////////////////////
 
-    var listener_mower_cut_height = new ROSLIB.Topic({
+    var listener_mower_status = new ROSLIB.Topic({
             ros : ros,
-            name : '/mower_cut_height',
-            messageType : 'std_msgs/Int32'
+            name : '/mower/status',
+            messageType : 'vitulus_msgs/Mower'
     });
 
-    listener_mower_cut_height.subscribe(function(message) {
+    listener_mower_status.subscribe(function(message) {
+        mower_status_span.textContent = message.status;
+        mower_direction_span.textContent = message.moto_dir;
+        mower_current_motor_rpm.textContent = message.moto_rpm;
         if (init_cut_height){
-            cut_height_slider.value = message.data;
-            cut_height_slider_value.textContent = message.data;
+            mower_height_slider.value = message.current_height;
+            mower_height_slider.max = message.max_height;
+            mower_height_slider_value.textContent = message.current_height;
             init_cut_height = false;
         }
-        current_cut_height.textContent = message.data;
+        mower_current_height.textContent = message.current_height;
+        if (init_cut_rpm){
+            mower_motor_rpm_slider.value = message.setpoint_rpm;
+//            mower_motor_rpm_slider.max = message.max_height;
+            mower_motor_rpm_slider_value.textContent = message.setpoint_rpm;
+            init_cut_rpm = false;
+        }
+
+        mower_current_motor_rpm.textContent = message.moto_rpm;
+        mower_motor_rpm_setpoint.textContent = message.setpoint_rpm;
     });
 
+/////////////////////////////////////////////////  MOWER COMMAND PUBLISHER  //////////////////////////////////////////////////////////////////////
 
-/////////////////////////////////////////////////  CUT HEIGHT PUBLISHER  //////////////////////////////////////////////////////////////////////
+
+    var mower_set_cmdTopic = new ROSLIB.Topic({
+        ros : ros,
+        name : '/mower/set_cmd',
+        messageType : 'std_msgs/String'
+    });
+    mower_set_cmdTopic.advertise();
+
+    mower_set_cmd_btn.onclick = function() {
+        var mower_set_cmdMsg = new ROSLIB.Message({
+            data : mower_cmd_input.value,
+        });
+        console.log("CMD SEND");
+        mower_set_cmdTopic.publish(mower_set_cmdMsg);
+    };
+    mower_set_cmd2_btn.onclick = function() {
+        var mower_set_cmd2Msg = new ROSLIB.Message({
+            data : mower_cmd2_input.value,
+        });
+        console.log("CMD2 SEND");
+        mower_set_cmdTopic.publish(mower_set_cmd2Msg);
+    };
+
+    mower_set_cmd3_btn.onclick = function() {
+        var mower_set_cmd3Msg = new ROSLIB.Message({
+            data : mower_cmd3_input.value,
+        });
+        console.log("CMD3 SEND");
+        mower_set_cmdTopic.publish(mower_set_cmd3Msg);
+    };
+
+    mower_set_cmd4_btn.onclick = function() {
+        var mower_set_cmd4Msg = new ROSLIB.Message({
+            data : mower_cmd4_input.value,
+        });
+        console.log("CMD4 SEND");
+        mower_set_cmdTopic.publish(mower_set_cmd4Msg);
+    };
+
+
+/////////////////////////////////////////////////  MOWER POWER PUBLISHER  //////////////////////////////////////////////////////////////////////
+
+
+    var mower_set_powerTopic = new ROSLIB.Topic({
+        ros : ros,
+        name : '/mower/set_power',
+        messageType : 'std_msgs/Bool'
+    });
+    mower_set_powerTopic.advertise();
+
+    mower_on_btn.onclick = function() {
+        var mower_set_powerMsg = new ROSLIB.Message({
+            data : true,
+        });
+        mower_set_powerTopic.publish(mower_set_powerMsg);
+    };
+
+    mower_off_btn.onclick = function() {
+        var mower_set_powerMsg = new ROSLIB.Message({
+            data : false,
+        });
+        mower_set_powerTopic.publish(mower_set_powerMsg);
+    };
+
+/////////////////////////////////////////////////  MOWER CALIBRATION PUBLISHER  //////////////////////////////////////////////////////////////////////
+
+
+    var mower_set_caliTopic = new ROSLIB.Topic({
+        ros : ros,
+        name : '/mower/set_calibrate',
+        messageType : 'std_msgs/Bool'
+    });
+    mower_set_caliTopic.advertise();
+
+    mower_cali_btn.onclick = function() {
+        var mower_set_caliMsg = new ROSLIB.Message({
+            data : true,
+        });
+        mower_set_caliTopic.publish(mower_set_caliMsg);
+    };
+
+/////////////////////////////////////////////////  MOWER HOME PUBLISHER  //////////////////////////////////////////////////////////////////////
+
+
+    var mower_set_homeTopic = new ROSLIB.Topic({
+        ros : ros,
+        name : '/mower/set_home',
+        messageType : 'std_msgs/Bool'
+    });
+    mower_set_homeTopic.advertise();
+
+    mower_home_btn.onclick = function() {
+        var mower_set_homeMsg = new ROSLIB.Message({
+            data : true,
+        });
+        mower_set_homeTopic.publish(mower_set_homeMsg);
+    };
+
+/////////////////////////////////////////////////  MOWER DIRECTION PUBLISHER  //////////////////////////////////////////////////////////////////////
+
+
+    var mower_set_motor_dirTopic = new ROSLIB.Topic({
+        ros : ros,
+        name : '/mower/set_motor_dir',
+        messageType : 'std_msgs/String'
+    });
+    mower_set_motor_dirTopic.advertise();
+
+    mower_dir_right_btn.onclick = function() {
+        var mower_set_motor_dirMsg = new ROSLIB.Message({
+            data : "RIGHT",
+        });
+        mower_set_motor_dirTopic.publish(mower_set_motor_dirMsg);
+    };
+
+    mower_dir_left_btn.onclick = function() {
+        var mower_set_motor_dirMsg = new ROSLIB.Message({
+            data : "LEFT",
+        });
+        mower_set_motor_dirTopic.publish(mower_set_motor_dirMsg);
+    };
+
+
+
+/////////////////////////////////////////////////  MOWER CUT HEIGHT PUBLISHER  //////////////////////////////////////////////////////////////////////
 
 
     var mower_set_heightTopic = new ROSLIB.Topic({
         ros : ros,
-        name : '/mower_set_height',
-        messageType : 'std_msgs/Int32'
+        name : '/mower/set_cut_height',
+        messageType : 'std_msgs/Int16'
     });
     mower_set_heightTopic.advertise();
 
-    cut_height_slider.oninput = function() {
-        cut_height_slider_value.textContent = cut_height_slider.value;
+    mower_height_slider.oninput = function() {
+        mower_height_slider_value.textContent = mower_height_slider.value;
         var mower_set_heightMsg = new ROSLIB.Message({
-            data : parseInt(cut_height_slider.value),
+            data : parseInt(mower_height_slider.value),
         });
         mower_set_heightTopic.publish(mower_set_heightMsg);
 
     };
 
+/////////////////////////////////////////////////  MOWER MOTOR RPM PUBLISHER  //////////////////////////////////////////////////////////////////////
 
 
-/////////////////////////////////////////////////  RPM SUBSCRIBER  //////////////////////////////////////////////////////////////////////
-
-    var listener_mower_rpm = new ROSLIB.Topic({
-            ros : ros,
-            name : '/mower_rpm',
-            messageType : 'std_msgs/Int32'
+    var mower_set_rpmTopic = new ROSLIB.Topic({
+        ros : ros,
+        name : '/mower/set_motor_rpm',
+        messageType : 'std_msgs/Int16'
     });
+    mower_set_rpmTopic.advertise();
 
-    listener_mower_rpm.subscribe(function(message) {
-        if (init_cut_rpm){
-            cut_rpm_slider.value = 3300;
-            cut_rpm_slider_value.textContent = 3300;
-            init_cut_rpm = false;
-        }
-        current_cut_rpm.textContent = message.data;
-    });
+    mower_motor_rpm_slider.oninput = function() {
+        mower_motor_rpm_slider_value.textContent = mower_motor_rpm_slider.value;
+        var mower_set_rpmMsg = new ROSLIB.Message({
+            data : parseInt(mower_motor_rpm_slider.value),
+        });
+        mower_set_rpmTopic.publish(mower_set_rpmMsg);
+
+    };
+
+
 
 
 /////////////////////////////////////////////////  RPM PUBLISHER  //////////////////////////////////////////////////////////////////////
@@ -2148,15 +2299,15 @@ window.onload = function() {
 
     var mower_set_rpmTopic = new ROSLIB.Topic({
         ros : ros,
-        name : '/mower_set_rpm',
+        name : '/mower/set_motor_rpm',
         messageType : 'std_msgs/Int32'
     });
     mower_set_rpmTopic.advertise();
 
-    cut_rpm_slider.oninput = function() {
-        cut_rpm_slider_value.textContent = cut_rpm_slider.value;
+    mower_motor_rpm_slider.oninput = function() {
+        mower_motor_rpm_slider_value.textContent = mower_motor_rpm_slider.value;
         var mower_set_rpmMsg = new ROSLIB.Message({
-            data : parseInt(cut_rpm_slider.value),
+            data : parseInt(mower_motor_rpm_slider.value),
         });
         mower_set_rpmTopic.publish(mower_set_rpmMsg);
 
@@ -2168,21 +2319,21 @@ window.onload = function() {
 
     var mower_set_motorTopic = new ROSLIB.Topic({
         ros : ros,
-        name : '/mower_set_motor',
-        messageType : 'std_msgs/Int32'
+        name : '/mower/set_motor_on',
+        messageType : 'std_msgs/Bool'
     });
     mower_set_motorTopic.advertise();
 
     mower_motor_start_btn.onclick = function() {
         var mower_set_motorMsg = new ROSLIB.Message({
-            data : 1,
+            data : true,
         });
         mower_set_motorTopic.publish(mower_set_motorMsg);
     };
 
     mower_motor_stop_btn.onclick = function() {
         var mower_set_motorMsg = new ROSLIB.Message({
-            data : 0,
+            data : false,
         });
         mower_set_motorTopic.publish(mower_set_motorMsg);
     };
@@ -2200,7 +2351,7 @@ window.onload = function() {
 
     var listener_front_left_wheel_state = new ROSLIB.Topic({
             ros : ros,
-            name : '/base/front_left_wheel_slow_state',
+            name : '/base/front_left_wheel_state',
             messageType : 'vitulus_msgs/Moteus_controller_state'
     });
 
@@ -2228,7 +2379,7 @@ window.onload = function() {
 
     var listener_front_right_wheel_state = new ROSLIB.Topic({
             ros : ros,
-            name : '/base/front_right_wheel_slow_state',
+            name : '/base/front_right_wheel_state',
             messageType : 'vitulus_msgs/Moteus_controller_state'
     });
 
@@ -2256,7 +2407,7 @@ window.onload = function() {
 
     var listener_rear_left_wheel_state = new ROSLIB.Topic({
             ros : ros,
-            name : '/base/rear_left_wheel_slow_state',
+            name : '/base/rear_left_wheel_state',
             messageType : 'vitulus_msgs/Moteus_controller_state'
     });
 
@@ -2284,7 +2435,7 @@ window.onload = function() {
 
     var listener_rear_right_wheel_state = new ROSLIB.Topic({
             ros : ros,
-            name : '/base/rear_right_wheel_slow_state',
+            name : '/base/rear_right_wheel_state',
             messageType : 'vitulus_msgs/Moteus_controller_state'
     });
 
