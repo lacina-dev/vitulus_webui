@@ -227,7 +227,7 @@ window.onload = function() {
     var RtabmapInfolistener = new ROSLIB.Topic({
         ros : ros,
         name : '/rtabmap/info',
-        messageType : 'rtabmap_ros/Info'
+        messageType : 'rtabmap_msgs/Info'
     });
 
     RtabmapInfolistener.subscribe(function(message) {
