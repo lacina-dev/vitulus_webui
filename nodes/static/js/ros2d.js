@@ -178,6 +178,8 @@ ROS2D.OccupancyGrid = function(options) {
         val = 0;
       } else if (data === 0) {
         val = 255;
+      } else if (data >= 1 && data <= 99) {
+        val = data;
       } else {
         val = 127;
       }
