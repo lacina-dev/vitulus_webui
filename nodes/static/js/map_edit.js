@@ -26,6 +26,7 @@ window.onload = function() {
     console.log(div_map);
     width = (div_map.clientWidth-4);
     height = (div_map.clientHeight-8);
+    var initiate = true;
     console.log(width);
     console.log(height);
 
@@ -37,6 +38,18 @@ window.onload = function() {
       height : height
     });
 
+    // Add zoom to the viewer.
+    zoomView = new ROS2D.ZoomView({
+        rootObject : viewer.scene
+    });
+    // Add panning to the viewer.
+    panView = new ROS2D.PanView({
+        rootObject : viewer.scene
+    });
+
+
+
+
     // Setup the map client.  //////////////////////////////////////////////////////////////////////////////////////////
     gridClient = new ROS2D.OccupancyGridClient({
       ros : ros,
@@ -46,13 +59,28 @@ window.onload = function() {
       continuous: true
     });
 
+    // Add coverage path
+    var coveragePath = new ROS2D.PathShape({
+        // ros : ros,
+        // rootObject : viewer.scene,
+        strokeSize : 0.03,
+        strokeColor : createjs.Graphics.getRGB(255, 0, 0),
+    });
+    gridClient.rootObject.addChild(coveragePath);
+
+
     gridClient.on('change', function() {
-      if (gridClient.currentGrid.width > gridClient.currentGrid.height){
-        viewer.scaleToDimensions(gridClient.currentGrid.width, gridClient.currentGrid.width);
-      }else{
-        viewer.scaleToDimensions(gridClient.currentGrid.height, gridClient.currentGrid.height);
-      }
-      viewer.shift(gridClient.currentGrid.pose.position.x, gridClient.currentGrid.pose.position.y);
+        if (initiate){
+            if (gridClient.currentGrid.width > gridClient.currentGrid.height){
+               viewer.scaleToDimensions(gridClient.currentGrid.width, gridClient.currentGrid.width);
+            }else{
+               viewer.scaleToDimensions(gridClient.currentGrid.height, gridClient.currentGrid.height);
+            }
+            viewer.shift(gridClient.currentGrid.pose.position.x, gridClient.currentGrid.pose.position.y);
+            initiate = false;
+        }
+
+      // registerMouseHandlers();
       // console.log(viewer);
       // console.log(gridClient);
       // console.log(viewer.scene.children[1]);
@@ -80,7 +108,7 @@ window.onload = function() {
 
     var lineCallBack = function(type, event, index) {
       if (type === 'mousedown') {
-        if (event.nativeEvent.ctrlKey === true) {
+        if (event.nativeEvent.shiftKey === true) {
           polygon.splitLine(index);
         }
       }
@@ -103,28 +131,88 @@ window.onload = function() {
     // Event listeners for mouse interaction with the stage  ///////////////////////////////////////////////////////////
     viewer.scene.mouseMoveOutside = false; // doesn't seem to work
 
-    viewer.scene.addEventListener('stagemousemove', function(event) {
-      // Move point when it's dragged
-      if (selectedPointIndex !== null) {
-        var pos = viewer.scene.globalToRos(event.stageX, event.stageY);
-        polygon.movePoint(selectedPointIndex, pos);
+    function registerMouseHandlers() {
+        // Setup mouse event handlers
+			var mouseDown = false;
+			var zoomKey = false;
+			var panKey = false;
+			var startPos = new ROSLIB.Vector3();
 
-      }
-    });
+        viewer.scene.addEventListener('stagemousedown', function(event) {
+            if (event.nativeEvent.altKey === true) {
+                console.log("alt pressed")
+                zoomKey = true;
+                zoomView.startZoom(event.stageX, event.stageY);
+            }
+            else if (event.nativeEvent.ctrlKey === true) {
+                console.log("ctrl pressed")
+                panKey = true;
+                panView.startPan(event.stageX, event.stageY);
+            }
+            startPos.x = event.stageX;
+            startPos.y = event.stageY;
+            mouseDown = true;
+        });
 
-    viewer.scene.addEventListener('stagemouseup', function(event) {
-      // Add point when not clicked on the polygon
-      if (selectedPointIndex !== null) {
-        selectedPointIndex = null;
-      }
-      else if (viewer.scene.mouseInBounds === true && clickedPolygon === false) {
-        var pos = viewer.scene.globalToRos(event.stageX, event.stageY);
-        console.log(pos);
-        polygon.addPoint(pos);
-        console.log(polygon);
-      }
-      clickedPolygon = false;
-    });
+        viewer.scene.addEventListener('stagemousemove', function(event) {
+          // Move point when it's dragged
+          if (selectedPointIndex !== null) {
+            var pos = viewer.scene.globalToRos(event.stageX, event.stageY);
+            polygon.movePoint(selectedPointIndex, pos);
+
+          } else {
+              if (mouseDown === true) {
+					if (zoomKey === true) {
+						var dy = event.stageY - startPos.y;
+						var zoom = 1 + 10*Math.abs(dy) / viewer.scene.canvas.clientHeight;
+						if (dy < 0)
+							zoom = 1 / zoom;
+						zoomView.zoom(zoom);
+					}
+					else if (panKey === true) {
+						panView.pan(event.stageX, event.stageY);
+					}
+				}
+          }
+        });
+
+        viewer.scene.addEventListener('stagemouseup', function(event) {
+          // Add point when not clicked on the polygon
+            console.log("zoomKey: " + zoomKey + " panKey: " + panKey + " mouseDown: " + mouseDown + " clickedPolygon: " + clickedPolygon + " selectedPointIndex: " + selectedPointIndex + " mouseInBounds: " + viewer.scene.mouseInBounds);
+          if (selectedPointIndex !== null) {
+            selectedPointIndex = null;
+            if (mouseDown === true) {
+					if (zoomKey === true) {
+						zoomKey = false;
+					}
+					else if (panKey === true) {
+						panKey = false;
+					}
+					mouseDown = false;
+				}
+          }
+          else if (viewer.scene.mouseInBounds === true && clickedPolygon === false && zoomKey === false && panKey === false) {
+            var pos = viewer.scene.globalToRos(event.stageX, event.stageY);
+            // console.log(pos);
+            polygon.addPoint(pos);
+            console.log("point added");
+            // console.log(polygon);
+          } else {
+              if (mouseDown === true) {
+					if (zoomKey === true) {
+						zoomKey = false;
+					}
+					else if (panKey === true) {
+						panKey = false;
+					}
+					mouseDown = false;
+				}
+          }
+          clickedPolygon = false;
+        });
+    }
+
+    registerMouseHandlers();
 
 
 
@@ -292,22 +380,22 @@ window.onload = function() {
         });
         topic_show_fill_map.publish(msg);
     }
-    // show border path  ///////////////////////////////////////////////////////////////////////////////////////////////
-    btn_show_border_path = document.getElementById("btn_show_border_path");
-    btn_show_border_path.onclick = function() {
+    // show assembled_lite   ///////////////////////////////////////////////////////////////////////////////////////////////
+    btn_show_assembled_lite = document.getElementById("btn_show_assembled_lite");
+    btn_show_assembled_lite.onclick = function() {
         var msg = new ROSLIB.Message({
-            data : "border_path",
+            data : "assembled_lite",
         });
         topic_show_fill_map.publish(msg);
     }
-    // show coverage path  /////////////////////////////////////////////////////////////////////////////////////////////
-    btn_show_coverage_path = document.getElementById("btn_show_coverage_path");
-    btn_show_coverage_path.onclick = function() {
-        var msg = new ROSLIB.Message({
-            data : "coverage_path",
-        });
-        topic_show_fill_map.publish(msg);
-    }
+    // // show coverage path  /////////////////////////////////////////////////////////////////////////////////////////////
+    // btn_show_coverage_path = document.getElementById("btn_show_coverage_path");
+    // btn_show_coverage_path.onclick = function() {
+    //     var msg = new ROSLIB.Message({
+    //         data : "coverage_path",
+    //     });
+    //     topic_show_fill_map.publish(msg);
+    // }
     // show original  //////////////////////////////////////////////////////////////////////////////////////////////////
     btn_show_original = document.getElementById("btn_show_original");
     btn_show_original.onclick = function() {
@@ -324,37 +412,54 @@ window.onload = function() {
         });
         topic_show_fill_map.publish(msg);
     }
+    // show zone map  /////////////////////////////////////////////////////////////////////////////////////////////////
+    btn_show_zone_map = document.getElementById("btn_show_zone_map");
+    btn_show_zone_map.onclick = function() {
+        var msg = new ROSLIB.Message({
+            data : "zone_map",
+        });
+        topic_show_fill_map.publish(msg);
+    }
+    // show zone_border_path map  /////////////////////////////////////////////////////////////////////////////////////////////////
+    btn_show_zone_border_path = document.getElementById("btn_show_zone_border_path");
+    btn_show_zone_border_path.onclick = function() {
+        var msg = new ROSLIB.Message({
+            data : "zone_border_path",
+        });
+        topic_show_fill_map.publish(msg);
+    }
+
 
     // Polygons  ///////////////////////////////////////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    // Publish current polygon  ////////////////////////////////////////////////////////////////////////////////////////
-    var topic_publish_polygon = new ROSLIB.Topic({
-        ros : ros,
-        name : '/publish_polygon',
-        messageType : 'geometry_msgs/PolygonStamped'
-    });
-    topic_publish_polygon.advertise();
-    btn_pub_polygon = document.getElementById("btn_pub_polygon");
-
-    btn_pub_polygon.onclick = function() {
-        console.log(polygon.pointContainer.children.length);
-        if (polygon.pointContainer.children.length > 0){
-            var points = [];
-            for (i in polygon.pointContainer.children){
-                points.push({x: polygon.pointContainer.children[i].x, y: polygon.pointContainer.children[i].y * -1});
-            }
-            var msg = new ROSLIB.Message({
-                header : {
-                    frame_id : "map"
-                },
-                polygon : {
-                    points : points
-                }
-            });
-            topic_publish_polygon.publish(msg);
-        }
-    };
+    // // Publish current polygon  ////////////////////////////////////////////////////////////////////////////////////////
+    // var topic_publish_polygon = new ROSLIB.Topic({
+    //     ros : ros,
+    //     name : '/publish_polygon',
+    //     messageType : 'geometry_msgs/PolygonStamped'
+    // });
+    // topic_publish_polygon.advertise();
+    // btn_pub_polygon = document.getElementById("btn_pub_polygon");
+    //
+    // btn_pub_polygon.onclick = function() {
+    //     // console.log(polygon.pointContainer.children.length);
+    //     if (polygon.pointContainer.children.length > 0){
+    //         var points = [];
+    //         for (i in polygon.pointContainer.children){
+    //             points.push({x: polygon.pointContainer.children[i].x, y: polygon.pointContainer.children[i].y * -1});
+    //         }
+    //         var msg = new ROSLIB.Message({
+    //             header : {
+    //                 frame_id : "map"
+    //             },
+    //             polygon : {
+    //                 points : points
+    //             }
+    //         });
+    //         topic_publish_polygon.publish(msg);
+    //     }
+    // };
 
     // Polygon elements  ///////////////////////////////////////////////////////////////////////////////////////////////
     var input_poly_template_name = document.getElementById("input_poly_template_name");
@@ -575,6 +680,15 @@ window.onload = function() {
         polygon.fillShape.graphics._oldInstructions = [];
         viewer.scene.addChild(polygon);
     }
+
+    // Selected zone topic /////////////////////////////////////////////////////////////////////////////////////////////////
+    var topic_selected_zone = new ROSLIB.Topic({
+            ros : ros,
+            name : '/selected_zone',
+            messageType : 'std_msgs/String'
+    });
+    topic_selected_zone.advertise();
+
     // Cancel zone ////////////////////////////////////////////////////////////////////////////////////////////////////
     btn_zone_template_cancel.onclick = function(){
         div_zone_template.setAttribute('style', 'display:none !important');
@@ -583,6 +697,10 @@ window.onload = function() {
         polygon.lineContainer.children = [];
         polygon.fillShape.graphics._instructions = [];
         polygon.fillShape.graphics._oldInstructions = [];
+        let msg = new ROSLIB.Message({
+                    data : "cancel**cancel**"
+                });
+                topic_selected_zone.publish(msg);
     }
 
     // Save zone topic /////////////////////////////////////////////////////////////////////////////////////////////////
@@ -682,6 +800,9 @@ window.onload = function() {
         }
     });
 
+
+
+
     // Edit zone from list by name /////////////////////////////////////////////////////////////////////////////////////
     this.editZone = function(zone_name){
         for (let i in current_zone_list){
@@ -709,6 +830,10 @@ window.onload = function() {
                 input_zone_template_border_path.value = zone.border_paths;
                 input_zone_template_coverage_path.value = zone.coverage_angle;
                 input_zone_template_path_distance.value = zone.paths_distance;
+                let msg = new ROSLIB.Message({
+                    data : zone_name
+                });
+                topic_selected_zone.publish(msg);
             }
         }
     }
@@ -727,6 +852,21 @@ window.onload = function() {
         });
         topic_remove_zone.publish(msg);
     }
+
+    // Paths  //////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    var pathCoverageTopic = new ROSLIB.Topic({
+        ros : ros,
+        name : '/path_show',
+        messageType : 'nav_msgs/Path'
+    });
+
+
+    pathCoverageTopic.subscribe(function(message) {
+        console.log("Path:");
+        coveragePath.setPath(message);
+    });
+
 
 
 
