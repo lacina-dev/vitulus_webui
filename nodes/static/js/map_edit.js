@@ -357,6 +357,14 @@ window.onload = function() {
         });
         topic_show_fill_map.publish(msg);
     }
+    // show zone_navi map  /////////////////////////////////////////////////////////////////////////////////////////////////
+    btn_show_zone_navi = document.getElementById("btn_show_zone_navi");
+    btn_show_zone_navi.onclick = function() {
+        var msg = new ROSLIB.Message({
+            data : "zone_navi",
+        });
+        topic_show_fill_map.publish(msg);
+    }
 
 
     // Polygons  ///////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -553,6 +561,7 @@ window.onload = function() {
     var input_zone_template_border_path = document.getElementById("input_zone_template_border_path");
     var input_zone_template_coverage_path = document.getElementById("input_zone_template_coverage_path");
     var input_zone_template_path_distance = document.getElementById("input_zone_template_path_distance");
+    var input_zone_template_simplify = document.getElementById("input_zone_template_simplify");
     var span_path_name = document.getElementById("span_path_name");
     var span_path_type = document.getElementById("span_path_type");
     var span_zone_name = document.getElementById("span_zone_name");
@@ -598,7 +607,8 @@ window.onload = function() {
         input_zone_template_cut_height.value = 45;
         input_zone_template_border_path.value = 2;
         input_zone_template_coverage_path.value = 160;
-        input_zone_template_path_distance.value = 20;
+        input_zone_template_path_distance.value = 0.2;
+        input_zone_template_simplify.value = 0.1;
         // header_zone_template_coverage_path.setAttribute('style', 'display:none !important');
         // header_zone_template_border_path.setAttribute('style', 'display:none !important');
         // header_zone_template_path_list.setAttribute('style', 'display:none !important');
@@ -669,7 +679,8 @@ window.onload = function() {
                 rpm: parseInt(input_zone_template_rpm.value),
                 border_paths: parseInt(input_zone_template_border_path.value),
                 coverage_angle: parseInt(input_zone_template_coverage_path.value),
-                paths_distance: parseInt(input_zone_template_path_distance.value),
+                paths_distance: parseFloat(input_zone_template_path_distance.value),
+                simplify: parseFloat(input_zone_template_simplify.value),
                 polygon: msgPoly,
                 paths: []
             });
