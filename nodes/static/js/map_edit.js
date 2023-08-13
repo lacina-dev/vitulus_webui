@@ -230,111 +230,40 @@ window.onload = function() {
         div_log.textContent = message.data;
     });
 
-    // Fill unknown (fill holes in map)  ///////////////////////////////////////////////////////////////////////////////
-    var topic_fill_unk = new ROSLIB.Topic({
-        ros : ros,
-        name : '/fill_unknown',
-        messageType : 'std_msgs/Int16'
-    });
-    topic_fill_unk.advertise();
-    btn_fill_free_set = document.getElementById("btn_fill_free_set");
-    btn_fill_free_default = document.getElementById("btn_fill_free_default");
-    btn_fill_free_reset = document.getElementById("btn_fill_free_reset");
-    input_fill_free = document.getElementById("input_fill_free");
-    btn_fill_free_set.onclick = function() {
-        var msg = new ROSLIB.Message({
-            data : parseInt(input_fill_free.value),
-        });
-        topic_fill_unk.publish(msg);
-    };
-    btn_fill_free_default.onclick = function() {
-        var msg = new ROSLIB.Message({
-            data : 999,
-        });
-        topic_fill_unk.publish(msg);
-    };
-    btn_fill_free_reset.onclick = function() {
-        var msg = new ROSLIB.Message({
-            data : 0,
-        });
-        topic_fill_unk.publish(msg);
-    };
-
-    // Increase obstacles  /////////////////////////////////////////////////////////////////////////////////////////////
-    var topic_increase_obstacles = new ROSLIB.Topic({
-        ros : ros,
-        name : '/increase_obstacles',
-        messageType : 'std_msgs/Int16'
-    });
-    topic_increase_obstacles.advertise();
-    btn_obstacle_margin_set = document.getElementById("btn_obstacle_margin_set");
-    btn_obstacle_margin_default = document.getElementById("btn_obstacle_margin_default");
-    btn_obstacle_margin_reset = document.getElementById("btn_obstacle_margin_reset");
     input_obstacle_margin = document.getElementById("input_obstacle_margin");
-    btn_obstacle_margin_set.onclick = function() {
-        var msg = new ROSLIB.Message({
-            data : parseInt(input_obstacle_margin.value),
-        });
-        topic_increase_obstacles.publish(msg);
-    };
-    btn_obstacle_margin_default.onclick = function() {
-        var msg = new ROSLIB.Message({
-            data : 999,
-        });
-        topic_increase_obstacles.publish(msg);
-    };
-    btn_obstacle_margin_reset.onclick = function() {
-        var msg = new ROSLIB.Message({
-            data : 0,
-        });
-        topic_increase_obstacles.publish(msg);
-    };
+    input_fill_free = document.getElementById("input_fill_free");
+    input_fill_shape = document.getElementById("input_fill_shape");
+    btn_assemble_map = document.getElementById("btn_assemble_map");
 
-    // // draw border path  ///////////////////////////////////////////////////////////////////////////////////////////////
-    // var topic_draw_border_path = new ROSLIB.Topic({
-    //     ros : ros,
-    //     name : '/border_paths',
-    //     messageType : 'std_msgs/Int16'
-    // });
-    // topic_draw_border_path.advertise();
-    // btn_zone_draw_border_path = document.getElementById("btn_zone_draw_border_path");
-    // input_zone_draw_border = document.getElementById("input_zone_draw_border");
-    // btn_zone_draw_border_path.onclick = function() {
-    //     var msg = new ROSLIB.Message({
-    //         data : parseInt(input_zone_draw_border.value),
-    //     });
-    //     topic_draw_border_path.publish(msg);
-    // };
-    //
-    // // draw coverage  //////////////////////////////////////////////////////////////////////////////////////////////////
-    // var topic_draw_coverage = new ROSLIB.Topic({
-    //     ros : ros,
-    //     name : '/coverage_paths',
-    //     messageType : 'std_msgs/Int16'
-    // });
-    // topic_draw_coverage.advertise();
-    // btn_zone_draw_coverage_path = document.getElementById("btn_zone_draw_coverage_path");
-    // input_zone_draw_coverage_path = document.getElementById("input_zone_draw_coverage_path");
-    // btn_zone_draw_coverage_path.onclick = function() {
-    //     var msg = new ROSLIB.Message({
-    //         data : parseInt(input_zone_draw_coverage_path.value),
-    //     });
-    //     topic_draw_coverage.publish(msg);
-    // };
+    // get map data  ////////////////////////////////////////////////////////////////////////////////////////////////////
+    var topic_map_data = new ROSLIB.Topic({
+        ros : ros,
+        name : '/map_data',
+        messageType : 'vitulus_msgs/MapEditMap'
+    });
+    topic_map_data.subscribe(function(message) {
+        input_obstacle_margin.value = message.margin;
+        input_fill_free.value = message.fill;
+        input_fill_shape.value = message.shape;
+    });
 
     // assembly map  ///////////////////////////////////////////////////////////////////////////////////////////////////
     var topic_assemble_map = new ROSLIB.Topic({
         ros : ros,
         name : '/assemble_map',
-        messageType : 'std_msgs/Int16'
+        messageType : 'vitulus_msgs/MapEditMap'
     });
     topic_assemble_map.advertise();
-    btn_assemble_map = document.getElementById("btn_assemble_map");
+
     btn_assemble_map.onclick = function() {
         var msg = new ROSLIB.Message({
             // data : parseInt(input_draw_coverage.value),
-            data : 1,
+            name : "",
+            fill : parseInt(input_fill_free.value),
+            margin : parseFloat(input_obstacle_margin.value),
+            shape : input_fill_shape.value,
         });
+        console.log(msg)
         topic_assemble_map.publish(msg);
     };
 
