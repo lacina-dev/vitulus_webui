@@ -50,7 +50,7 @@ window.onload = function() {
 
 
 
-    // Setup the map client.  //////////////////////////////////////////////////////////////////////////////////////////
+    // Grid client.  //////////////////////////////////////////////////////////////////////////////////////////
     gridClient = new ROS2D.OccupancyGridClient({
       ros : ros,
       topic: '/map_show',
@@ -68,7 +68,7 @@ window.onload = function() {
     });
     gridClient.rootObject.addChild(coveragePath);
 
-
+    // Grid client on change  //////////////////////////////////////////////////////////////////////////////////////////
     gridClient.on('change', function() {
         if (initiate){
             if (gridClient.currentGrid.width > gridClient.currentGrid.height){
@@ -86,12 +86,13 @@ window.onload = function() {
       // console.log(viewer.scene.children[1]);
     });
 
+    // Polygon setup
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    // Callback functions when there is mouse interaction with the polygon  ////////////////////////////////////////////
     var polygon_enabled = false
     var clickedPolygon = false;
     var selectedPointIndex = null;
-
+    // Callback functions when there is mouse interaction with the polygon  ////////////////////////////////////////////
     var pointCallBack = function(type, event, index) {
         if (polygon_enabled == false){
           if (type === 'mousedown') {
@@ -217,159 +218,171 @@ window.onload = function() {
 
 
     // Map tools ///////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     // Map edit log  ///////////////////////////////////////////////////////////////////////////////////////////////////
-    var div_log = document.getElementById("div_log")
-    var logTopic = new ROSLIB.Topic({
-        ros : ros,
-        name : '/log',
-        messageType : 'std_msgs/String'
-    });
-    logTopic.subscribe(function(message) {
-        console.log("MapEdit log:" + message.data);
-        div_log.textContent = message.data;
-    });
+    function planner_log() {
+        var div_log = document.getElementById("div_log")
+        var logTopic = new ROSLIB.Topic({
+            ros: ros,
+            name: '/log',
+            messageType: 'std_msgs/String'
+        });
+        logTopic.subscribe(function (message) {
+            console.log("MapEdit log:" + message.data);
+            div_log.textContent = message.data;
+        });
 
-    input_obstacle_margin = document.getElementById("input_obstacle_margin");
-    input_fill_free = document.getElementById("input_fill_free");
-    input_fill_shape = document.getElementById("input_fill_shape");
-    btn_assemble_map = document.getElementById("btn_assemble_map");
+        input_obstacle_margin = document.getElementById("input_obstacle_margin");
+        input_fill_free = document.getElementById("input_fill_free");
+        input_fill_shape = document.getElementById("input_fill_shape");
+        btn_assemble_map = document.getElementById("btn_assemble_map");
+    }
+    planner_log();
 
     // get map data  ////////////////////////////////////////////////////////////////////////////////////////////////////
-    var topic_map_data = new ROSLIB.Topic({
-        ros : ros,
-        name : '/map_data',
-        messageType : 'vitulus_msgs/MapEditMap'
-    });
-    topic_map_data.subscribe(function(message) {
-        input_obstacle_margin.value = message.margin;
-        input_fill_free.value = message.fill;
-        input_fill_shape.value = message.shape;
-    });
+    function get_map_data() {
+        var topic_map_data = new ROSLIB.Topic({
+            ros: ros,
+            name: '/map_data',
+            messageType: 'vitulus_msgs/MapEditMap'
+        });
+        topic_map_data.subscribe(function (message) {
+            input_obstacle_margin.value = message.margin;
+            input_fill_free.value = message.fill;
+            input_fill_shape.value = message.shape;
+        });
+    }
+    get_map_data();
 
     // assembly map  ///////////////////////////////////////////////////////////////////////////////////////////////////
-    var topic_assemble_map = new ROSLIB.Topic({
-        ros : ros,
-        name : '/assemble_map',
-        messageType : 'vitulus_msgs/MapEditMap'
-    });
-    topic_assemble_map.advertise();
-
-    btn_assemble_map.onclick = function() {
-        var msg = new ROSLIB.Message({
-            // data : parseInt(input_draw_coverage.value),
-            name : "",
-            fill : parseInt(input_fill_free.value),
-            margin : parseFloat(input_obstacle_margin.value),
-            shape : input_fill_shape.value,
+    function assemble_map() {
+        var topic_assemble_map = new ROSLIB.Topic({
+            ros: ros,
+            name: '/assemble_map',
+            messageType: 'vitulus_msgs/MapEditMap'
         });
-        console.log(msg)
-        topic_assemble_map.publish(msg);
+        topic_assemble_map.advertise();
+
+        btn_assemble_map.onclick = function () {
+            var msg = new ROSLIB.Message({
+                // data : parseInt(input_draw_coverage.value),
+                name: "",
+                fill: parseInt(input_fill_free.value),
+                margin: parseFloat(input_obstacle_margin.value),
+                shape: input_fill_shape.value,
+            });
+            console.log(msg)
+            topic_assemble_map.publish(msg);
+        };
     };
+    assemble_map();
 
     // Map show ////////////////////////////////////////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    function show_map() {
+        var topic_show_fill_map = new ROSLIB.Topic({
+            ros: ros,
+            name: '/show_map_layer',
+            messageType: 'std_msgs/String'
+        });
+        topic_show_fill_map.advertise();
 
-    var topic_show_fill_map = new ROSLIB.Topic({
-        ros : ros,
-        name : '/show_map_layer',
-        messageType : 'std_msgs/String'
-    });
-    topic_show_fill_map.advertise();
+        // show free fill  //////////////////////////////////////////////////////////////////////////////////////////////////
+        btn_show_fill = document.getElementById("btn_show_fill");
+        btn_show_fill.onclick = function () {
+            var msg = new ROSLIB.Message({
+                data: "filled",
+            });
+            topic_show_fill_map.publish(msg);
+        }
+        // show free poly  /////////////////////////////////////////////////////////////////////////////////////////////////
+        btn_show_free_poly = document.getElementById("btn_show_free_poly");
+        btn_show_free_poly.onclick = function () {
+            var msg = new ROSLIB.Message({
+                data: "free_poly",
+            });
+            topic_show_fill_map.publish(msg);
+        }
+        // show obstacle poly  /////////////////////////////////////////////////////////////////////////////////////////////
+        btn_show_obstacles_poly = document.getElementById("btn_show_obstacles_poly");
+        btn_show_obstacles_poly.onclick = function () {
+            var msg = new ROSLIB.Message({
+                data: "obstacles_poly",
+            });
+            topic_show_fill_map.publish(msg);
+        }
+        // show obstacle margin  ///////////////////////////////////////////////////////////////////////////////////////////
+        btn_show_obstacle_margin = document.getElementById("btn_show_obstacle_margin");
+        btn_show_obstacle_margin.onclick = function () {
+            var msg = new ROSLIB.Message({
+                data: "obstacle_margin",
+            });
+            topic_show_fill_map.publish(msg);
+        }
+        // show assembled_lite   ///////////////////////////////////////////////////////////////////////////////////////////////
+        btn_show_assembled_lite = document.getElementById("btn_show_assembled_lite");
+        btn_show_assembled_lite.onclick = function () {
+            var msg = new ROSLIB.Message({
+                data: "assembled_lite",
+            });
+            topic_show_fill_map.publish(msg);
+        }
+        // // show coverage path  /////////////////////////////////////////////////////////////////////////////////////////////
+        // btn_show_coverage_path = document.getElementById("btn_show_coverage_path");
+        // btn_show_coverage_path.onclick = function() {
+        //     var msg = new ROSLIB.Message({
+        //         data : "coverage_path",
+        //     });
+        //     topic_show_fill_map.publish(msg);
+        // }
+        // show original  //////////////////////////////////////////////////////////////////////////////////////////////////
+        btn_show_original = document.getElementById("btn_show_original");
+        btn_show_original.onclick = function () {
+            var msg = new ROSLIB.Message({
+                data: "original",
+            });
+            topic_show_fill_map.publish(msg);
+        }
+        // show assembled  /////////////////////////////////////////////////////////////////////////////////////////////////
+        btn_show_assembled = document.getElementById("btn_show_assembled");
+        btn_show_assembled.onclick = function () {
+            var msg = new ROSLIB.Message({
+                data: "assembled",
+            });
+            topic_show_fill_map.publish(msg);
+        }
+        // show zone map  /////////////////////////////////////////////////////////////////////////////////////////////////
+        btn_show_zone_map = document.getElementById("btn_show_zone_map");
+        btn_show_zone_map.onclick = function () {
+            var msg = new ROSLIB.Message({
+                data: "zone_map",
+            });
+            topic_show_fill_map.publish(msg);
+        }
+        // show zone_border_path map  /////////////////////////////////////////////////////////////////////////////////////////////////
+        btn_show_zone_border_path = document.getElementById("btn_show_zone_border_path");
+        btn_show_zone_border_path.onclick = function () {
+            var msg = new ROSLIB.Message({
+                data: "zone_border_path",
+            });
+            topic_show_fill_map.publish(msg);
+        }
+        // show zone_navi map  /////////////////////////////////////////////////////////////////////////////////////////////////
+        btn_show_zone_navi = document.getElementById("btn_show_zone_navi");
+        btn_show_zone_navi.onclick = function () {
+            var msg = new ROSLIB.Message({
+                data: "zone_navi",
+            });
+            topic_show_fill_map.publish(msg);
+        }
 
-    // show fee fill  //////////////////////////////////////////////////////////////////////////////////////////////////
-    btn_show_fill = document.getElementById("btn_show_fill");
-    btn_show_fill.onclick = function() {
-        var msg = new ROSLIB.Message({
-            data : "filled",
-        });
-        topic_show_fill_map.publish(msg);
     }
-    // show free poly  /////////////////////////////////////////////////////////////////////////////////////////////////
-    btn_show_free_poly = document.getElementById("btn_show_free_poly");
-    btn_show_free_poly.onclick = function() {
-        var msg = new ROSLIB.Message({
-            data : "free_poly",
-        });
-        topic_show_fill_map.publish(msg);
-    }
-    // show obstacle poly  /////////////////////////////////////////////////////////////////////////////////////////////
-    btn_show_obstacles_poly = document.getElementById("btn_show_obstacles_poly");
-    btn_show_obstacles_poly.onclick = function() {
-        var msg = new ROSLIB.Message({
-            data : "obstacles_poly",
-        });
-        topic_show_fill_map.publish(msg);
-    }
-    // show obstacle margin  ///////////////////////////////////////////////////////////////////////////////////////////
-    btn_show_obstacle_margin = document.getElementById("btn_show_obstacle_margin");
-    btn_show_obstacle_margin.onclick = function() {
-        var msg = new ROSLIB.Message({
-            data : "obstacle_margin",
-        });
-        topic_show_fill_map.publish(msg);
-    }
-    // show assembled_lite   ///////////////////////////////////////////////////////////////////////////////////////////////
-    btn_show_assembled_lite = document.getElementById("btn_show_assembled_lite");
-    btn_show_assembled_lite.onclick = function() {
-        var msg = new ROSLIB.Message({
-            data : "assembled_lite",
-        });
-        topic_show_fill_map.publish(msg);
-    }
-    // // show coverage path  /////////////////////////////////////////////////////////////////////////////////////////////
-    // btn_show_coverage_path = document.getElementById("btn_show_coverage_path");
-    // btn_show_coverage_path.onclick = function() {
-    //     var msg = new ROSLIB.Message({
-    //         data : "coverage_path",
-    //     });
-    //     topic_show_fill_map.publish(msg);
-    // }
-    // show original  //////////////////////////////////////////////////////////////////////////////////////////////////
-    btn_show_original = document.getElementById("btn_show_original");
-    btn_show_original.onclick = function() {
-        var msg = new ROSLIB.Message({
-            data : "original",
-        });
-        topic_show_fill_map.publish(msg);
-    }
-    // show assembled  /////////////////////////////////////////////////////////////////////////////////////////////////
-    btn_show_assembled = document.getElementById("btn_show_assembled");
-    btn_show_assembled.onclick = function() {
-        var msg = new ROSLIB.Message({
-            data : "assembled",
-        });
-        topic_show_fill_map.publish(msg);
-    }
-    // show zone map  /////////////////////////////////////////////////////////////////////////////////////////////////
-    btn_show_zone_map = document.getElementById("btn_show_zone_map");
-    btn_show_zone_map.onclick = function() {
-        var msg = new ROSLIB.Message({
-            data : "zone_map",
-        });
-        topic_show_fill_map.publish(msg);
-    }
-    // show zone_border_path map  /////////////////////////////////////////////////////////////////////////////////////////////////
-    btn_show_zone_border_path = document.getElementById("btn_show_zone_border_path");
-    btn_show_zone_border_path.onclick = function() {
-        var msg = new ROSLIB.Message({
-            data : "zone_border_path",
-        });
-        topic_show_fill_map.publish(msg);
-    }
-    // show zone_navi map  /////////////////////////////////////////////////////////////////////////////////////////////////
-    btn_show_zone_navi = document.getElementById("btn_show_zone_navi");
-    btn_show_zone_navi.onclick = function() {
-        var msg = new ROSLIB.Message({
-            data : "zone_navi",
-        });
-        topic_show_fill_map.publish(msg);
-    }
-
+    show_map();
 
     // Polygons  ///////////////////////////////////////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
+    function map_polygons() {
     // // Publish current polygon  ////////////////////////////////////////////////////////////////////////////////////////
     // var topic_publish_polygon = new ROSLIB.Topic({
     //     ros : ros,
@@ -549,177 +562,181 @@ window.onload = function() {
         }
     });
 
-
+    };
+    map_polygons();
 
     // Zones     ///////////////////////////////////////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    function map_zones() {
+        // Zone elements  ///////////////////////////////////////////////////////////////////////////////////////////////
+        var input_zone_template_name = document.getElementById("input_zone_template_name");
+        var input_zone_template_cut_height = document.getElementById("input_zone_template_cut_height");
+        var input_zone_template_rpm = document.getElementById("input_zone_template_rpm");
+        var input_zone_template_border_path = document.getElementById("input_zone_template_border_path");
+        var input_zone_template_coverage_path = document.getElementById("input_zone_template_coverage_path");
+        var input_zone_template_path_distance = document.getElementById("input_zone_template_path_distance");
+        var input_zone_template_simplify = document.getElementById("input_zone_template_simplify");
+        var span_path_name = document.getElementById("span_path_name");
+        var span_path_type = document.getElementById("span_path_type");
+        var span_zone_name = document.getElementById("span_zone_name");
+        var span_zone_height = document.getElementById("span_zone_height");
+        var span_zone_rpm = document.getElementById("span_zone_rpm");
+        var span_zone_area = document.getElementById("span_zone_area");
+        var btn_new_zone = document.getElementById("btn_new_zone");
+        var btn_zone_template_save = document.getElementById("btn_zone_template_save");
+        var btn_zone_template_cancel = document.getElementById("btn_zone_template_cancel");
+        var btn_zone_draw_border_path = document.getElementById("btn_zone_draw_border_path");
+        var btn_zone_draw_coverage_path = document.getElementById("btn_zone_draw_coverage_path");
+        var btn_path_publish = document.getElementById("btn_path_publish");
+        var btn_path_remove = document.getElementById("btn_path_remove");
+        var btn_zone_edit = document.getElementById("btn_zone_edit");
+        var btn_zone_remove = document.getElementById("btn_zone_remove");
+        var panel_zones = document.getElementById("panel_zones");
+        var div_zone_template = document.getElementById("div_zone_template");
+        // var div_path_list = document.getElementById("div_path_list");
+        var header_zone_template_coverage_path = document.getElementById("header_zone_template_coverage_path");
+        var header_zone_template_border_path = document.getElementById("header_zone_template_border_path");
+        var header_zone_template_path_list = document.getElementById("header_zone_template_path_list");
+        var div_zone_list = document.getElementById("div_zone_list");
 
-    // Polygon elements  ///////////////////////////////////////////////////////////////////////////////////////////////
-    var input_zone_template_name = document.getElementById("input_zone_template_name");
-    var input_zone_template_cut_height = document.getElementById("input_zone_template_cut_height");
-    var input_zone_template_rpm = document.getElementById("input_zone_template_rpm");
-    var input_zone_template_border_path = document.getElementById("input_zone_template_border_path");
-    var input_zone_template_coverage_path = document.getElementById("input_zone_template_coverage_path");
-    var input_zone_template_path_distance = document.getElementById("input_zone_template_path_distance");
-    var input_zone_template_simplify = document.getElementById("input_zone_template_simplify");
-    var span_path_name = document.getElementById("span_path_name");
-    var span_path_type = document.getElementById("span_path_type");
-    var span_zone_name = document.getElementById("span_zone_name");
-    var span_zone_height = document.getElementById("span_zone_height");
-    var span_zone_rpm = document.getElementById("span_zone_rpm");
-    var span_zone_area = document.getElementById("span_zone_area");
-    var btn_new_zone = document.getElementById("btn_new_zone");
-    var btn_zone_template_save = document.getElementById("btn_zone_template_save");
-    var btn_zone_template_cancel = document.getElementById("btn_zone_template_cancel");
-    var btn_zone_draw_border_path = document.getElementById("btn_zone_draw_border_path");
-    var btn_zone_draw_coverage_path = document.getElementById("btn_zone_draw_coverage_path");
-    var btn_path_publish = document.getElementById("btn_path_publish");
-    var btn_path_remove = document.getElementById("btn_path_remove");
-    var btn_zone_edit = document.getElementById("btn_zone_edit");
-    var btn_zone_remove = document.getElementById("btn_zone_remove");
-    var panel_zones = document.getElementById("panel_zones");
-    var div_zone_template = document.getElementById("div_zone_template");
-    var div_path_list = document.getElementById("div_path_list");
-    var header_zone_template_coverage_path = document.getElementById("header_zone_template_coverage_path");
-    var header_zone_template_border_path = document.getElementById("header_zone_template_border_path");
-    var header_zone_template_path_list = document.getElementById("header_zone_template_path_list");
-    var div_zone_list = document.getElementById("div_zone_list");
-
-    // Init zone template //////////////////////////////////////////////////////////////////////////////////////////////
-    var zone_template_style_attr = div_zone_template.getAttribute('style');
-    var header_zone_template_coverage_path_style_attr = header_zone_template_coverage_path.getAttribute('style');
-    var header_zone_template_border_path_style_attr = header_zone_template_border_path.getAttribute('style');
-    var header_zone_template_path_list_style_attr = header_zone_template_path_list.getAttribute('style');
-    div_zone_template.setAttribute('style', 'display:none !important');
-    div_zone_list.innerHTML = "";
-
-    var current_zone = null;
-
-
-    // Zone ///////////////////////////////////////////////////////////////////////////////////////////////////////////
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    // New zone ///////////////////////////////////////////////////////////////////////////////////////////////////////
-    btn_new_zone.onclick = function(){
-        div_zone_template.setAttribute('style', zone_template_style_attr);
-        input_zone_template_name.value = "Zone";
-        input_zone_template_rpm.value = 3300;
-        input_zone_template_cut_height.value = 45;
-        input_zone_template_border_path.value = 2;
-        input_zone_template_coverage_path.value = 160;
-        input_zone_template_path_distance.value = 0.2;
-        input_zone_template_simplify.value = 0.1;
-        // header_zone_template_coverage_path.setAttribute('style', 'display:none !important');
-        // header_zone_template_border_path.setAttribute('style', 'display:none !important');
-        // header_zone_template_path_list.setAttribute('style', 'display:none !important');
-        div_path_list.innerHTML = "";
-        polygon.pointContainer.children = [];
-        polygon.lineContainer.children = [];
-        polygon.fillShape.graphics._instructions = [];
-        polygon.fillShape.graphics._oldInstructions = [];
-        viewer.scene.addChild(polygon);
-    }
-
-    // Selected zone topic /////////////////////////////////////////////////////////////////////////////////////////////////
-    var topic_selected_zone = new ROSLIB.Topic({
-            ros : ros,
-            name : '/selected_zone',
-            messageType : 'std_msgs/String'
-    });
-    topic_selected_zone.advertise();
-
-    // Cancel zone ////////////////////////////////////////////////////////////////////////////////////////////////////
-    btn_zone_template_cancel.onclick = function(){
+        // Init zone template //////////////////////////////////////////////////////////////////////////////////////////////
+        var zone_template_style_attr = div_zone_template.getAttribute('style');
+        var header_zone_template_coverage_path_style_attr = header_zone_template_coverage_path.getAttribute('style');
+        var header_zone_template_border_path_style_attr = header_zone_template_border_path.getAttribute('style');
+        // var header_zone_template_path_list_style_attr = header_zone_template_path_list.getAttribute('style');
         div_zone_template.setAttribute('style', 'display:none !important');
-        viewer.scene.removeChild(polygon);
-        polygon.pointContainer.children = [];
-        polygon.lineContainer.children = [];
-        polygon.fillShape.graphics._instructions = [];
-        polygon.fillShape.graphics._oldInstructions = [];
-        let msg = new ROSLIB.Message({
-                    data : "cancel**cancel**"
-                });
-                topic_selected_zone.publish(msg);
-    }
+        div_zone_list.innerHTML = "";
 
-    // Save zone topic /////////////////////////////////////////////////////////////////////////////////////////////////
-    var topic_save_zone = new ROSLIB.Topic({
-            ros : ros,
-            name : '/save_zone',
-            messageType : 'vitulus_msgs/MapEditZone'
-    });
-    topic_save_zone.advertise();
+        var current_zone = null;
 
-    // Save zone //////////////////////////////////////////////////////////////////////////////////////////////////////
-    btn_zone_template_save.onclick = function(){
-        console.log(polygon.pointContainer.children.length);
-        if (polygon.pointContainer.children.length > 0){
-            var points = [];
-            for (i in polygon.pointContainer.children){
-                points.push({x: polygon.pointContainer.children[i].x, y: polygon.pointContainer.children[i].y * -1});
-            }
-            console.log(points);
-            var msgPoly = new ROSLIB.Message({
-                header : {
-                    frame_id : "map"
-                },
-                polygon : {
-                    points : points
-                }
-            });
-            console.log(msgPoly);
-            var msg = new ROSLIB.Message({
-                header : {
-                    frame_id : "map"
-                },
-                name: input_zone_template_name.value,
-                area: 0,
-                type: 'normal',
-                cut_height: parseInt(input_zone_template_cut_height.value),
-                rpm: parseInt(input_zone_template_rpm.value),
-                border_paths: parseInt(input_zone_template_border_path.value),
-                coverage_angle: parseInt(input_zone_template_coverage_path.value),
-                paths_distance: parseFloat(input_zone_template_path_distance.value),
-                simplify: parseFloat(input_zone_template_simplify.value),
-                polygon: msgPoly,
-                paths: []
-            });
-            topic_save_zone.publish(msg);
-            console.log(msg);
 
-            // clean up
+        // Zone ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+        ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        // New zone ///////////////////////////////////////////////////////////////////////////////////////////////////////
+        btn_new_zone.onclick = function () {
+            div_zone_template.setAttribute('style', zone_template_style_attr);
+            input_zone_template_name.value = "Zone";
+            input_zone_template_rpm.value = 3300;
+            input_zone_template_cut_height.value = 45;
+            input_zone_template_border_path.value = 2;
+            input_zone_template_coverage_path.value = 160;
+            input_zone_template_path_distance.value = 0.2;
+            input_zone_template_simplify.value = 0.1;
+            // header_zone_template_coverage_path.setAttribute('style', 'display:none !important');
+            // header_zone_template_border_path.setAttribute('style', 'display:none !important');
+            // header_zone_template_path_list.setAttribute('style', 'display:none !important');
+            // div_path_list.innerHTML = "";
+            polygon.pointContainer.children = [];
+            polygon.lineContainer.children = [];
+            polygon.fillShape.graphics._instructions = [];
+            polygon.fillShape.graphics._oldInstructions = [];
+            viewer.scene.addChild(polygon);
+        }
+
+        // Selected zone topic /////////////////////////////////////////////////////////////////////////////////////////////////
+        var topic_selected_zone = new ROSLIB.Topic({
+            ros: ros,
+            name: '/selected_zone',
+            messageType: 'std_msgs/String'
+        });
+        topic_selected_zone.advertise();
+
+        // Cancel zone ////////////////////////////////////////////////////////////////////////////////////////////////////
+        btn_zone_template_cancel.onclick = function () {
             div_zone_template.setAttribute('style', 'display:none !important');
             viewer.scene.removeChild(polygon);
             polygon.pointContainer.children = [];
             polygon.lineContainer.children = [];
             polygon.fillShape.graphics._instructions = [];
             polygon.fillShape.graphics._oldInstructions = [];
-
-        } else{
-            div_log.textContent = "Draw the polygon on the map!";
+            let msg = new ROSLIB.Message({
+                data: "cancel**cancel**"
+            });
+            topic_selected_zone.publish(msg);
         }
-    }
 
-    // Get zone list //////////////////////////////////////////////////////////////////////////////////////////////////
-    var zoneListTopic = new ROSLIB.Topic({
-        ros : ros,
-        name : '/zone_list',
-        messageType : 'vitulus_msgs/MapEditZoneList'
-    });
+        // Save zone topic /////////////////////////////////////////////////////////////////////////////////////////////////
+        var topic_save_zone = new ROSLIB.Topic({
+            ros: ros,
+            name: '/save_zone',
+            messageType: 'vitulus_msgs/MapEditZone'
+        });
+        topic_save_zone.advertise();
 
-    var current_zone_list = [];
-    zoneListTopic.subscribe(function(message) {
-        console.log("Zone list:");
-        current_zone_list = message.zone_list;
-        var html_zone_list ='';
-        for (let zone in message.zone_list){
-            console.log(message.zone_list[zone]);
-            let zone_name = message.zone_list[zone].name;
-            let zone_type = message.zone_list[zone].type;
-            let zone_area = message.zone_list[zone].area;
-            let zone_height = message.zone_list[zone].cut_height;
-            let zone_rpm = message.zone_list[zone].rpm;
-            html_zone_list += `<div class="d-flex align-items-center" id="div_zone_${zone_name}" style="border-bottom: 1px solid #444444;padding-right: 2px;padding-left: 6px;padding-bottom: 2px;padding-top: 2px;">
+        // Save zone //////////////////////////////////////////////////////////////////////////////////////////////////////
+        btn_zone_template_save.onclick = function () {
+            console.log(polygon.pointContainer.children.length);
+            if (polygon.pointContainer.children.length > 0) {
+                var points = [];
+                for (i in polygon.pointContainer.children) {
+                    points.push({
+                        x: polygon.pointContainer.children[i].x,
+                        y: polygon.pointContainer.children[i].y * -1
+                    });
+                }
+                console.log(points);
+                var msgPoly = new ROSLIB.Message({
+                    header: {
+                        frame_id: "map"
+                    },
+                    polygon: {
+                        points: points
+                    }
+                });
+                console.log(msgPoly);
+                var msg = new ROSLIB.Message({
+                    header: {
+                        frame_id: "map"
+                    },
+                    name: input_zone_template_name.value,
+                    area: 0,
+                    type: 'normal',
+                    cut_height: parseInt(input_zone_template_cut_height.value),
+                    rpm: parseInt(input_zone_template_rpm.value),
+                    border_paths: parseInt(input_zone_template_border_path.value),
+                    coverage_angle: parseInt(input_zone_template_coverage_path.value),
+                    paths_distance: parseFloat(input_zone_template_path_distance.value),
+                    simplify: parseFloat(input_zone_template_simplify.value),
+                    polygon: msgPoly,
+                    paths: []
+                });
+                topic_save_zone.publish(msg);
+                console.log(msg);
+
+                // clean up
+                div_zone_template.setAttribute('style', 'display:none !important');
+                viewer.scene.removeChild(polygon);
+                polygon.pointContainer.children = [];
+                polygon.lineContainer.children = [];
+                polygon.fillShape.graphics._instructions = [];
+                polygon.fillShape.graphics._oldInstructions = [];
+
+            } else {
+                div_log.textContent = "Draw the polygon on the map!";
+            }
+        }
+
+        // Get zone list //////////////////////////////////////////////////////////////////////////////////////////////////
+        var zoneListTopic = new ROSLIB.Topic({
+            ros: ros,
+            name: '/zone_list',
+            messageType: 'vitulus_msgs/MapEditZoneList'
+        });
+
+        var current_zone_list = [];
+        zoneListTopic.subscribe(function (message) {
+            console.log("Zone list:");
+            current_zone_list = message.zone_list;
+            var html_zone_list = '';
+            for (let zone in message.zone_list) {
+                console.log(message.zone_list[zone]);
+                let zone_name = message.zone_list[zone].name;
+                let zone_type = message.zone_list[zone].type;
+                let zone_area = message.zone_list[zone].area;
+                let zone_height = message.zone_list[zone].cut_height;
+                let zone_rpm = message.zone_list[zone].rpm;
+                html_zone_list += `<div class="d-flex align-items-center" id="div_zone_${zone_name}" style="border-bottom: 1px solid #444444;padding-right: 2px;padding-left: 6px;padding-bottom: 2px;padding-top: 2px;">
                                     <div class="d-flex">
                                         <span id="span_zone_name_${zone_name}" style="margin-right: 6px;width: 155px;font-size: 13.2px;">${zone_name}</span>
                                         <span class="text-nowrap" id="span_zone_height_${zone_name}" style="margin-right: 12px;font-size: 13.2px;">${zone_height} mm</span>
@@ -731,67 +748,137 @@ window.onload = function() {
                                         <button class="btn btn-outline-danger d-inline-flex btn-sm-s" id="btn_zone_remove_${zone_name}" onClick="removeZone('${zone_name}')" type="button">Remove </button>
                                     </div>
                                 </div>`;
-            div_zone_list.innerHTML = html_zone_list;
+                div_zone_list.innerHTML = html_zone_list;
 
 
-        }
-        if (message.zone_list.length === 0){
-            div_zone_list.innerHTML = "";
-        }
-    });
+            }
+            if (message.zone_list.length === 0) {
+                div_zone_list.innerHTML = "";
+            }
+        });
 
 
-
-
-    // Edit zone from list by name /////////////////////////////////////////////////////////////////////////////////////
-    this.editZone = function(zone_name){
-        for (let i in current_zone_list){
-            if (current_zone_list[i].name === zone_name){
-                let zone = current_zone_list[i];
-                console.log(zone);
-                div_zone_template.setAttribute('style', zone_template_style_attr);
-                // header_zone_template_coverage_path.setAttribute('style', header_zone_template_coverage_path_style_attr);
-                // header_zone_template_border_path.setAttribute('style', header_zone_template_border_path_style_attr);
-                // header_zone_template_path_list.setAttribute('style', header_zone_template_path_list_style_attr);
-                viewer.scene.removeChild(polygon);
-                polygon.pointContainer.children = [];
-                polygon.lineContainer.children = [];
-                polygon.fillShape.graphics._instructions = [];
-                polygon.fillShape.graphics._oldInstructions = [];
-                viewer.scene.addChild(polygon);
-                for (let point in zone.polygon.polygon.points){
-                    console.log("Point:");
-                    console.log(zone.polygon.polygon.points[point]);
-                    polygon.addPoint(zone.polygon.polygon.points[point]);
+        // Edit zone from list by name /////////////////////////////////////////////////////////////////////////////////////
+        this.editZone = function (zone_name) {
+            for (let i in current_zone_list) {
+                if (current_zone_list[i].name === zone_name) {
+                    let zone = current_zone_list[i];
+                    console.log(zone);
+                    div_zone_template.setAttribute('style', zone_template_style_attr);
+                    // header_zone_template_coverage_path.setAttribute('style', header_zone_template_coverage_path_style_attr);
+                    // header_zone_template_border_path.setAttribute('style', header_zone_template_border_path_style_attr);
+                    // header_zone_template_path_list.setAttribute('style', header_zone_template_path_list_style_attr);
+                    viewer.scene.removeChild(polygon);
+                    polygon.pointContainer.children = [];
+                    polygon.lineContainer.children = [];
+                    polygon.fillShape.graphics._instructions = [];
+                    polygon.fillShape.graphics._oldInstructions = [];
+                    viewer.scene.addChild(polygon);
+                    for (let point in zone.polygon.polygon.points) {
+                        console.log("Point:");
+                        console.log(zone.polygon.polygon.points[point]);
+                        polygon.addPoint(zone.polygon.polygon.points[point]);
+                    }
+                    input_zone_template_name.value = zone.name;
+                    input_zone_template_rpm.value = zone.rpm;
+                    input_zone_template_cut_height.value = zone.cut_height;
+                    input_zone_template_border_path.value = zone.border_paths;
+                    input_zone_template_coverage_path.value = zone.coverage_angle;
+                    input_zone_template_path_distance.value = zone.paths_distance;
+                    let msg = new ROSLIB.Message({
+                        data: zone_name
+                    });
+                    topic_selected_zone.publish(msg);
                 }
-                input_zone_template_name.value = zone.name;
-                input_zone_template_rpm.value = zone.rpm;
-                input_zone_template_cut_height.value = zone.cut_height;
-                input_zone_template_border_path.value = zone.border_paths;
-                input_zone_template_coverage_path.value = zone.coverage_angle;
-                input_zone_template_path_distance.value = zone.paths_distance;
-                let msg = new ROSLIB.Message({
-                    data : zone_name
-                });
-                topic_selected_zone.publish(msg);
             }
         }
-    }
 
-    // Remove zone from list by name  /////////////////////////////////////////////////////////////////////////////////
-    var topic_remove_zone = new ROSLIB.Topic({
-        ros : ros,
-        name : '/remove_zone',
-        messageType : 'std_msgs/String'
-    });
-    topic_remove_zone.advertise();
-
-    this.removeZone = function(zone_name){
-        let msg = new ROSLIB.Message({
-            data : zone_name,
+        // Remove zone from list by name  /////////////////////////////////////////////////////////////////////////////////
+        var topic_remove_zone = new ROSLIB.Topic({
+            ros: ros,
+            name: '/remove_zone',
+            messageType: 'std_msgs/String'
         });
-        topic_remove_zone.publish(msg);
-    }
+        topic_remove_zone.advertise();
+
+        this.removeZone = function (zone_name) {
+            let msg = new ROSLIB.Message({
+                data: zone_name,
+            });
+            topic_remove_zone.publish(msg);
+        }
+    };
+    map_zones();
+
+    // Programs     ///////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    function planner_programs() {
+        // Program elements  ///////////////////////////////////////////////////////////////////////////////////////////////
+        var div_program_template = document.getElementById("div_program_template");
+        var div_program_list = document.getElementById("div_program_list");
+
+        // Init program template //////////////////////////////////////////////////////////////////////////////////////////////
+        var program_template_style_attr = div_program_template.getAttribute('style');
+        div_program_template.setAttribute('style', 'display:none !important');
+        div_program_list.innerHTML = "";
+
+        // Get program list //////////////////////////////////////////////////////////////////////////////////////////////////
+        var programListTopic = new ROSLIB.Topic({
+            ros: ros,
+            name: '/program_list',
+            messageType: 'vitulus_msgs/PlannerProgramList'
+        });
+
+        var current_program_list = [];
+        programListTopic.subscribe(function (message) {
+            console.log("Program list:");
+            current_program_list = message.program_list;
+            var html_program_list = '';
+            for (let program in message.program_list) {
+                console.log(message.program_list[program]);
+                let program_name = message.program_list[program].name;
+                let program_duration = message.program_list[program].last_duration_minutes;
+                let program_area = message.program_list[program].area;
+                html_program_list += `<div class="d-flex align-items-center" id="div_program_${program_name}" style="border-bottom: 1px solid #444444;padding-right: 2px;padding-left: 6px;padding-bottom: 2px;padding-top: 2px;">
+                    <div class="d-flex">
+                        <span id="span_program_name_${program_name}" style="margin-right: 6px;width: 155px;font-size: 13.2px;">${program_name}</span>
+                        <span class="text-nowrap" id="span_program_duration_${program_name}" style="margin-right: 12px;font-size: 13.2px;">${program_duration} min.</span>
+                        <span class="text-nowrap" id="span_program_area_${program_name}" style="margin-right: 12px;font-size: 13.2px;">${program_area} m2</span>
+                    </div>
+                    <div class="btn-group btn-group-sm d-flex ml-auto" role="group">
+                        <button class="btn btn-outline-success d-inline-flex btn-sm-s" id="btn_program_run_${program_name}" onClick="runProgram('${program_name}')" type="button">Run</button>
+                        <button class="btn btn-outline-info d-inline-flex btn-sm-s" id="btn_program_edit_${program_name}" type="button">Edit</button>
+                        <button class="btn btn-outline-danger d-inline-flex btn-sm-s" id="btn_program_remove_${program_name}" type="button">Remove</button>
+                    </div>
+                </div>`
+                div_program_list.innerHTML = html_program_list;
+
+
+
+            }
+            if (message.program_list.length === 0) {
+                div_program_list.innerHTML = "";
+            }
+        });
+
+        // Publish program to run  /////////////////////////////////////////////////////////////////////////////////////
+        var topic_program_select = new ROSLIB.Topic({
+            ros: ros,
+            name: '/program_select',
+            messageType: 'std_msgs/String'
+        });
+        topic_program_select.advertise();
+
+        this.runProgram = function (program_name) {
+            let msg = new ROSLIB.Message({
+                data: program_name,
+            });
+            topic_program_select.publish(msg);
+            console.log(msg);
+        }
+
+    };
+    planner_programs();
 
     // Paths  //////////////////////////////////////////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

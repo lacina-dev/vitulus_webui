@@ -1119,7 +1119,8 @@ window.onload = function() {
         tfClient: tfClientMap,
         rootObject : viewer.scene,
         continuous: true,
-        topic: '/rtabmap/grid_map',
+        // topic: '/rtabmap/grid_map',
+        topic: '/map_assembled',
         color: {r:0,g:255,b:255},  // {r:0,g:255,b:255} gridmap, {r:255,g:0,b:255} loc costmap, {r:255,g:255,b:0} glob costmap
         opacity: 0.99,
         offsetPose: z_offset_map

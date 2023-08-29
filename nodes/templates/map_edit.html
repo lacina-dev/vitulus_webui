@@ -140,21 +140,34 @@
                                 <div></div>
                                 <div class="d-flex"></div>
                             </header>
-                            <header class="d-flex align-items-center visible" id="header_zone_template_path_list" style="background: #333333;padding-top: 10px;padding-bottom: 10px;padding-right: 3px;">
-                                <div class="bg-dark" id="div_path_list" style="width: 100%;min-height: 20px;margin: 0px;margin-right: 6px;margin-left: 8px;">
-                                    <div class="d-flex align-items-center" id="div_path" style="border-bottom: 1px solid #444444;padding-right: 2px;padding-left: 6px;padding-bottom: 2px;padding-top: 2px;">
-                                        <div class="d-flex"><span id="span_path_name" style="margin-right: 6px;width: 155px;font-size: 13.2px;">Path_name</span><span class="text-nowrap" id="span_path_type" style="margin-right: 12px;font-size: 13.2px;">type</span></div>
-                                        <div class="btn-group btn-group-sm d-flex ml-auto" role="group"><button class="btn btn-outline-info d-inline-flex btn-sm-s" id="btn_path_publish" type="button">Publish</button><button class="btn btn-outline-danger d-inline-flex btn-sm-s" id="btn_path_remove" type="button">Remove</button></div>
-                                    </div>
-                                </div>
-                                <div></div>
-                                <div class="d-flex"></div>
-                            </header>
                         </div>
                         <div id="div_zone_list" style="margin-top: 3px;">
                             <div class="d-flex align-items-center" id="div_zone" style="border-bottom: 1px solid #444444;padding-right: 2px;padding-left: 6px;padding-bottom: 2px;padding-top: 2px;">
                                 <div class="d-flex"><span id="span_zone_name" style="margin-right: 6px;width: 155px;font-size: 13.2px;">Zone</span><span class="text-nowrap" id="span_zone_height" style="margin-right: 12px;font-size: 13.2px;">height</span><span class="text-nowrap" id="span_zone_rpm" style="margin-right: 12px;font-size: 13.2px;">rpm</span><span class="text-nowrap" id="span_zone_area" style="margin-right: 12px;font-size: 13.2px;">area</span></div>
                                 <div class="btn-group btn-group-sm d-flex ml-auto" role="group"><button class="btn btn-outline-info d-inline-flex btn-sm-s" id="btn_zone_edit" type="button">Edit</button><button class="btn btn-outline-danger d-inline-flex btn-sm-s" id="btn_zone_remove" type="button">Remove</button></div>
+                            </div>
+                        </div>
+                        <div id="panel_finish_map-1" style="border: 1px solid #636363;margin-top: 6px;">
+                            <header style="padding: 2px;background: #333333;padding-left: 8px;width: 100%;"><span class="text-nowrap text-uppercase font-weight-bold" style="font-size: 13px;">PROGRAMS</span><button class="btn btn-outline-info text-nowrap d-inline-flex float-right btn-sm-s" id="btn_program_new" type="button" style="margin-right: 4px;margin-left: 3px;">New program</button></header>
+                        </div>
+                        <div id="div_program_template" style="border-right-color: rgb(51,51,51);border-bottom-color: #333333;border-left-color: #333333;">
+                            <header class="d-flex align-items-center visible" id="program_template_main" style="background: #333333;padding-top: 10px;padding-bottom: 10px;padding-right: 5px;padding-left: 2px;">
+                                <div style="padding-left: 6px;"><input class="bg-dark border rounded-0 border-secondary" type="text" id="input_program_template_name" value="Program" style="color: #b5b5b5;width: 155px;margin-right: 9px;height: 22px;padding-left: 4px;font-size: 13.2px;" placeholder="Zone name"></div>
+                                <div class="d-flex"></div>
+                                <div class="btn-group btn-group-sm d-flex ml-auto" role="group"><button class="btn btn-outline-success d-inline-flex btn-sm-s" id="btn_program_template_save" type="button">Save</button><button class="btn btn-outline-warning text-nowrap d-inline-flex btn-sm-s" id="btn_program_template_cancel" type="button">Cancel</button></div>
+                            </header>
+                            <header class="d-flex align-items-center visible" id="header_program_template_add_zone" style="background: #333333;padding-top: 3px;padding-bottom: 3px;padding-right: 3px;margin-left: 1px;">
+                                <div style="padding-left: 6px;"></div><select class="bg-dark" id="input_program_add_zone" style="color: rgb(184,179,179);font-size: 13.2px;padding-bottom: 2px;padding-top: 1px;">
+                                    <option value="todo" selected="">todo</option>
+                                </select><button class="btn btn-outline-info text-nowrap d-inline-flex float-right btn-sm-s" id="btn_program_add_zone" type="button" style="margin-right: 4px;margin-left: 3px;">Add zone</button>
+                                <div></div>
+                                <div class="d-flex"></div>
+                            </header>
+                        </div>
+                        <div id="div_program_list" style="margin-top: 3px;">
+                            <div class="d-flex align-items-center" id="div_program" style="border-bottom: 1px solid #444444;padding-right: 2px;padding-left: 6px;padding-bottom: 2px;padding-top: 2px;">
+                                <div class="d-flex"><span id="span_program_name" style="margin-right: 6px;width: 155px;font-size: 13.2px;">Program</span><span class="text-nowrap" id="span_program_duration" style="margin-right: 12px;font-size: 13.2px;">last duration</span><span class="text-nowrap" id="span_program_area" style="margin-right: 12px;font-size: 13.2px;">area</span></div>
+                                <div class="btn-group btn-group-sm d-flex ml-auto" role="group"><button class="btn btn-outline-success d-inline-flex btn-sm-s" id="btn_program_run" type="button">Run</button><button class="btn btn-outline-info d-inline-flex btn-sm-s" id="btn_program_edit" type="button">Edit</button><button class="btn btn-outline-danger d-inline-flex btn-sm-s" id="btn_program_remove" type="button">Remove</button></div>
                             </div>
                         </div>
                     </div>
