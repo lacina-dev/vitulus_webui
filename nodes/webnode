@@ -53,6 +53,10 @@ if __name__ == '__main__':
         def navi():
             return render_template('nav.html', ros_ip=host)
 
+        @app.route("/dashboard")
+        def dashboard():
+            return render_template('dashboard.html', ros_ip=host)
+
         @app.route("/map_edit")
         def map_edit():
             return render_template('map_edit.html', ros_ip=host)

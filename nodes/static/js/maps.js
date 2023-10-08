@@ -26,13 +26,13 @@ window.onload = function() {
     var rtabmap_refid_span = document.getElementById('rtabmap_refid_span');
     var rtabmap_state = document.getElementById('rtabmap_state');
 
+    var gnss_heading_fix_span = document.getElementById('gnss_heading_fix_span');
+    var gnss_heading_fixstat_span = document.getElementById('gnss_heading_fixstat_span');
+    var gnss_heading_state = document.getElementById('gnss_heading_state');
+
     var gnss_fix_span = document.getElementById('gnss_fix_span');
     var gnss_fixstat_span = document.getElementById('gnss_fixstat_span');
     var gnss_state = document.getElementById('gnss_state');
-
-    var gnss_lite_fix_span = document.getElementById('gnss_lite_fix_span');
-    var gnss_lite_fixstat_span = document.getElementById('gnss_lite_fixstat_span');
-    var gnss_lite_state = document.getElementById('gnss_lite_state');
     var stop_btn = document.getElementById("stop_btn");
 
 
@@ -70,118 +70,6 @@ window.onload = function() {
 
     var GnssLiteStatuslistener = new ROSLIB.Topic({
         ros : ros,
-        name : '/gnss_lite/navstatus',
-        messageType : 'ublox_msgs/NavSTATUS'
-    });
-
-    //            uint8 GPS_NO_FIX = 0
-    //            uint8 GPS_DEAD_RECKONING_ONLY = 1
-    //            uint8 GPS_2D_FIX = 2
-    //            uint8 GPS_3D_FIX = 3
-    //            uint8 GPS_GPS_DEAD_RECKONING_COMBINED = 4
-    //            uint8 GPS_TIME_ONLY_FIX = 5
-
-    GnssLiteStatuslistener.subscribe(function(message) {
-//    		 console.log(message);
-    		 if (message.gpsFix == 0){
-    		    gnss_lite_fix_span.className = "text-center d-xl-flex justify-content-xl-center align-items-xl-center bg-danger";
-    		    gnss_lite_fix_span.textContent = "NO_FIX";
-    		 }
-    		 if (message.gpsFix == 1){
-    		    gnss_lite_fix_span.className = "text-center d-xl-flex justify-content-xl-center align-items-xl-center bg-danger";
-    		    gnss_lite_fix_span.textContent = "DEAD_RECKONING_ONLY";
-    		 }
-    		 if (message.gpsFix == 2){
-    		    gnss_lite_fix_span.className = "text-center d-xl-flex justify-content-xl-center align-items-xl-center bg-warning";
-    		    gnss_lite_fix_span.textContent = "2D_FIX";
-    		 }
-
-    		 if (message.gpsFix == 3){
-    		    gnss_lite_fix_span.className = "text-center d-xl-flex justify-content-xl-center align-items-xl-center bg-success";
-    		    gnss_lite_fix_span.textContent = "3D_FIX";
-    		 }
-    		 if (message.gpsFix == 4){
-    		    gnss_lite_fix_span.className = "text-center d-xl-flex justify-content-xl-center align-items-xl-center bg-danger";
-    		    gnss_lite_fix_span.textContent = "DEAD_RECKONING_COMBINED";
-    		 }
-    		 if (message.gpsFix == 5){
-    		    gnss_lite_fix_span.className = "text-center d-xl-flex justify-content-xl-center align-items-xl-center bg-danger";
-    		    gnss_lite_fix_span.textContent = "GPS_TIME_ONLY_FIX";
-    		 }
-    });
-
-///////////////////////////////////////////////////////////////////////  GET GNSS LITE FIX    ///////////////////////////////////////////////////////////////////////
-
-    var GnssLiteFixlistener = new ROSLIB.Topic({
-        ros : ros,
-        name : '/gnss_lite/fix',
-        messageType : 'sensor_msgs/NavSatFix'
-    });
-
-//    int8 STATUS_NO_FIX =  -1        # unable to fix position
-//    int8 STATUS_FIX =      0        # unaugmented fix
-//    int8 STATUS_SBAS_FIX = 1        # with satellite-based augmentation
-//    int8 STATUS_GBAS_FIX = 2        # with ground-based augmentation
-
-    GnssLiteFixlistener.subscribe(function(message) {
-//    		 console.log(message);
-    		 if (message.status.status == -1){
-    		    gnss_lite_fixstat_span.className = "text-center d-xl-flex justify-content-xl-center align-items-xl-center bg-danger";
-    		    gnss_lite_fixstat_span.textContent = "NO_FIX";
-    		 }
-    		 if (message.status.status == 0){
-    		    gnss_lite_fixstat_span.className = "text-center d-xl-flex justify-content-xl-center align-items-xl-center bg-warning";
-    		    gnss_lite_fixstat_span.textContent = "FIX";
-    		 }
-    		 if (message.status.status == 1){
-    		    gnss_lite_fixstat_span.className = "text-center d-xl-flex justify-content-xl-center align-items-xl-center bg-success";
-    		    gnss_lite_fixstat_span.textContent = "SBAS_FIX";
-    		 }
-    		 if (message.status.status == 2){
-    		    gnss_lite_fixstat_span.className = "text-center d-xl-flex justify-content-xl-center align-items-xl-center bg-success";
-    		    gnss_lite_fixstat_span.textContent = "GBAS_FIX";
-    		 }
-
-    });
-
-///////////////////////////////////////////////////////////////////////  GET GNSS FIX    ///////////////////////////////////////////////////////////////////////
-
-    var GnssFixlistener = new ROSLIB.Topic({
-        ros : ros,
-        name : '/gnss/fix',
-        messageType : 'sensor_msgs/NavSatFix'
-    });
-
-//    int8 STATUS_NO_FIX =  -1        # unable to fix position
-//    int8 STATUS_FIX =      0        # unaugmented fix
-//    int8 STATUS_SBAS_FIX = 1        # with satellite-based augmentation
-//    int8 STATUS_GBAS_FIX = 2        # with ground-based augmentation
-
-    GnssFixlistener.subscribe(function(message) {
-//    		 console.log(message);
-    		 if (message.status.status == -1){
-    		    gnss_fixstat_span.className = "text-center d-xl-flex justify-content-xl-center align-items-xl-center bg-danger";
-    		    gnss_fixstat_span.textContent = "NO_FIX";
-    		 }
-    		 if (message.status.status == 0){
-    		    gnss_fixstat_span.className = "text-center d-xl-flex justify-content-xl-center align-items-xl-center bg-warning";
-    		    gnss_fixstat_span.textContent = "FIX";
-    		 }
-    		 if (message.status.status == 1){
-    		    gnss_fixstat_span.className = "text-center d-xl-flex justify-content-xl-center align-items-xl-center bg-success";
-    		    gnss_fixstat_span.textContent = "SBAS_FIX";
-    		 }
-    		 if (message.status.status == 2){
-    		    gnss_fixstat_span.className = "text-center d-xl-flex justify-content-xl-center align-items-xl-center bg-success";
-    		    gnss_fixstat_span.textContent = "GBAS_FIX";
-    		 }
-
-    });
-
-///////////////////////////////////////////////////////////////////////  GET GNSS STATUS    ///////////////////////////////////////////////////////////////////////
-
-    var GnssStatuslistener = new ROSLIB.Topic({
-        ros : ros,
         name : '/gnss/navstatus',
         messageType : 'ublox_msgs/NavSTATUS'
     });
@@ -193,7 +81,7 @@ window.onload = function() {
     //            uint8 GPS_GPS_DEAD_RECKONING_COMBINED = 4
     //            uint8 GPS_TIME_ONLY_FIX = 5
 
-    GnssStatuslistener.subscribe(function(message) {
+    GnssLiteStatuslistener.subscribe(function(message) {
 //    		 console.log(message);
     		 if (message.gpsFix == 0){
     		    gnss_fix_span.className = "text-center d-xl-flex justify-content-xl-center align-items-xl-center bg-danger";
@@ -219,6 +107,118 @@ window.onload = function() {
     		 if (message.gpsFix == 5){
     		    gnss_fix_span.className = "text-center d-xl-flex justify-content-xl-center align-items-xl-center bg-danger";
     		    gnss_fix_span.textContent = "GPS_TIME_ONLY_FIX";
+    		 }
+    });
+
+///////////////////////////////////////////////////////////////////////  GET GNSS LITE FIX    ///////////////////////////////////////////////////////////////////////
+
+    var GnssLiteFixlistener = new ROSLIB.Topic({
+        ros : ros,
+        name : '/gnss/fix',
+        messageType : 'sensor_msgs/NavSatFix'
+    });
+
+//    int8 STATUS_NO_FIX =  -1        # unable to fix position
+//    int8 STATUS_FIX =      0        # unaugmented fix
+//    int8 STATUS_SBAS_FIX = 1        # with satellite-based augmentation
+//    int8 STATUS_GBAS_FIX = 2        # with ground-based augmentation
+
+    GnssLiteFixlistener.subscribe(function(message) {
+//    		 console.log(message);
+    		 if (message.status.status == -1){
+    		    gnss_fixstat_span.className = "text-center d-xl-flex justify-content-xl-center align-items-xl-center bg-danger";
+    		    gnss_fixstat_span.textContent = "NO_FIX";
+    		 }
+    		 if (message.status.status == 0){
+    		    gnss_fixstat_span.className = "text-center d-xl-flex justify-content-xl-center align-items-xl-center bg-warning";
+    		    gnss_fixstat_span.textContent = "FIX";
+    		 }
+    		 if (message.status.status == 1){
+    		    gnss_fixstat_span.className = "text-center d-xl-flex justify-content-xl-center align-items-xl-center bg-success";
+    		    gnss_fixstat_span.textContent = "SBAS_FIX";
+    		 }
+    		 if (message.status.status == 2){
+    		    gnss_fixstat_span.className = "text-center d-xl-flex justify-content-xl-center align-items-xl-center bg-success";
+    		    gnss_fixstat_span.textContent = "GBAS_FIX";
+    		 }
+
+    });
+
+///////////////////////////////////////////////////////////////////////  GET GNSS FIX    ///////////////////////////////////////////////////////////////////////
+
+    var GnssFixlistener = new ROSLIB.Topic({
+        ros : ros,
+        name : '/gnss_heading/fix',
+        messageType : 'sensor_msgs/NavSatFix'
+    });
+
+//    int8 STATUS_NO_FIX =  -1        # unable to fix position
+//    int8 STATUS_FIX =      0        # unaugmented fix
+//    int8 STATUS_SBAS_FIX = 1        # with satellite-based augmentation
+//    int8 STATUS_GBAS_FIX = 2        # with ground-based augmentation
+
+    GnssFixlistener.subscribe(function(message) {
+//    		 console.log(message);
+    		 if (message.status.status == -1){
+    		    gnss_heading_fixstat_span.className = "text-center d-xl-flex justify-content-xl-center align-items-xl-center bg-danger";
+    		    gnss_heading_fixstat_span.textContent = "NO_FIX";
+    		 }
+    		 if (message.status.status == 0){
+    		    gnss_heading_fixstat_span.className = "text-center d-xl-flex justify-content-xl-center align-items-xl-center bg-warning";
+    		    gnss_heading_fixstat_span.textContent = "FIX";
+    		 }
+    		 if (message.status.status == 1){
+    		    gnss_heading_fixstat_span.className = "text-center d-xl-flex justify-content-xl-center align-items-xl-center bg-success";
+    		    gnss_fixstat_span.textContent = "SBAS_FIX";
+    		 }
+    		 if (message.status.status == 2){
+    		    gnss_heading_fixstat_span.className = "text-center d-xl-flex justify-content-xl-center align-items-xl-center bg-success";
+    		    gnss_heading_fixstat_span.textContent = "GBAS_FIX";
+    		 }
+
+    });
+
+///////////////////////////////////////////////////////////////////////  GET GNSS STATUS    ///////////////////////////////////////////////////////////////////////
+
+    var GnssStatuslistener = new ROSLIB.Topic({
+        ros : ros,
+        name : '/gnss_heading/navstatus',
+        messageType : 'ublox_msgs/NavSTATUS'
+    });
+
+    //            uint8 GPS_NO_FIX = 0
+    //            uint8 GPS_DEAD_RECKONING_ONLY = 1
+    //            uint8 GPS_2D_FIX = 2
+    //            uint8 GPS_3D_FIX = 3
+    //            uint8 GPS_GPS_DEAD_RECKONING_COMBINED = 4
+    //            uint8 GPS_TIME_ONLY_FIX = 5
+
+    GnssStatuslistener.subscribe(function(message) {
+//    		 console.log(message);
+    		 if (message.gpsFix == 0){
+    		    gnss_heading_fix_span.className = "text-center d-xl-flex justify-content-xl-center align-items-xl-center bg-danger";
+    		    gnss_heading_fix_span.textContent = "NO_FIX";
+    		 }
+    		 if (message.gpsFix == 1){
+    		    gnss_heading_fix_span.className = "text-center d-xl-flex justify-content-xl-center align-items-xl-center bg-danger";
+    		    gnss_heading_fix_span.textContent = "DEAD_RECKONING_ONLY";
+    		 }
+    		 if (message.gpsFix == 2){
+    		    gnss_heading_fix_span.className = "text-center d-xl-flex justify-content-xl-center align-items-xl-center bg-warning";
+    		    gnss_heading_fix_span.textContent = "2D_FIX";
+    		 }
+
+    		 if (message.gpsFix == 3){
+    		    gnss_heading_fix_span.className = "text-center d-xl-flex justify-content-xl-center align-items-xl-center bg-success";
+    		    gnss_heading_fix_span.textContent = "3D_FIX";
+    		 }
+    		 if (message.gpsFix == 4){
+    		    gnss_heading_fix_span.className = "text-center d-xl-flex justify-content-xl-center align-items-xl-center bg-danger";
+    		    gnss_heading_fix_span.textContent = "DEAD_RECKONING_COMBINED";
+    		 }
+    		 if (message.gpsFix == 5){
+    		    gnss_heading_fix_span.className = "text-center d-xl-flex justify-content-xl-center align-items-xl-center bg-danger";
+    		    gnss_heading_fix_span.textContent = "GPS_TIME_ONLY_FIX";
     		 }
     });
 
