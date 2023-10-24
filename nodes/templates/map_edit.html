@@ -22,8 +22,7 @@
     <script src="assets/js/roslib.js"></script>
     <script src="assets/js/nav2d.js"></script>
     <script src="assets/js/ros2d.js"></script>
-    <script src="assets/js/mjpegcanvas.js"></script>
-    <script src="assets/js/map_edit.js"></script>
+    <script src="assets/js/mjpegcanvas.js"></script><script src="assets/js/map_edit.js"></script>
 </head>
 
 <body style="height: 100%;">
@@ -65,6 +64,15 @@
             </div>
             <div class="col-5 flex-grow-1" style="padding-left: 3px;">
                 <div>
+                    <div id="current_map" style="border: 1px solid #636363;margin-top: 6px;margin-bottom: 6px;">
+                        <header style="padding: 2px;background: #333333;padding-left: 8px;margin-bottom: 0px;width: 100%;"><span class="text-nowrap text-uppercase font-weight-bold" style="font-size: 13px;">ACTIVE MAP</span><span class="text-nowrap font-weight-bold text-info float-right" id="active_map_name" style="font-size: 13px;margin-right: 3px;">Map name</span></header>
+                        <div id="active_map_panel" style="border-right-color: rgb(51,51,51);border-bottom-color: #333333;border-left-color: #333333;">
+                            <header class="d-flex align-items-center visible" id="div_active_map_subpanel_1" style="background: #333333;padding-top: 10px;padding-bottom: 10px;padding-right: 3px;">
+                                <div class="d-flex"></div>
+                                <div class="btn-group btn-group-sm d-flex ml-auto" role="group"><button class="btn btn-outline-success d-inline-flex btn-sm-s" id="btn_save_planner_data" type="button">Save planner data</button><button class="btn btn-outline-info d-inline-flex btn-sm-s" id="btn_load_planner_data" type="button">Load planner data</button><button class="btn btn-outline-warning text-nowrap d-inline-flex btn-sm-s" id="btn_reload_map" type="button">Reload map</button></div>
+                            </header>
+                        </div>
+                    </div>
                     <div id="panel_log" style="border: 1px solid #636363;">
                         <header class="d-flex" style="padding: 2px;background: #333333;padding-left: 8px;"><span class="text-nowrap text-uppercase font-weight-bold" style="font-size: 13px;">STATUS</span></header>
                         <div></div>

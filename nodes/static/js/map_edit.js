@@ -7,7 +7,7 @@ window.onload = function() {
 
      var listenerMapMeta = new ROSLIB.Topic({
         ros : ros,
-        name : '/map_metadata',
+        name : '/web_plan/map_metadata',
         messageType : 'nav_msgs/MapMetaData'
     });
 
@@ -53,7 +53,7 @@ window.onload = function() {
     // Grid client.  //////////////////////////////////////////////////////////////////////////////////////////
     gridClient = new ROS2D.OccupancyGridClient({
       ros : ros,
-      topic: '/map_show',
+      topic: '/web_plan/map_show',
       rootObject : viewer.scene,
       // Use this property in case of continuous updates
       continuous: true
@@ -225,7 +225,7 @@ window.onload = function() {
         var div_log = document.getElementById("div_log")
         var logTopic = new ROSLIB.Topic({
             ros: ros,
-            name: '/log',
+            name: '/web_plan/log',
             messageType: 'std_msgs/String'
         });
         logTopic.subscribe(function (message) {
@@ -244,7 +244,7 @@ window.onload = function() {
     function get_map_data() {
         var topic_map_data = new ROSLIB.Topic({
             ros: ros,
-            name: '/map_data',
+            name: '/web_plan/map_data',
             messageType: 'vitulus_msgs/MapEditMap'
         });
         topic_map_data.subscribe(function (message) {
@@ -259,7 +259,7 @@ window.onload = function() {
     function assemble_map() {
         var topic_assemble_map = new ROSLIB.Topic({
             ros: ros,
-            name: '/assemble_map',
+            name: '/web_plan/assemble_map',
             messageType: 'vitulus_msgs/MapEditMap'
         });
         topic_assemble_map.advertise();
@@ -283,7 +283,7 @@ window.onload = function() {
     function show_map() {
         var topic_show_fill_map = new ROSLIB.Topic({
             ros: ros,
-            name: '/show_map_layer',
+            name: '/web_plan/show_map_layer',
             messageType: 'std_msgs/String'
         });
         topic_show_fill_map.advertise();
@@ -442,7 +442,7 @@ window.onload = function() {
     // Save polygon ////////////////////////////////////////////////////////////////////////////////////////////////////
     var topic_save_poly = new ROSLIB.Topic({
             ros : ros,
-            name : '/save_polygon',
+            name : '/web_plan/save_polygon',
             messageType : 'vitulus_msgs/MapEditPolygon'
     });
     topic_save_poly.advertise();
@@ -491,7 +491,7 @@ window.onload = function() {
     // Remove polygon from list by name  ///////////////////////////////////////////////////////////////////////////////
     var topic_remove_poly = new ROSLIB.Topic({
         ros : ros,
-        name : '/remove_polygon',
+        name : '/web_plan/remove_polygon',
         messageType : 'std_msgs/String'
     });
     topic_remove_poly.advertise();
@@ -530,7 +530,7 @@ window.onload = function() {
     // load polygon list ///////////////////////////////////////////////////////////////////////////////////////////////
     var polyListTopic = new ROSLIB.Topic({
         ros : ros,
-        name : '/polygon_list',
+        name : '/web_plan/polygon_list',
         messageType : 'vitulus_msgs/MapEditPolygonList'
     });
 
@@ -637,7 +637,7 @@ window.onload = function() {
         // Selected zone topic /////////////////////////////////////////////////////////////////////////////////////////////////
         var topic_selected_zone = new ROSLIB.Topic({
             ros: ros,
-            name: '/selected_zone',
+            name: '/web_plan/selected_zone',
             messageType: 'std_msgs/String'
         });
         topic_selected_zone.advertise();
@@ -659,7 +659,7 @@ window.onload = function() {
         // Save zone topic /////////////////////////////////////////////////////////////////////////////////////////////////
         var topic_save_zone = new ROSLIB.Topic({
             ros: ros,
-            name: '/save_zone',
+            name: '/web_plan/save_zone',
             messageType: 'vitulus_msgs/MapEditZone'
         });
         topic_save_zone.advertise();
@@ -720,7 +720,7 @@ window.onload = function() {
         // Get zone list //////////////////////////////////////////////////////////////////////////////////////////////////
         var zoneListTopic = new ROSLIB.Topic({
             ros: ros,
-            name: '/zone_list',
+            name: '/web_plan/zone_list',
             messageType: 'vitulus_msgs/MapEditZoneList'
         });
 
@@ -796,7 +796,7 @@ window.onload = function() {
         // Remove zone from list by name  /////////////////////////////////////////////////////////////////////////////////
         var topic_remove_zone = new ROSLIB.Topic({
             ros: ros,
-            name: '/remove_zone',
+            name: '/web_plan/remove_zone',
             messageType: 'std_msgs/String'
         });
         topic_remove_zone.advertise();
@@ -825,7 +825,7 @@ window.onload = function() {
         // Get program list //////////////////////////////////////////////////////////////////////////////////////////////////
         var programListTopic = new ROSLIB.Topic({
             ros: ros,
-            name: '/program_list',
+            name: '/web_plan/program_list',
             messageType: 'vitulus_msgs/PlannerProgramList'
         });
 
@@ -864,7 +864,7 @@ window.onload = function() {
         // Publish program to run  /////////////////////////////////////////////////////////////////////////////////////
         var topic_program_select = new ROSLIB.Topic({
             ros: ros,
-            name: '/program_select',
+            name: '/web_plan/program_select',
             messageType: 'std_msgs/String'
         });
         topic_program_select.advertise();
@@ -884,7 +884,7 @@ window.onload = function() {
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     var pathCoverageTopic = new ROSLIB.Topic({
         ros : ros,
-        name : '/path_show',
+        name : '/web_plan/path_show',
         messageType : 'nav_msgs/Path'
     });
 
@@ -893,6 +893,77 @@ window.onload = function() {
         console.log("Path:");
         coveragePath.setPath(message);
     });
+
+
+    // Active map ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    function active_map() {
+        // Program elements  ///////////////////////////////////////////////////////////////////////////////////////////////
+        var btn_save_planner_data = document.getElementById("btn_save_planner_data");
+        var btn_load_planner_data = document.getElementById("btn_load_planner_data");
+        var btn_reload_map = document.getElementById("btn_reload_map");
+        var active_map_name = document.getElementById("active_map_name");
+
+        // Display map name ///////////////////////////////////////////////////////////////////////////////////////////////////////
+        var active_map_Topic = new ROSLIB.Topic({
+            ros : ros,
+            name : '/navi_manager/active_map',
+            messageType : 'std_msgs/String'
+        });
+
+
+        active_map_Topic.subscribe(function(message) {
+            console.log("Active map:");
+            active_map_name.textContent = message.data;
+        });
+
+        // Load planner data ///////////////////////////////////////////////////////////////////////////////////////////////////////
+        var load_planner_data_Topic = new ROSLIB.Topic({
+            ros : ros,
+            name : '/web_plan/load_planner_data',
+            messageType : 'std_msgs/Bool'
+        });
+        load_planner_data_Topic.advertise();
+
+        btn_load_planner_data.onclick = function () {
+            let msg = new ROSLIB.Message({
+                data: true,
+            });
+            load_planner_data_Topic.publish(msg)
+        }
+
+        // Save planner data ///////////////////////////////////////////////////////////////////////////////////////////////////////
+        var save_planner_data_Topic = new ROSLIB.Topic({
+            ros : ros,
+            name : '/web_plan/save_planner_data',
+            messageType : 'std_msgs/Bool'
+        });
+        save_planner_data_Topic.advertise();
+
+        btn_save_planner_data.onclick = function () {
+            let msg = new ROSLIB.Message({
+                data: true,
+            });
+            save_planner_data_Topic.publish(msg)
+        }
+
+        // Reload map ///////////////////////////////////////////////////////////////////////////////////////////////////////
+        var reload_map_Topic = new ROSLIB.Topic({
+            ros : ros,
+            name : '/web_plan/reload_map',
+            messageType : 'std_msgs/Bool'
+        });
+        reload_map_Topic.advertise();
+
+        btn_reload_map.onclick = function () {
+            let msg = new ROSLIB.Message({
+                data: true,
+            });
+            reload_map_Topic.publish(msg)
+        }
+    }
+    active_map();
 
 
 
@@ -906,7 +977,7 @@ window.onload = function() {
 
     var topic_publish_reload = new ROSLIB.Topic({
         ros : ros,
-        name : '/reload',
+        name : '/web_plan/reload',
         messageType : 'std_msgs/Bool'
     });
     topic_publish_reload.advertise();
