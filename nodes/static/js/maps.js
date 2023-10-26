@@ -1174,23 +1174,23 @@ window.onload = function() {
         gridClient.currentGrid.visible = false;
         gridClient.unsubscribe();
         gridClientRtabmap.currentGrid.visible = true;
-        gridClientRtabmap.subscribe();
+        // gridClientRtabmap.subscribe();
         // console.log(gridClient);
         // console.log(viewer.scene);
         // gridClient.unsubscribe();
         // viewer.scene.remove(gridClient);
-        // gridClient = new ROS3D.OccupancyGridClient({
-        //     ros : ros,
-        //     tfClient: tfClientMap,
-        //     rootObject : viewer.scene,
-        //     continuous: true,
-        //     topic: '/rtabmap/grid_map',
-        //     // topic: '/map_assembled',
-        //     // topic: '/web_plan/map_edited',
-        //     color: {r:0,g:255,b:255},  // {r:0,g:255,b:255} gridmap, {r:255,g:0,b:255} loc costmap, {r:255,g:255,b:0} glob costmap
-        //     opacity: 0.99,
-        //     offsetPose: z_offset_map
-        // });
+        gridClient = new ROS3D.OccupancyGridClient({
+            ros : ros,
+            tfClient: tfClientMap,
+            rootObject : viewer.scene,
+            continuous: true,
+            topic: '/rtabmap/grid_map',
+            // topic: '/map_assembled',
+            // topic: '/web_plan/map_edited',
+            color: {r:0,g:255,b:255},  // {r:0,g:255,b:255} gridmap, {r:255,g:0,b:255} loc costmap, {r:255,g:255,b:0} glob costmap
+            opacity: 0.99,
+            offsetPose: z_offset_map
+        });
 
         // gridClient.topicName = '/rtabmap/grid_map';
         // gridClient.rootObject.remove(gridClient.currentGrid);
@@ -1204,7 +1204,7 @@ window.onload = function() {
     btn_map_view_planner_map = document.getElementById("btn_map_view_planner_map");
     btn_map_view_planner_map.onclick = function() {
         gridClient.currentGrid.visible = true;
-        gridClient.subscribe();
+        // gridClient.subscribe();
         gridClientRtabmap.currentGrid.visible = false;
         gridClientRtabmap.unsubscribe();
         // console.log(gridClient);
@@ -1219,18 +1219,18 @@ window.onload = function() {
         // console.log(viewer.scene);
         // gridClient.unsubscribe();
         // viewer.scene.remove(gridClient);
-        // gridClient = new ROS3D.OccupancyGridClient({
-        //     ros : ros,
-        //     tfClient: tfClientMap,
-        //     rootObject : viewer.scene,
-        //     continuous: true,
-        //     topic: '/rtabmap/grid_map',
-        //     // topic: '/map_assembled',
-        //     // topic: '/web_plan/map_edited',
-        //     color: {r:0,g:255,b:255},  // {r:0,g:255,b:255} gridmap, {r:255,g:0,b:255} loc costmap, {r:255,g:255,b:0} glob costmap
-        //     opacity: 0.99,
-        //     offsetPose: z_offset_map
-        // });
+        gridClient = new ROS3D.OccupancyGridClient({
+            ros : ros,
+            tfClient: tfClientMap,
+            rootObject : viewer.scene,
+            continuous: true,
+            // topic: '/rtabmap/grid_map',
+            // topic: '/map_assembled',
+            topic: '/web_plan/map_edited',
+            color: {r:0,g:255,b:255},  // {r:0,g:255,b:255} gridmap, {r:255,g:0,b:255} loc costmap, {r:255,g:255,b:0} glob costmap
+            opacity: 0.99,
+            offsetPose: z_offset_map
+        });
         console.log(gridClient);
         console.log(viewer.scene);
     }
@@ -1361,7 +1361,7 @@ window.onload = function() {
     ////////// send cancel goal
     var cancelGoalTopic = new ROSLIB.Topic({
         ros : ros,
-        name : '/move_base/cancel',
+        name : '/move_base_flex/move_base/cancel',
         messageType : 'actionlib_msgs/GoalID'
     });
 
