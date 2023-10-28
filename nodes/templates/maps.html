@@ -52,6 +52,7 @@
     <script src="assets/js/mjpegcanvas.js"></script>
     <script src="assets/js/maps.js"></script>
 
+
     <script type="text/javascript">
 <!--        var ip = location.hostname;-->
 <!--&lt;!&ndash;        var robot_IP = '{{ ros_ip }}';&ndash;&gt;-->
@@ -65,6 +66,8 @@
     <div>
         <nav class="navbar navbar-light navbar-expand-md sticky-top navigation-clean-button" style="height: 34px;background-color: #37434d;color: #ffffff;">
             <div class="container-fluid"><a class="navbar-brand" href="#" style="color: var(--yellow);padding-top: 5px;padding-bottom: 5px;margin-right: 46px;">&nbsp;Vitulus UI</a><button data-toggle="collapse" class="navbar-toggler" data-target="#navcol-1"><span class="sr-only">Toggle navigation</span><span class="navbar-toggler-icon"></span></button>
+                <div id="status_div" style="padding: 4px;background: #000000;border-radius: 7px;box-shadow: 2px 2px var(--primary);"><img id="ico_wifi" src="assets/img/robot_icons/Nextion_ico_wifi_grey.png" style="margin-left: 4px;transform: scale(0.75);"><img id="ico_gps" src="assets/img/robot_icons/Nextion_ico_gps_grey.png" style="margin-left: 4px;transform: scale(0.75);"><img id="ico_gps_nav" src="assets/img/robot_icons/Nextion_ico_gpsnav_grey.png" style="margin-left: 1px;transform: scale(0.75);"><img id="ico_imu" src="assets/img/robot_icons/Nextion_ico_imu_grey.png" style="margin-left: 1px;transform: scale(0.75);"><img id="ico_lidar" src="assets/img/robot_icons/Nextion_ico_lidar_grey.png" style="margin-left: 1px;transform: scale(0.75);"><img id="ico_camera" src="assets/img/robot_icons/Nextion_ico_camera_grey.png" style="margin-left: 1px;transform: scale(0.75);"><img id="ico_mower" src="assets/img/robot_icons/Nextion_ico_mower_grey.png" style="margin-left: 9px;transform: scale(0.75);"><img id="ico_fl_motor" src="assets/img/robot_icons/Nextion_ico_motorLF_grey.png" style="margin-left: 7px;transform: scale(0.75);"><img id="ico_fr_motor" src="assets/img/robot_icons/Nextion_ico_motorRF_grey.png" style="margin-left: -1px;transform: scale(0.75);"><img id="ico_rl_motor" src="assets/img/robot_icons/Nextion_ico_motorLR_grey.png" style="margin-left: -2px;transform: scale(0.75);"><img id="ico_rr_motor" src="assets/img/robot_icons/Nextion_ico_motorRR_grey.png" style="margin-left: -1px;transform: scale(0.75);"><img id="ico_temp_pcb" src="assets/img/robot_icons/Nextion_ico_tempPCB_grey.png" style="margin-left: 8px;transform: scale(0.75);"><img id="ico_fan_pcb" src="assets/img/robot_icons/Nextion_ico_fanPCB_grey.png" style="margin-left: -3px;transform: scale(0.75);"><img id="ico_temp" src="assets/img/robot_icons/Nextion_ico_temp_grey.png" style="margin-left: 3px;transform: scale(0.75);"><img id="ico_fan" src="assets/img/robot_icons/Nextion_ico_fan_grey.png" style="margin-left: -5px;transform: scale(0.75);"><img id="ico_supply" src="assets/img/robot_icons/Nextion_ico_supply_grey.png" style="margin-left: 5px;transform: scale(0.75);"><img id="ico_batt" src="assets/img/robot_icons/Nextion_ico_batt_disabled.png" style="margin-left: 0px;transform: scale(0.75);"></div>
+
                 <div class="collapse navbar-collapse" id="navcol-1">
                     <ul class="navbar-nav ml-auto">
                         <li class="nav-item"><a class="nav-link active" style="color: #ffffff;padding-top: 5px;padding-bottom: 5px;" href="#"><i class="fa fa-th-large"></i>&nbsp;Dashboard</a></li>
@@ -244,6 +247,13 @@
                             <div class="tab-pane fade" role="tabpanel" id="tab-map" style="padding: 4px;border-color: #333333;overflow: auto;overflow-x: hidden;height: 542px;">
                                 <div style="border: 1px solid #636363 ;">
                                     <header class="d-flex" style="padding: 2px;background: #333333;padding-left: 8px;"><span>Running map</span></header>
+                                    <div>
+                                        <div class="btn-group btn-group-sm" role="group" style="width: 100%;">
+                                            <button class="btn btn-primary" id="btn_map_indoor" type="button">Indoor&nbsp;</button>
+                                            <button class="btn btn-primary" id="btn_map_outdoor" type="button">Outdoor</button>
+
+                                        </div>
+                                    </div>
                                     <div>
                                         <div class="btn-group btn-group-sm" role="group" style="width: 100%;"><button class="btn btn-primary" id="save_map" type="button">Save&nbsp;</button><button class="btn btn-primary" id="new_map" type="button">New</button><button class="btn btn-primary" id="mapping" type="button">Mapping</button><button class="btn btn-primary" id="localization" type="button">Localization</button></div>
                                     </div>

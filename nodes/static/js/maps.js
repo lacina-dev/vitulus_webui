@@ -1,4 +1,229 @@
 
+class IconStatus {
+    constructor(ros) {
+        this.icon_status_topic = new ROSLIB.Topic({
+            ros: ros,
+            name: '/device_state_pub/icon_status',
+            messageType: 'vitulus_msgs/Device_icon_status'
+        });
+        this.subscribe = this.icon_status_topic.subscribe(function (message) {
+            // WiFi
+            if (message.wifi === "FINE") {
+                ico_wifi.src = "assets/img/robot_icons/Nextion_ico_wifi_green.png";
+            }
+            if (message.wifi === "MEDIUM") {
+                ico_wifi.src = "assets/img/robot_icons/Nextion_ico_wifi_orange.png";
+            }
+            if (message.wifi === "BAD") {
+                ico_wifi.src = "assets/img/robot_icons/Nextion_ico_wifi_red.png";
+            }
+            if (message.wifi === "DISCONNECTED") {
+                ico_wifi.src = "assets/img/robot_icons/Nextion_ico_wifi_grey.png";
+            }
+            // GPS
+            if (message.gnss === "RTK") {
+                ico_gps.src = "assets/img/robot_icons/Nextion_ico_gps_green.png";
+            }
+            if (message.gnss === "3DFIX") {
+                ico_gps.src = "assets/img/robot_icons/Nextion_ico_gps_orange.png";
+            }
+            if (message.gnss === "BAD") {
+                ico_gps.src = "assets/img/robot_icons/Nextion_ico_gps_red.png";
+            }
+            if (message.gnss === "DISABLED") {
+                ico_gps.src = "assets/img/robot_icons/Nextion_ico_gps_grey.png";
+            }
+            // GPS_NAV
+            if (message.gnss_nav === "RTK") {
+                ico_gps_nav.src = "assets/img/robot_icons/Nextion_ico_gpsnav_green.png";
+            }
+            if (message.gnss_nav === "3DFIX") {
+                ico_gps_nav.src = "assets/img/robot_icons/Nextion_ico_gpsnav_orange.png";
+            }
+            if (message.gnss_nav === "BAD") {
+                ico_gps_nav.src = "assets/img/robot_icons/Nextion_ico_gpsnav_red.png";
+            }
+            if (message.gnss_nav === "DISABLED") {
+                ico_gps_nav.src = "assets/img/robot_icons/Nextion_ico_gpsnav_grey.png";
+            }
+            // IMU
+            if (message.imu === "ON") {
+                ico_imu.src = "assets/img/robot_icons/Nextion_ico_imu_green.png";
+            }
+            else  {
+                ico_imu.src = "assets/img/robot_icons/Nextion_ico_imu_grey.png";
+            }
+            // LIDAR
+            if (message.lidar === "ON") {
+                ico_lidar.src = "assets/img/robot_icons/Nextion_ico_lidar_green.png";
+            }
+            else  {
+                ico_lidar.src = "assets/img/robot_icons/Nextion_ico_lidar_grey.png";
+            }
+            // D435
+            if (message.d435 === "ON") {
+                ico_camera.src = "assets/img/robot_icons/Nextion_ico_camera_green.png";
+            }
+            else  {
+                ico_camera.src = "assets/img/robot_icons/Nextion_ico_camera_grey.png";
+            }
+            // MOWER
+            if (message.mower === "ON") {
+                ico_mower.src = "assets/img/robot_icons/Nextion_ico_mower_green.png";
+            }
+            if (message.mower === "BUSY") {
+                ico_mower.src = "assets/img/robot_icons/Nextion_ico_mower_green.png";
+            }
+            if (message.mower === "ERROR") {
+                ico_mower.src = "assets/img/robot_icons/Nextion_ico_mower_red.png";
+            }
+            if (message.mower === "DISABLED") {
+                ico_mower.src = "assets/img/robot_icons/Nextion_ico_mower_grey.png";
+            }
+            // FL MOTOR
+            if (message.mot_lf === "OK") {
+                ico_fl_motor.src = "assets/img/robot_icons/Nextion_ico_motorLF_green.png";
+            }
+            if (message.mot_lf === "WARM") {
+                ico_fl_motor.src = "assets/img/robot_icons/Nextion_ico_motorLF_orange.png";
+            }
+            if (message.mot_lf === "HOT") {
+                ico_fl_motor.src = "assets/img/robot_icons/Nextion_ico_motorLF_red.png";
+            }
+            if (message.mot_lf === "DISABLED") {
+                ico_fl_motor.src = "assets/img/robot_icons/Nextion_ico_motorLF_grey.png";
+            }
+            // FR MOTOR
+            if (message.mot_rf === "OK") {
+                ico_fr_motor.src = "assets/img/robot_icons/Nextion_ico_motorRF_green.png";
+            }
+            if (message.mot_rf === "WARM") {
+                ico_fr_motor.src = "assets/img/robot_icons/Nextion_ico_motorRF_orange.png";
+            }
+            if (message.mot_rf === "HOT") {
+                ico_fr_motor.src = "assets/img/robot_icons/Nextion_ico_motorRF_red.png";
+            }
+            if (message.mot_rf === "DISABLED") {
+                ico_fr_motor.src = "assets/img/robot_icons/Nextion_ico_motorRF_grey.png";
+            }
+            // RL MOTOR
+            if (message.mot_lr === "OK") {
+                ico_rl_motor.src = "assets/img/robot_icons/Nextion_ico_motorLR_green.png";
+            }
+            if (message.mot_lr === "WARM") {
+                ico_rl_motor.src = "assets/img/robot_icons/Nextion_ico_motorLR_orange.png";
+            }
+            if (message.mot_lr === "HOT") {
+                ico_rl_motor.src = "assets/img/robot_icons/Nextion_ico_motorLR_red.png";
+            }
+            if (message.mot_lr === "DISABLED") {
+                ico_rl_motor.src = "assets/img/robot_icons/Nextion_ico_motorLR_grey.png";
+            }
+            // RR MOTOR
+            if (message.mot_rr === "OK") {
+                ico_rr_motor.src = "assets/img/robot_icons/Nextion_ico_motorRR_green.png";
+            }
+            if (message.mot_rr === "WARM") {
+                ico_rr_motor.src = "assets/img/robot_icons/Nextion_ico_motorRR_orange.png";
+            }
+            if (message.mot_rr === "HOT") {
+                ico_rr_motor.src = "assets/img/robot_icons/Nextion_ico_motorRR_red.png";
+            }
+            if (message.mot_rr === "DISABLED") {
+                ico_rr_motor.src = "assets/img/robot_icons/Nextion_ico_motorRR_grey.png";
+            }
+            // TEMP_PCB
+            if (message.temp_int === "OK") {
+                ico_temp_pcb.src = "assets/img/robot_icons/Nextion_ico_tempPCB_green.png";
+            }
+            if (message.temp_int === "WARM") {
+                ico_temp_pcb.src = "assets/img/robot_icons/Nextion_ico_tempPCB_orange.png";
+            }
+            if (message.temp_int === "HOT") {
+                ico_temp_pcb.src = "assets/img/robot_icons/Nextion_ico_tempPCB_red.png";
+            }
+            if (message.temp_int === "DISABLED") {
+                ico_temp_pcb.src = "assets/img/robot_icons/Nextion_ico_tempPCB_grey.png";
+            }
+            // FAN_PCB
+            if (message.fan_int === "ON") {
+                ico_fan_pcb.src = "assets/img/robot_icons/Nextion_ico_fanPCB_green.png";
+            }
+            else  {
+                ico_fan_pcb.src = "assets/img/robot_icons/Nextion_ico_fanPCB_grey.png";
+            }
+            // TEMP_EXT
+            if (message.temp_ext === "OK") {
+                ico_temp.src = "assets/img/robot_icons/Nextion_ico_temp_green.png";
+            }
+            if (message.temp_ext === "WARM") {
+                ico_temp.src = "assets/img/robot_icons/Nextion_ico_temp_orange.png";
+            }
+            if (message.temp_ext === "HOT") {
+                ico_temp.src = "assets/img/robot_icons/Nextion_ico_temp_red.png";
+            }
+            if (message.temp_ext === "DISABLED") {
+                ico_temp.src = "assets/img/robot_icons/Nextion_ico_temp_grey.png";
+            }
+            // FAN_EXT
+            if (message.fan_ext === "ON") {
+                ico_fan.src = "assets/img/robot_icons/Nextion_ico_fan_green.png";
+            }
+            else  {
+                ico_fan.src = "assets/img/robot_icons/Nextion_ico_fan_grey.png";
+            }
+            // supply
+            if (message.supply === "ONLINE") {
+                ico_supply.src = "assets/img/robot_icons/Nextion_ico_supply_green.png";
+            }
+            else  {
+                if (message.supply === "FAIL") {
+                ico_supply.src = "assets/img/robot_icons/Nextion_ico_supply_red.png";
+                }
+                else  {
+                    ico_supply.src = "assets/img/robot_icons/Nextion_ico_supply_grey.png";
+                }
+            }
+            // BATTERY
+            if (message.batt === "FULL") {
+                ico_batt.src = "assets/img/robot_icons/Nextion_ico_batt_full.png";
+            }
+            if (message.batt === "75") {
+                ico_batt.src = "assets/img/robot_icons/Nextion_ico_batt_34.png";
+            }
+            if (message.batt === "50") {
+                ico_batt.src = "assets/img/robot_icons/Nextion_ico_batt_half.png";
+            }
+            if (message.batt === "25") {
+                ico_batt.src = "assets/img/robot_icons/Nextion_ico_batt_14.png";
+            }
+            if (message.batt === "EMPTY") {
+                ico_batt.src = "assets/img/robot_icons/Nextion_ico_batt_empty.png";
+            }
+            if (message.batt === "FULL_CHARGE") {
+                ico_batt.src = "assets/img/robot_icons/Nextion_ico_battCHARGE_full.png";
+            }
+            if (message.batt === "75_CHARGE") {
+                ico_batt.src = "assets/img/robot_icons/Nextion_ico_battCHARGE_34.png";
+            }
+            if (message.batt === "50_CHARGE") {
+                ico_batt.src = "assets/img/robot_icons/Nextion_ico_battCHARGE_half.png";
+            }
+            if (message.batt === "25_CHARGE") {
+                ico_batt.src = "assets/img/robot_icons/Nextion_ico_battCHARGE_14.png";
+            }
+            if (message.batt === "EMPTY_CHARGE") {
+                ico_batt.src = "assets/img/robot_icons/Nextion_ico_battCHARGE_empty.png";
+            }
+            if (message.batt === "DISABLED") {
+                ico_batt.src = "assets/img/robot_icons/Nextion_ico_batt_disabled.png";
+            }
+        });
+    }
+}
+
+
+
 window.onload = function() {
 //    var ip = location.hostname;
 ////    alert(ip);
@@ -7,10 +232,12 @@ window.onload = function() {
     var ros;
     ros = new ROSLIB.Ros({url: "ws://" + location.hostname + ":9090"});
 
-
+    icon_status = new IconStatus(ros);
 ///////////////////////////////////////////////////////////////////////  VARIABLES DECLARATION    //////////////////////////////////////////////////
     const LOG_VIEW_LENGTH = 300;
     const LOG_LENGTH = 20000;
+
+    var is_rtabmap = false;
 
     let id_ros_log = document.getElementById("ros_log");
     let id_scroll_down = document.getElementById("scroll_down");
@@ -625,6 +852,28 @@ window.onload = function() {
         newMapTopic.publish(newMapMsg);
     };
 
+///////////////////////////////////////////////////////////////////////  INDOOR OUTDOOR    ///////////////////////////////////////////////////////////////////////
+
+    var is_indoor_topic = new ROSLIB.Topic({
+        ros : ros,
+        name : '/navi_manager/is_indoor',
+        messageType : 'std_msgs/Bool'
+    });
+    is_indoor_topic.advertise();
+
+    document.getElementById('btn_map_indoor').onclick = function() {
+        var newMapMsg = new ROSLIB.Message({
+            data : true
+        });
+        is_indoor_topic.publish(newMapMsg);
+    };
+
+    document.getElementById('btn_map_outdoor').onclick = function() {
+        var newMapMsg = new ROSLIB.Message({
+            data : false
+        });
+        is_indoor_topic.publish(newMapMsg);
+    };
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////
@@ -1144,6 +1393,8 @@ window.onload = function() {
         offsetPose: z_offset_map
     });
 
+
+
     var gridClientRtabmap = new ROS3D.OccupancyGridClient({
         ros : ros,
         tfClient: tfClientMap,
@@ -1153,6 +1404,30 @@ window.onload = function() {
         color: {r:0,g:255,b:255},  // {r:0,g:255,b:255} gridmap, {r:255,g:0,b:255} loc costmap, {r:255,g:255,b:0} glob costmap
         opacity: 0.99,
         offsetPose: z_offset_map2
+    });
+
+    gridClient.on('change', function() {
+        // gridClientRtabmap.currentGrid.visible = false;
+        // gridClient.currentGrid.visible = false;
+        console.log(is_rtabmap)
+        if (!is_rtabmap){
+            gridClient.currentGrid.visible = true;
+            gridClientRtabmap.currentGrid.visible = false;
+        } else{
+            gridClientRtabmap.currentGrid.visible = true;
+            gridClient.currentGrid.visible = false;
+        }
+    });
+
+    gridClientRtabmap.on('change', function() {
+        if (is_rtabmap){
+            gridClientRtabmap.currentGrid.visible = true;
+            gridClient.currentGrid.visible = false;
+        } else{
+            gridClient.currentGrid.visible = true;
+            gridClientRtabmap.currentGrid.visible = false;
+        }
+
     });
 
     console.log(gridClient)
@@ -1171,42 +1446,48 @@ window.onload = function() {
 
     btn_map_view_rtabmap = document.getElementById("btn_map_view_rtabmap");
     btn_map_view_rtabmap.onclick = function() {
-        gridClient.currentGrid.visible = false;
-        gridClient.unsubscribe();
+        is_rtabmap = true;
         gridClientRtabmap.currentGrid.visible = true;
+        gridClient.currentGrid.visible = false;
+        // gridClient.currentGrid.visible = false;
+        // gridClient.unsubscribe();
+        // gridClientRtabmap.currentGrid.visible = true;
         // gridClientRtabmap.subscribe();
         // console.log(gridClient);
         // console.log(viewer.scene);
         // gridClient.unsubscribe();
         // viewer.scene.remove(gridClient);
-        gridClient = new ROS3D.OccupancyGridClient({
-            ros : ros,
-            tfClient: tfClientMap,
-            rootObject : viewer.scene,
-            continuous: true,
-            topic: '/rtabmap/grid_map',
-            // topic: '/map_assembled',
-            // topic: '/web_plan/map_edited',
-            color: {r:0,g:255,b:255},  // {r:0,g:255,b:255} gridmap, {r:255,g:0,b:255} loc costmap, {r:255,g:255,b:0} glob costmap
-            opacity: 0.99,
-            offsetPose: z_offset_map
-        });
+        // gridClient = new ROS3D.OccupancyGridClient({
+        //     ros : ros,
+        //     tfClient: tfClientMap,
+        //     rootObject : viewer.scene,
+        //     continuous: true,
+        //     topic: '/rtabmap/grid_map',
+        //     // topic: '/map_assembled',
+        //     // topic: '/web_plan/map_edited',
+        //     color: {r:0,g:255,b:255},  // {r:0,g:255,b:255} gridmap, {r:255,g:0,b:255} loc costmap, {r:255,g:255,b:0} glob costmap
+        //     opacity: 0.99,
+        //     offsetPose: z_offset_map
+        // });
 
         // gridClient.topicName = '/rtabmap/grid_map';
         // gridClient.rootObject.remove(gridClient.currentGrid);
         // gridClient.sceneNode.remove(gridClient.currentGrid);
-        console.log(gridClient);
-        console.log(viewer.scene);
+        // console.log(gridClient);
+        // console.log(viewer.scene);
         // gridClient.subscribe();
 
     }
 
     btn_map_view_planner_map = document.getElementById("btn_map_view_planner_map");
     btn_map_view_planner_map.onclick = function() {
-        gridClient.currentGrid.visible = true;
-        // gridClient.subscribe();
+        is_rtabmap = false;
         gridClientRtabmap.currentGrid.visible = false;
-        gridClientRtabmap.unsubscribe();
+        gridClient.currentGrid.visible = true;
+        // gridClient.currentGrid.visible = true;
+        // gridClient.subscribe();
+        // gridClientRtabmap.currentGrid.visible = false;
+        // gridClientRtabmap.unsubscribe();
         // console.log(gridClient);
         // console.log(viewer);
         // gridClient.unsubscribe();
@@ -1219,20 +1500,20 @@ window.onload = function() {
         // console.log(viewer.scene);
         // gridClient.unsubscribe();
         // viewer.scene.remove(gridClient);
-        gridClient = new ROS3D.OccupancyGridClient({
-            ros : ros,
-            tfClient: tfClientMap,
-            rootObject : viewer.scene,
-            continuous: true,
-            // topic: '/rtabmap/grid_map',
-            // topic: '/map_assembled',
-            topic: '/web_plan/map_edited',
-            color: {r:0,g:255,b:255},  // {r:0,g:255,b:255} gridmap, {r:255,g:0,b:255} loc costmap, {r:255,g:255,b:0} glob costmap
-            opacity: 0.99,
-            offsetPose: z_offset_map
-        });
-        console.log(gridClient);
-        console.log(viewer.scene);
+        // gridClient = new ROS3D.OccupancyGridClient({
+        //     ros : ros,
+        //     tfClient: tfClientMap,
+        //     rootObject : viewer.scene,
+        //     continuous: true,
+        //     // topic: '/rtabmap/grid_map',
+        //     // topic: '/map_assembled',
+        //     topic: '/web_plan/map_edited',
+        //     color: {r:0,g:255,b:255},  // {r:0,g:255,b:255} gridmap, {r:255,g:0,b:255} loc costmap, {r:255,g:255,b:0} glob costmap
+        //     opacity: 0.99,
+        //     offsetPose: z_offset_map
+        // });
+        // console.log(gridClient);
+        // console.log(viewer.scene);
     }
 
 
@@ -1361,7 +1642,8 @@ window.onload = function() {
     ////////// send cancel goal
     var cancelGoalTopic = new ROSLIB.Topic({
         ros : ros,
-        name : '/move_base_flex/move_base/cancel',
+        // name : '/move_base_flex/move_base/cancel',
+        name : '/move_base_flex/exe_path/cancel',
         messageType : 'actionlib_msgs/GoalID'
     });
 
@@ -2146,6 +2428,21 @@ window.onload = function() {
 
 ///////////////////////////////////////////////////////////////////////  RTABMAP LOCALIZATION MAPPING    ///////////////////////////////////////////////////////////////////////
 
+    var rtabmap_status_topic = new ROSLIB.Topic({
+        ros : ros,
+        name : '/navi_manager/is_rtabmap',
+        messageType : 'std_msgs/Bool'
+    });
+
+    rtabmap_status_topic.subscribe(function(message) {
+//    		 console.log(message);
+        if (message.data){
+            is_rtabmap = message.data;
+        }
+        else {
+            is_rtabmap = message.data;
+        }
+    });
 
     function callRtabmapLocalization() {
         var rtabmapLocalizationClient = new ROSLIB.Service({
@@ -2608,10 +2905,10 @@ window.onload = function() {
         pub_base_set_torqueTopic.publish(base_set_torqueMsg);
     };
 
-    gridClient.currentGrid.visible = false;
-    gridClient.unsubscribe();
-    gridClientRtabmap.currentGrid.visible = true;
-    gridClientRtabmap.subscribe();
+    // gridClient.currentGrid.visible = false;
+    // gridClient.unsubscribe();
+    // gridClientRtabmap.currentGrid.visible = true;
+    // gridClientRtabmap.subscribe();
 
 } /// end of on.load()
 
