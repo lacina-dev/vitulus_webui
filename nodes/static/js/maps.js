@@ -875,6 +875,31 @@ window.onload = function() {
         is_indoor_topic.publish(newMapMsg);
     };
 
+///////////////////////////////////////////////////////////////////////  RUN/SAVE IMU CALIBRATION    ///////////////////////////////////////////////////////////////////////
+
+    var run_save_calib_topic = new ROSLIB.Topic({
+        ros : ros,
+        name : '/bno085/run_calibration',
+        messageType : 'std_msgs/Bool'
+    });
+    run_save_calib_topic.advertise();
+
+    document.getElementById('btn_run_calib').onclick = function() {
+        var runCalibMsg = new ROSLIB.Message({
+            data : true
+        });
+        run_save_calib_topic.publish(runCalibMsg);
+    };
+
+    document.getElementById('btn_save_calib').onclick = function() {
+        var runCalibMsg = new ROSLIB.Message({
+            data : false
+        });
+        run_save_calib_topic.publish(runCalibMsg);
+    };
+
+
+
 
 ////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////   POINTS    //////////////////////////////////////////////////////
