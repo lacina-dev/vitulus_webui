@@ -819,7 +819,42 @@ window.onload = function() {
 //    };
 
 
-///////////////////////////////////////////////////////////////////////  SAVE MAP    ///////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////  CURRENT MAP NAME    ///////////////////////////////////////////////////////////////////////
+    // Display map name ///////////////////////////////////////////////////////////////////////////////////////////////////////
+    var span_map_name = document.getElementById('span_map_name');
+
+    var active_map_Topic = new ROSLIB.Topic({
+            ros : ros,
+            name : '/navi_manager/active_map',
+            messageType : 'std_msgs/String'
+        });
+
+
+        active_map_Topic.subscribe(function(message) {
+            span_map_name.textContent = message.data;
+        });
+
+    // Display indoor/outdoor ///////////////////////////////////////////////////////////////////////////////////////////////////////
+    var span_map_indoor = document.getElementById('span_map_indoor');
+
+    var is_indoor_Topic = new ROSLIB.Topic({
+            ros : ros,
+            name : '/navi_manager/is_indoor',
+            messageType : 'std_msgs/Bool'
+        });
+
+
+        is_indoor_Topic.subscribe(function(message) {
+            if(message.data){
+                span_map_indoor.textContent = "indoor";
+            } else {
+                span_map_indoor.textContent = "outdoor";
+            }
+
+        });
+
+
+    ///////////////////////////////////////////////////////////////////////  SAVE MAP    ///////////////////////////////////////////////////////////////////////
 
     var saveMapTopic = new ROSLIB.Topic({
         ros : ros,
