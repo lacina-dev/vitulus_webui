@@ -70,6 +70,10 @@ if __name__ == '__main__':
         def mobjoy():
             return render_template('mobJoyMow.html', ros_ip=host)
 
+        @app.route("/mobimu")
+        def mobimu():
+            return render_template('mobImu.html', ros_ip=host)
+
         server = ServerThread(app, host, port)
         server.start()
         rospy.loginfo("Initialising webnode node...")
