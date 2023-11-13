@@ -77,6 +77,71 @@
   margin-bottom: 0;
   list-style: none;
   /*background-color: #282b30;*/
-  /*z-index: 2000;*/
+  z-index: 2000;
+}
+
+.navbar .nav-link {
+  padding: 0.3rem;
+  border-right: 1px solid rgba(0,0,0,.2);
+  border-left: 1px solid rgba(255,255,255,.1);
+}
+
+@media (max-width:992px) {
+  .navbar-expand-lg .nav-link, .navbar-expand-lg .navbar-brand {
+    border: none!important;
+    padding: 4.5px;
+  }
+}
+
+#div_container {
+  height: 100%;
+  width: 100%;
+  left: 0;
+  top: 0;
+  overflow: hidden;
+  position: fixed;
+}
+
+.col-12 {
+  flex: 0 0 auto;
+  width: 100%;
+  height: calc((100vh - 42px)/2);
+}
+
+@media (min-width:576px) {
+  .col-sm-12 {
+    flex: 0 0 auto;
+    width: 100%;
+  }
+}
+
+@media (min-width:1200px) {
+  .col-xl-6 {
+    flex: 0 0 auto;
+    width: 50%;
+  }
+}
+
+@media (min-width:992px) {
+  .col-lg-6 {
+    flex: 0 0 auto;
+    width: 50%;
+  }
+}
+
+@media (min-width:768px) {
+  .col-md-6 {
+    flex: 0 0 auto;
+    width: 50%;
+    height: calc((100vh - 42px)/1);
+  }
+}
+
+@media (min-width:576px) {
+  .col-sm-6 {
+    flex: 0 0 auto;
+    width: 50%;
+    height: calc((100vh - 42px)/1);
+  }
 }
 

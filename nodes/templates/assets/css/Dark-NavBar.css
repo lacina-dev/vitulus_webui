@@ -70,3 +70,8 @@
 span {
 }
 
+.navbar-collapse.show {
+  height: calc(100vh - 42px);
+  /*transition: height .35s ease;*/
+}
+

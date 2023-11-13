@@ -3,7 +3,7 @@ import rospy
 import tf
 from tf.transformations import euler_from_quaternion
 from nav_msgs.msg import Odometry
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, Blueprint, send_from_directory
 import os
 import threading
 import sys
@@ -42,8 +42,18 @@ if __name__ == '__main__':
     try:
 
         rospy.init_node('webnode', anonymous=True)
-        app = Flask(__name__, static_url_path='/assets')
+        # app = Flask(__name__, static_url_path='/assets')
+        app = Flask(__name__,
+                    static_url_path='/assets',
+                    static_folder='templates/assets',
+                    template_folder='templates')
 
+        # bp = Blueprint('pwa', __name__, url_prefix='')
+
+
+        @app.route('/manifest.json')
+        def manifest():
+            return send_from_directory('templates', 'manifest.json')
 
         @app.route("/old")
         def index():
@@ -65,14 +75,33 @@ if __name__ == '__main__':
         def nav():
             return render_template('maps.html', ros_ip=host)
 
-
         @app.route("/mobjoy")
         def mobjoy():
             return render_template('mobJoyMow.html', ros_ip=host)
 
-        @app.route("/mobimu")
-        def mobimu():
-            return render_template('mobImu.html', ros_ip=host)
+        @app.route("/mob/imu_calibration")
+        def mob_imu_calibration():
+            return render_template('mob/imu_calibration.html', ros_ip=host)
+
+        @app.route("/mob/dashboard")
+        def mob_dashboard():
+            return render_template('mob/dashboard.html', ros_ip=host)
+
+        @app.route("/mob/power_module")
+        def mob_power_module():
+            return render_template('mob/power_module.html', ros_ip=host)
+
+        @app.route("/mob/motors")
+        def mob_motors():
+            return render_template('mob/motors.html', ros_ip=host)
+
+        @app.route("/mob/mower")
+        def mob_mower():
+            return render_template('mob/mower.html', ros_ip=host)
+
+        @app.route("/mob/diagnostics")
+        def mob_diagnostics():
+            return render_template('mob/diagnostics.html', ros_ip=host)
 
         server = ServerThread(app, host, port)
         server.start()
