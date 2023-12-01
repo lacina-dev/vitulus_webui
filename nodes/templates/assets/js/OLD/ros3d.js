@@ -52570,7 +52570,8 @@ var ROS3D = (function (exports, ROSLIB) {
 	        this.addEventListener('touchmove', this.parent.moveAxis.bind(this.parent, this, controlAxis));
 	        break;
 	      case INTERACTIVE_MARKER_ROTATE_AXIS:
-	        this.addEventListener('mousemove', this.parent.rotateAxis.bind(this.parent, this, controlOri));
+	        this
+	            .addEventListener('mousemove', this.parent.rotateAxis.bind(this.parent, this, controlOri));
 	        break;
 	      case INTERACTIVE_MARKER_MOVE_PLANE:
 	        this
@@ -52610,7 +52611,6 @@ var ROS3D = (function (exports, ROSLIB) {
 
 	      // touch support
 	      this.addEventListener('touchstart', function(event3d) {
-              console.log("touchstart")
 	        if (event3d.domEvent.touches.length === 1) {
 	          event3d.type = 'mousedown';
 	          event3d.domEvent.button = 0;
@@ -52618,7 +52618,6 @@ var ROS3D = (function (exports, ROSLIB) {
 	        }
 	      });
 	      this.addEventListener('touchmove', function(event3d) {
-              console.log("touchmove")
 	        if (event3d.domEvent.touches.length === 1) {
 	          event3d.type = 'mousemove';
 	          event3d.domEvent.button = 0;
@@ -58337,12 +58336,8 @@ var ROS3D = (function (exports, ROSLIB) {
 	   * @param event - the event that contains the target of the mouseover
 	   */
 	  onMouseOver(event) {
-          console.log("onmouseover")
-          console.log(event)
-          console.log(event.currentTarget)
 	    this.hoverObjs[event.currentTarget.uuid] = event.currentTarget;
 	  };
-
 
 	  /**
 	   * Remove the current target of the mouseover from the hover list.
@@ -58772,8 +58767,6 @@ var ROS3D = (function (exports, ROSLIB) {
 	     * @param event3D - the 3D event to handle
 	     */
 	    function onMouseDown(event3D) {
-            console.log("this");
-            console.log(this);
 	      var event = event3D.domEvent;
 	      event.preventDefault();
 

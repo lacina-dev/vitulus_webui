@@ -10,12 +10,14 @@ var ROS3D = (function (exports, ROSLIB) {
 					var d = Object.getOwnPropertyDescriptor(e, k);
 					Object.defineProperty(n, k, d.get ? d : {
 						enumerable: true,
-						get: function () { return e[k]; }
+						get: function () {
+							return e[k];
+						}
 					});
 				}
 			});
 		}
-		n["default"] = e;
+		n['default'] = e;
 		return Object.freeze(n);
 	}
 
@@ -38025,9 +38027,7 @@ var ROS3D = (function (exports, ROSLIB) {
 				if ( ! glyph ) return;
 
 				var path = new ShapePath();
-
-				var pts = [];
-				var x, y, cpx, cpy, cpx1, cpy1, cpx2, cpy2, laste;
+				var x, y, cpx, cpy, cpx1, cpy1, cpx2, cpy2;
 
 				if ( glyph.o ) {
 
@@ -38066,17 +38066,6 @@ var ROS3D = (function (exports, ROSLIB) {
 
 								path.quadraticCurveTo( cpx1, cpy1, cpx, cpy );
 
-								laste = pts[ pts.length - 1 ];
-
-								if ( laste ) {
-
-									laste.x;
-									laste.y;
-
-									
-
-								}
-
 								break;
 
 							case 'b': // bezierCurveTo
@@ -38089,17 +38078,6 @@ var ROS3D = (function (exports, ROSLIB) {
 								cpy2 = outline[ i ++ ] * scale + offsetY;
 
 								path.bezierCurveTo( cpx1, cpy1, cpx2, cpy2, cpx, cpy );
-
-								laste = pts[ pts.length - 1 ];
-
-								if ( laste ) {
-
-									laste.x;
-									laste.y;
-
-									
-
-								}
 
 								break;
 
@@ -46039,8 +46017,7 @@ var ROS3D = (function (exports, ROSLIB) {
 	var INTERACTIVE_MARKER_VIEW_FACING = 2;
 
 	/**
-	 * @function makeColorMaterial
-	 * @description Create a THREE material based on the given RGBA values.
+	 * Create a THREE material based on the given RGBA values.
 	 *
 	 * @param r - the red value
 	 * @param g - the green value
@@ -46072,8 +46049,7 @@ var ROS3D = (function (exports, ROSLIB) {
 	};
 
 	/**
-	 * @function intersectPlane
-	 * @description Return the intersection between the mouseray and the plane.
+	 * Return the intersection between the mouseray and the plane.
 	 *
 	 * @param mouseRay - the mouse ray
 	 * @param planeOrigin - the origin of the plane
@@ -46099,8 +46075,7 @@ var ROS3D = (function (exports, ROSLIB) {
 	};
 
 	/**
-	 * @function findClosestPoint
-	 * @description Find the closest point on targetRay to any point on mouseRay. Math taken from
+	 * Find the closest point on targetRay to any point on mouseRay. Math taken from
 	 * http://paulbourke.net/geometry/lineline3d/
 	 *
 	 * @param targetRay - the target ray to use
@@ -46130,8 +46105,7 @@ var ROS3D = (function (exports, ROSLIB) {
 	};
 
 	/**
-	 * @function closestAxisPoint
-	 * @description Find the closest point between the axis and the mouse.
+	 * Find the closest point between the axis and the mouse.
 	 *
 	 * @param axisRay - the ray from the axis
 	 * @param camera - the camera to project from
@@ -46166,7 +46140,6 @@ var ROS3D = (function (exports, ROSLIB) {
 	};
 
 	/**
-	 * @fileOverview
 	 * @author Julius Kammerl - jkammerl@willowgarage.com
 	 */
 
@@ -46498,7 +46471,6 @@ var ROS3D = (function (exports, ROSLIB) {
 	}
 
 	/**
-	 * @fileOverview
 	 * @author David Gossow - dgossow@willowgarage.com
 	 */
 
@@ -46600,7 +46572,6 @@ var ROS3D = (function (exports, ROSLIB) {
 	}
 
 	/**
-	 * @fileOverview
 	 * @author aleeper / http://adamleeper.com/
 	 * @author mrdoob / http://mrdoob.com/
 	 * @author gero3 / https://github.com/gero3
@@ -46924,7 +46895,6 @@ var ROS3D = (function (exports, ROSLIB) {
 	};
 
 	/**
-	 * @fileOverview
 	 * @author mrdoob / http://mrdoob.com/
 	 *
 	 * @Modified by Jose Rojas from OBJLoader.js@r106
@@ -47718,7 +47688,6 @@ var ROS3D = (function (exports, ROSLIB) {
 	};
 
 	/**
-	 * @fileOverview
 	 * Loads a Wavefront .mtl file specifying materials
 	 *
 	 * @author angelxuanchang
@@ -48298,7 +48267,6 @@ var ROS3D = (function (exports, ROSLIB) {
 	};
 
 	/**
-	 * @fileOverview
 	 * @author mrdoob / http://mrdoob.com/
 	 * @author Mugen87 / https://github.com/Mugen87
 	 *
@@ -51760,7 +51728,6 @@ var ROS3D = (function (exports, ROSLIB) {
 	};
 
 	/**
-	 * @fileOverview
 	 * @author Jose Rojas - jrojas@redlinesolutions.co
 	 */
 
@@ -51893,7 +51860,6 @@ var ROS3D = (function (exports, ROSLIB) {
 	 };
 
 	/**
-	 * @fileOverview
 	 * @author Jihoon Lee - jihoonlee.in@gmail.com
 	 * @author Russell Toris - rctoris@wpi.edu
 	 */
@@ -51940,7 +51906,6 @@ var ROS3D = (function (exports, ROSLIB) {
 	}
 
 	/**
-	 * @fileOverview
 	 * @author David Gossow - dgossow@willowgarage.com
 	 */
 
@@ -52021,7 +51986,6 @@ var ROS3D = (function (exports, ROSLIB) {
 	}
 
 	/**
-	 * @fileOverview
 	 * @author David Gossow - dgossow@willowgarage.com
 	 * @author Russell Toris - rctoris@wpi.edu
 	 */
@@ -52124,7 +52088,7 @@ var ROS3D = (function (exports, ROSLIB) {
 	      case MARKER_LINE_STRIP:
 	        var lineStripGeom = new THREE.Geometry();
 	        var lineStripMaterial = new THREE.LineBasicMaterial({
-	          linewidth : message.scale.x
+	          size : message.scale.x
 	        });
 
 	        // add the points
@@ -52155,7 +52119,7 @@ var ROS3D = (function (exports, ROSLIB) {
 	      case MARKER_LINE_LIST:
 	        var lineListGeom = new THREE.Geometry();
 	        var lineListMaterial = new THREE.LineBasicMaterial({
-	          linewidth : message.scale.x
+	          size : message.scale.x
 	        });
 
 	        // add the points
@@ -52181,7 +52145,7 @@ var ROS3D = (function (exports, ROSLIB) {
 	        }
 
 	        // add the line
-	        this.add(new THREE.LineSegments(lineListGeom, lineListMaterial));
+	        this.add(new THREE.Line(lineListGeom, lineListMaterial,THREE.LinePieces));
 	        break;
 	      case MARKER_CUBE_LIST:
 	        // holds the main object
@@ -52250,7 +52214,7 @@ var ROS3D = (function (exports, ROSLIB) {
 	      case MARKER_POINTS:
 	        // for now, use a particle system for the lists
 	        var geometry = new THREE.Geometry();
-	        var material = new THREE.PointsMaterial({
+	        var material = new THREE.ParticleBasicMaterial({
 	          size : message.scale.x
 	        });
 
@@ -52277,7 +52241,7 @@ var ROS3D = (function (exports, ROSLIB) {
 	        }
 
 	        // add the particle system
-	        this.add(new THREE.Points(geometry, material));
+	        this.add(new THREE.ParticleSystem(geometry, material));
 	        break;
 	      case MARKER_TEXT_VIEW_FACING:
 	        // only work on non-empty text
@@ -52512,7 +52476,6 @@ var ROS3D = (function (exports, ROSLIB) {
 	}
 
 	/**
-	 * @fileOverview
 	 * @author David Gossow - dgossow@willowgarage.com
 	 */
 
@@ -52570,7 +52533,8 @@ var ROS3D = (function (exports, ROSLIB) {
 	        this.addEventListener('touchmove', this.parent.moveAxis.bind(this.parent, this, controlAxis));
 	        break;
 	      case INTERACTIVE_MARKER_ROTATE_AXIS:
-	        this.addEventListener('mousemove', this.parent.rotateAxis.bind(this.parent, this, controlOri));
+	        this
+	            .addEventListener('mousemove', this.parent.rotateAxis.bind(this.parent, this, controlOri));
 	        break;
 	      case INTERACTIVE_MARKER_MOVE_PLANE:
 	        this
@@ -52610,7 +52574,6 @@ var ROS3D = (function (exports, ROSLIB) {
 
 	      // touch support
 	      this.addEventListener('touchstart', function(event3d) {
-              console.log("touchstart")
 	        if (event3d.domEvent.touches.length === 1) {
 	          event3d.type = 'mousedown';
 	          event3d.domEvent.button = 0;
@@ -52618,7 +52581,6 @@ var ROS3D = (function (exports, ROSLIB) {
 	        }
 	      });
 	      this.addEventListener('touchmove', function(event3d) {
-              console.log("touchmove")
 	        if (event3d.domEvent.touches.length === 1) {
 	          event3d.type = 'mousemove';
 	          event3d.domEvent.button = 0;
@@ -52734,7 +52696,7 @@ var ROS3D = (function (exports, ROSLIB) {
 	    });
 	  };
 
-	  updateMatrixWorld(force) {
+	  updateMatrixWorld (force) {
 	    var that = this;
 	    var message = this.message;
 	    switch (message.orientation_mode) {
@@ -52783,7 +52745,6 @@ var ROS3D = (function (exports, ROSLIB) {
 	}
 
 	/**
-	 * @fileOverview
 	 * @author David Gossow - dgossow@willowgarage.com
 	 */
 
@@ -52967,7 +52928,6 @@ var ROS3D = (function (exports, ROSLIB) {
 	}
 
 	/**
-	 * @fileOverview
 	 * @author David Gossow - dgossow@willowgarage.com
 	 */
 
@@ -53320,10 +53280,6 @@ var ROS3D = (function (exports, ROSLIB) {
 	  };
 	}
 
-	function getDefaultExportFromCjs (x) {
-		return x && x.__esModule && Object.prototype.hasOwnProperty.call(x, 'default') ? x['default'] : x;
-	}
-
 	var eventemitter2 = {exports: {}};
 
 	/*!
@@ -53333,1633 +53289,1626 @@ var ROS3D = (function (exports, ROSLIB) {
 	 * Copyright (c) 2013 hij1nx
 	 * Licensed under the MIT license.
 	 */
-	eventemitter2.exports;
 
 	(function (module, exports) {
 	!function(undefined$1) {
-		  var hasOwnProperty= Object.hasOwnProperty;
-		  var isArray = Array.isArray ? Array.isArray : function _isArray(obj) {
-		    return Object.prototype.toString.call(obj) === "[object Array]";
-		  };
-		  var defaultMaxListeners = 10;
-		  var nextTickSupported= typeof process=='object' && typeof process.nextTick=='function';
-		  var symbolsSupported= typeof Symbol==='function';
-		  var reflectSupported= typeof Reflect === 'object';
-		  var setImmediateSupported= typeof setImmediate === 'function';
-		  var _setImmediate= setImmediateSupported ? setImmediate : setTimeout;
-		  var ownKeys= symbolsSupported? (reflectSupported && typeof Reflect.ownKeys==='function'? Reflect.ownKeys : function(obj){
-		    var arr= Object.getOwnPropertyNames(obj);
-		    arr.push.apply(arr, Object.getOwnPropertySymbols(obj));
-		    return arr;
-		  }) : Object.keys;
-
-		  function init() {
-		    this._events = {};
-		    if (this._conf) {
-		      configure.call(this, this._conf);
-		    }
-		  }
-
-		  function configure(conf) {
-		    if (conf) {
-		      this._conf = conf;
-
-		      conf.delimiter && (this.delimiter = conf.delimiter);
-
-		      if(conf.maxListeners!==undefined$1){
-		          this._maxListeners= conf.maxListeners;
-		      }
-
-		      conf.wildcard && (this.wildcard = conf.wildcard);
-		      conf.newListener && (this._newListener = conf.newListener);
-		      conf.removeListener && (this._removeListener = conf.removeListener);
-		      conf.verboseMemoryLeak && (this.verboseMemoryLeak = conf.verboseMemoryLeak);
-		      conf.ignoreErrors && (this.ignoreErrors = conf.ignoreErrors);
-
-		      if (this.wildcard) {
-		        this.listenerTree = {};
-		      }
-		    }
-		  }
-
-		  function logPossibleMemoryLeak(count, eventName) {
-		    var errorMsg = '(node) warning: possible EventEmitter memory ' +
-		        'leak detected. ' + count + ' listeners added. ' +
-		        'Use emitter.setMaxListeners() to increase limit.';
-
-		    if(this.verboseMemoryLeak){
-		      errorMsg += ' Event name: ' + eventName + '.';
-		    }
-
-		    if(typeof process !== 'undefined' && process.emitWarning){
-		      var e = new Error(errorMsg);
-		      e.name = 'MaxListenersExceededWarning';
-		      e.emitter = this;
-		      e.count = count;
-		      process.emitWarning(e);
-		    } else {
-		      console.error(errorMsg);
-
-		      if (console.trace){
-		        console.trace();
-		      }
-		    }
-		  }
-
-		  var toArray = function (a, b, c) {
-		    var n = arguments.length;
-		    switch (n) {
-		      case 0:
-		        return [];
-		      case 1:
-		        return [a];
-		      case 2:
-		        return [a, b];
-		      case 3:
-		        return [a, b, c];
-		      default:
-		        var arr = new Array(n);
-		        while (n--) {
-		          arr[n] = arguments[n];
-		        }
-		        return arr;
-		    }
-		  };
-
-		  function toObject(keys, values) {
-		    var obj = {};
-		    var key;
-		    var len = keys.length;
-		    var valuesCount = values ? value.length : 0;
-		    for (var i = 0; i < len; i++) {
-		      key = keys[i];
-		      obj[key] = i < valuesCount ? values[i] : undefined$1;
-		    }
-		    return obj;
-		  }
-
-		  function TargetObserver(emitter, target, options) {
-		    this._emitter = emitter;
-		    this._target = target;
-		    this._listeners = {};
-		    this._listenersCount = 0;
-
-		    var on, off;
-
-		    if (options.on || options.off) {
-		      on = options.on;
-		      off = options.off;
-		    }
-
-		    if (target.addEventListener) {
-		      on = target.addEventListener;
-		      off = target.removeEventListener;
-		    } else if (target.addListener) {
-		      on = target.addListener;
-		      off = target.removeListener;
-		    } else if (target.on) {
-		      on = target.on;
-		      off = target.off;
-		    }
-
-		    if (!on && !off) {
-		      throw Error('target does not implement any known event API');
-		    }
-
-		    if (typeof on !== 'function') {
-		      throw TypeError('on method must be a function');
-		    }
-
-		    if (typeof off !== 'function') {
-		      throw TypeError('off method must be a function');
-		    }
-
-		    this._on = on;
-		    this._off = off;
-
-		    var _observers= emitter._observers;
-		    if(_observers){
-		      _observers.push(this);
-		    }else {
-		      emitter._observers= [this];
-		    }
-		  }
-
-		  Object.assign(TargetObserver.prototype, {
-		    subscribe: function(event, localEvent, reducer){
-		      var observer= this;
-		      var target= this._target;
-		      var emitter= this._emitter;
-		      var listeners= this._listeners;
-		      var handler= function(){
-		        var args= toArray.apply(null, arguments);
-		        var eventObj= {
-		          data: args,
-		          name: localEvent,
-		          original: event
-		        };
-		        if(reducer){
-		          var result= reducer.call(target, eventObj);
-		          if(result!==false){
-		            emitter.emit.apply(emitter, [eventObj.name].concat(args));
-		          }
-		          return;
-		        }
-		        emitter.emit.apply(emitter, [localEvent].concat(args));
-		      };
-
-
-		      if(listeners[event]){
-		        throw Error('Event \'' + event + '\' is already listening');
-		      }
-
-		      this._listenersCount++;
-
-		      if(emitter._newListener && emitter._removeListener && !observer._onNewListener){
-
-		        this._onNewListener = function (_event) {
-		          if (_event === localEvent && listeners[event] === null) {
-		            listeners[event] = handler;
-		            observer._on.call(target, event, handler);
-		          }
-		        };
-
-		        emitter.on('newListener', this._onNewListener);
-
-		        this._onRemoveListener= function(_event){
-		          if(_event === localEvent && !emitter.hasListeners(_event) && listeners[event]){
-		            listeners[event]= null;
-		            observer._off.call(target, event, handler);
-		          }
-		        };
-
-		        listeners[event]= null;
-
-		        emitter.on('removeListener', this._onRemoveListener);
-		      }else {
-		        listeners[event]= handler;
-		        observer._on.call(target, event, handler);
-		      }
-		    },
-
-		    unsubscribe: function(event){
-		      var observer= this;
-		      var listeners= this._listeners;
-		      var emitter= this._emitter;
-		      var handler;
-		      var events;
-		      var off= this._off;
-		      var target= this._target;
-		      var i;
-
-		      if(event && typeof event!=='string'){
-		        throw TypeError('event must be a string');
-		      }
-
-		      function clearRefs(){
-		        if(observer._onNewListener){
-		          emitter.off('newListener', observer._onNewListener);
-		          emitter.off('removeListener', observer._onRemoveListener);
-		          observer._onNewListener= null;
-		          observer._onRemoveListener= null;
-		        }
-		        var index= findTargetIndex.call(emitter, observer);
-		        emitter._observers.splice(index, 1);
-		      }
-
-		      if(event){
-		        handler= listeners[event];
-		        if(!handler) return;
-		        off.call(target, event, handler);
-		        delete listeners[event];
-		        if(!--this._listenersCount){
-		          clearRefs();
-		        }
-		      }else {
-		        events= ownKeys(listeners);
-		        i= events.length;
-		        while(i-->0){
-		          event= events[i];
-		          off.call(target, event, listeners[event]);
-		        }
-		        this._listeners= {};
-		        this._listenersCount= 0;
-		        clearRefs();
-		      }
-		    }
-		  });
-
-		  function resolveOptions(options, schema, reducers, allowUnknown) {
-		    var computedOptions = Object.assign({}, schema);
-
-		    if (!options) return computedOptions;
-
-		    if (typeof options !== 'object') {
-		      throw TypeError('options must be an object')
-		    }
-
-		    var keys = Object.keys(options);
-		    var length = keys.length;
-		    var option, value;
-		    var reducer;
-
-		    function reject(reason) {
-		      throw Error('Invalid "' + option + '" option value' + (reason ? '. Reason: ' + reason : ''))
-		    }
-
-		    for (var i = 0; i < length; i++) {
-		      option = keys[i];
-		      if (!allowUnknown && !hasOwnProperty.call(schema, option)) {
-		        throw Error('Unknown "' + option + '" option');
-		      }
-		      value = options[option];
-		      if (value !== undefined$1) {
-		        reducer = reducers[option];
-		        computedOptions[option] = reducer ? reducer(value, reject) : value;
-		      }
-		    }
-		    return computedOptions;
-		  }
-
-		  function constructorReducer(value, reject) {
-		    if (typeof value !== 'function' || !value.hasOwnProperty('prototype')) {
-		      reject('value must be a constructor');
-		    }
-		    return value;
-		  }
-
-		  function makeTypeReducer(types) {
-		    var message= 'value must be type of ' + types.join('|');
-		    var len= types.length;
-		    var firstType= types[0];
-		    var secondType= types[1];
-
-		    if (len === 1) {
-		      return function (v, reject) {
-		        if (typeof v === firstType) {
-		          return v;
-		        }
-		        reject(message);
-		      }
-		    }
-
-		    if (len === 2) {
-		      return function (v, reject) {
-		        var kind= typeof v;
-		        if (kind === firstType || kind === secondType) return v;
-		        reject(message);
-		      }
-		    }
-
-		    return function (v, reject) {
-		      var kind = typeof v;
-		      var i = len;
-		      while (i-- > 0) {
-		        if (kind === types[i]) return v;
-		      }
-		      reject(message);
-		    }
-		  }
-
-		  var functionReducer= makeTypeReducer(['function']);
-
-		  var objectFunctionReducer= makeTypeReducer(['object', 'function']);
-
-		  function makeCancelablePromise(Promise, executor, options) {
-		    var isCancelable;
-		    var callbacks;
-		    var timer= 0;
-		    var subscriptionClosed;
-
-		    var promise = new Promise(function (resolve, reject, onCancel) {
-		      options= resolveOptions(options, {
-		        timeout: 0,
-		        overload: false
-		      }, {
-		        timeout: function(value, reject){
-		          value*= 1;
-		          if (typeof value !== 'number' || value < 0 || !Number.isFinite(value)) {
-		            reject('timeout must be a positive number');
-		          }
-		          return value;
-		        }
-		      });
-
-		      isCancelable = !options.overload && typeof Promise.prototype.cancel === 'function' && typeof onCancel === 'function';
-
-		      function cleanup() {
-		        if (callbacks) {
-		          callbacks = null;
-		        }
-		        if (timer) {
-		          clearTimeout(timer);
-		          timer = 0;
-		        }
-		      }
-
-		      var _resolve= function(value){
-		        cleanup();
-		        resolve(value);
-		      };
-
-		      var _reject= function(err){
-		        cleanup();
-		        reject(err);
-		      };
-
-		      if (isCancelable) {
-		        executor(_resolve, _reject, onCancel);
-		      } else {
-		        callbacks = [function(reason){
-		          _reject(reason || Error('canceled'));
-		        }];
-		        executor(_resolve, _reject, function (cb) {
-		          if (subscriptionClosed) {
-		            throw Error('Unable to subscribe on cancel event asynchronously')
-		          }
-		          if (typeof cb !== 'function') {
-		            throw TypeError('onCancel callback must be a function');
-		          }
-		          callbacks.push(cb);
-		        });
-		        subscriptionClosed= true;
-		      }
-
-		      if (options.timeout > 0) {
-		        timer= setTimeout(function(){
-		          var reason= Error('timeout');
-		          reason.code = 'ETIMEDOUT';
-		          timer= 0;
-		          promise.cancel(reason);
-		          reject(reason);
-		        }, options.timeout);
-		      }
-		    });
-
-		    if (!isCancelable) {
-		      promise.cancel = function (reason) {
-		        if (!callbacks) {
-		          return;
-		        }
-		        var length = callbacks.length;
-		        for (var i = 1; i < length; i++) {
-		          callbacks[i](reason);
-		        }
-		        // internal callback to reject the promise
-		        callbacks[0](reason);
-		        callbacks = null;
-		      };
-		    }
-
-		    return promise;
-		  }
-
-		  function findTargetIndex(observer) {
-		    var observers = this._observers;
-		    if(!observers){
-		      return -1;
-		    }
-		    var len = observers.length;
-		    for (var i = 0; i < len; i++) {
-		      if (observers[i]._target === observer) return i;
-		    }
-		    return -1;
-		  }
-
-		  // Attention, function return type now is array, always !
-		  // It has zero elements if no any matches found and one or more
-		  // elements (leafs) if there are matches
-		  //
-		  function searchListenerTree(handlers, type, tree, i, typeLength) {
-		    if (!tree) {
-		      return null;
-		    }
-
-		    if (i === 0) {
-		      var kind = typeof type;
-		      if (kind === 'string') {
-		        var ns, n, l = 0, j = 0, delimiter = this.delimiter, dl = delimiter.length;
-		        if ((n = type.indexOf(delimiter)) !== -1) {
-		          ns = new Array(5);
-		          do {
-		            ns[l++] = type.slice(j, n);
-		            j = n + dl;
-		          } while ((n = type.indexOf(delimiter, j)) !== -1);
-
-		          ns[l++] = type.slice(j);
-		          type = ns;
-		          typeLength = l;
-		        } else {
-		          type = [type];
-		          typeLength = 1;
-		        }
-		      } else if (kind === 'object') {
-		        typeLength = type.length;
-		      } else {
-		        type = [type];
-		        typeLength = 1;
-		      }
-		    }
-
-		    var listeners= null, branch, xTree, xxTree, isolatedBranch, endReached, currentType = type[i],
-		        nextType = type[i + 1], branches, _listeners;
-
-		    if (i === typeLength) {
-		      //
-		      // If at the end of the event(s) list and the tree has listeners
-		      // invoke those listeners.
-		      //
-
-		      if(tree._listeners) {
-		        if (typeof tree._listeners === 'function') {
-		          handlers && handlers.push(tree._listeners);
-		          listeners = [tree];
-		        } else {
-		          handlers && handlers.push.apply(handlers, tree._listeners);
-		          listeners = [tree];
-		        }
-		      }
-		    } else {
-
-		      if (currentType === '*') {
-		        //
-		        // If the event emitted is '*' at this part
-		        // or there is a concrete match at this patch
-		        //
-		        branches = ownKeys(tree);
-		        n = branches.length;
-		        while (n-- > 0) {
-		          branch = branches[n];
-		          if (branch !== '_listeners') {
-		            _listeners = searchListenerTree(handlers, type, tree[branch], i + 1, typeLength);
-		            if (_listeners) {
-		              if (listeners) {
-		                listeners.push.apply(listeners, _listeners);
-		              } else {
-		                listeners = _listeners;
-		              }
-		            }
-		          }
-		        }
-		        return listeners;
-		      } else if (currentType === '**') {
-		        endReached = (i + 1 === typeLength || (i + 2 === typeLength && nextType === '*'));
-		        if (endReached && tree._listeners) {
-		          // The next element has a _listeners, add it to the handlers.
-		          listeners = searchListenerTree(handlers, type, tree, typeLength, typeLength);
-		        }
-
-		        branches = ownKeys(tree);
-		        n = branches.length;
-		        while (n-- > 0) {
-		          branch = branches[n];
-		          if (branch !== '_listeners') {
-		            if (branch === '*' || branch === '**') {
-		              if (tree[branch]._listeners && !endReached) {
-		                _listeners = searchListenerTree(handlers, type, tree[branch], typeLength, typeLength);
-		                if (_listeners) {
-		                  if (listeners) {
-		                    listeners.push.apply(listeners, _listeners);
-		                  } else {
-		                    listeners = _listeners;
-		                  }
-		                }
-		              }
-		              _listeners = searchListenerTree(handlers, type, tree[branch], i, typeLength);
-		            } else if (branch === nextType) {
-		              _listeners = searchListenerTree(handlers, type, tree[branch], i + 2, typeLength);
-		            } else {
-		              // No match on this one, shift into the tree but not in the type array.
-		              _listeners = searchListenerTree(handlers, type, tree[branch], i, typeLength);
-		            }
-		            if (_listeners) {
-		              if (listeners) {
-		                listeners.push.apply(listeners, _listeners);
-		              } else {
-		                listeners = _listeners;
-		              }
-		            }
-		          }
-		        }
-		        return listeners;
-		      } else if (tree[currentType]) {
-		        listeners = searchListenerTree(handlers, type, tree[currentType], i + 1, typeLength);
-		      }
-		    }
-
-		      xTree = tree['*'];
-		    if (xTree) {
-		      //
-		      // If the listener tree will allow any match for this part,
-		      // then recursively explore all branches of the tree
-		      //
-		      searchListenerTree(handlers, type, xTree, i + 1, typeLength);
-		    }
-
-		    xxTree = tree['**'];
-		    if (xxTree) {
-		      if (i < typeLength) {
-		        if (xxTree._listeners) {
-		          // If we have a listener on a '**', it will catch all, so add its handler.
-		          searchListenerTree(handlers, type, xxTree, typeLength, typeLength);
-		        }
-
-		        // Build arrays of matching next branches and others.
-		        branches= ownKeys(xxTree);
-		        n= branches.length;
-		        while(n-->0){
-		          branch= branches[n];
-		          if (branch !== '_listeners') {
-		            if (branch === nextType) {
-		              // We know the next element will match, so jump twice.
-		              searchListenerTree(handlers, type, xxTree[branch], i + 2, typeLength);
-		            } else if (branch === currentType) {
-		              // Current node matches, move into the tree.
-		              searchListenerTree(handlers, type, xxTree[branch], i + 1, typeLength);
-		            } else {
-		              isolatedBranch = {};
-		              isolatedBranch[branch] = xxTree[branch];
-		              searchListenerTree(handlers, type, {'**': isolatedBranch}, i + 1, typeLength);
-		            }
-		          }
-		        }
-		      } else if (xxTree._listeners) {
-		        // We have reached the end and still on a '**'
-		        searchListenerTree(handlers, type, xxTree, typeLength, typeLength);
-		      } else if (xxTree['*'] && xxTree['*']._listeners) {
-		        searchListenerTree(handlers, type, xxTree['*'], typeLength, typeLength);
-		      }
-		    }
-
-		    return listeners;
-		  }
-
-		  function growListenerTree(type, listener, prepend) {
-		    var len = 0, j = 0, i, delimiter = this.delimiter, dl= delimiter.length, ns;
-
-		    if(typeof type==='string') {
-		      if ((i = type.indexOf(delimiter)) !== -1) {
-		        ns = new Array(5);
-		        do {
-		          ns[len++] = type.slice(j, i);
-		          j = i + dl;
-		        } while ((i = type.indexOf(delimiter, j)) !== -1);
-
-		        ns[len++] = type.slice(j);
-		      }else {
-		        ns= [type];
-		        len= 1;
-		      }
-		    }else {
-		      ns= type;
-		      len= type.length;
-		    }
-
-		    //
-		    // Looks for two consecutive '**', if so, don't add the event at all.
-		    //
-		    if (len > 1) {
-		      for (i = 0; i + 1 < len; i++) {
-		        if (ns[i] === '**' && ns[i + 1] === '**') {
-		          return;
-		        }
-		      }
-		    }
-
-
-
-		    var tree = this.listenerTree, name;
-
-		    for (i = 0; i < len; i++) {
-		      name = ns[i];
-
-		      tree = tree[name] || (tree[name] = {});
-
-		      if (i === len - 1) {
-		        if (!tree._listeners) {
-		          tree._listeners = listener;
-		        } else {
-		          if (typeof tree._listeners === 'function') {
-		            tree._listeners = [tree._listeners];
-		          }
-
-		          if (prepend) {
-		            tree._listeners.unshift(listener);
-		          } else {
-		            tree._listeners.push(listener);
-		          }
-
-		          if (
-		              !tree._listeners.warned &&
-		              this._maxListeners > 0 &&
-		              tree._listeners.length > this._maxListeners
-		          ) {
-		            tree._listeners.warned = true;
-		            logPossibleMemoryLeak.call(this, tree._listeners.length, name);
-		          }
-		        }
-		        return true;
-		      }
-		    }
-
-		    return true;
-		  }
-
-		  function collectTreeEvents(tree, events, root, asArray){
-		     var branches= ownKeys(tree);
-		     var i= branches.length;
-		     var branch, branchName, path;
-		     var hasListeners= tree['_listeners'];
-		     var isArrayPath;
-
-		     while(i-->0){
-		         branchName= branches[i];
-
-		         branch= tree[branchName];
-
-		         if(branchName==='_listeners'){
-		             path= root;
-		         }else {
-		             path = root ? root.concat(branchName) : [branchName];
-		         }
-
-		         isArrayPath= asArray || typeof branchName==='symbol';
-
-		         hasListeners && events.push(isArrayPath? path : path.join(this.delimiter));
-
-		         if(typeof branch==='object'){
-		             collectTreeEvents.call(this, branch, events, path, isArrayPath);
-		         }
-		     }
-
-		     return events;
-		  }
-
-		  function recursivelyGarbageCollect(root) {
-		    var keys = ownKeys(root);
-		    var i= keys.length;
-		    var obj, key, flag;
-		    while(i-->0){
-		      key = keys[i];
-		      obj = root[key];
-
-		      if(obj){
-		          flag= true;
-		          if(key !== '_listeners' && !recursivelyGarbageCollect(obj)){
-		             delete root[key];
-		          }
-		      }
-		    }
-
-		    return flag;
-		  }
-
-		  function Listener(emitter, event, listener){
-		    this.emitter= emitter;
-		    this.event= event;
-		    this.listener= listener;
-		  }
-
-		  Listener.prototype.off= function(){
-		    this.emitter.off(this.event, this.listener);
-		    return this;
-		  };
-
-		  function setupListener(event, listener, options){
-		      if (options === true) {
-		        promisify = true;
-		      } else if (options === false) {
-		        async = true;
-		      } else {
-		        if (!options || typeof options !== 'object') {
-		          throw TypeError('options should be an object or true');
-		        }
-		        var async = options.async;
-		        var promisify = options.promisify;
-		        var nextTick = options.nextTick;
-		        var objectify = options.objectify;
-		      }
-
-		      if (async || nextTick || promisify) {
-		        var _listener = listener;
-		        var _origin = listener._origin || listener;
-
-		        if (nextTick && !nextTickSupported) {
-		          throw Error('process.nextTick is not supported');
-		        }
-
-		        if (promisify === undefined$1) {
-		          promisify = listener.constructor.name === 'AsyncFunction';
-		        }
-
-		        listener = function () {
-		          var args = arguments;
-		          var context = this;
-		          var event = this.event;
-
-		          return promisify ? (nextTick ? Promise.resolve() : new Promise(function (resolve) {
-		            _setImmediate(resolve);
-		          }).then(function () {
-		            context.event = event;
-		            return _listener.apply(context, args)
-		          })) : (nextTick ? process.nextTick : _setImmediate)(function () {
-		            context.event = event;
-		            _listener.apply(context, args);
-		          });
-		        };
-
-		        listener._async = true;
-		        listener._origin = _origin;
-		      }
-
-		    return [listener, objectify? new Listener(this, event, listener): this];
-		  }
-
-		  function EventEmitter(conf) {
-		    this._events = {};
-		    this._newListener = false;
-		    this._removeListener = false;
-		    this.verboseMemoryLeak = false;
-		    configure.call(this, conf);
-		  }
-
-		  EventEmitter.EventEmitter2 = EventEmitter; // backwards compatibility for exporting EventEmitter property
-
-		  EventEmitter.prototype.listenTo= function(target, events, options){
-		    if(typeof target!=='object'){
-		      throw TypeError('target musts be an object');
-		    }
-
-		    var emitter= this;
-
-		    options = resolveOptions(options, {
-		      on: undefined$1,
-		      off: undefined$1,
-		      reducers: undefined$1
-		    }, {
-		      on: functionReducer,
-		      off: functionReducer,
-		      reducers: objectFunctionReducer
-		    });
-
-		    function listen(events){
-		      if(typeof events!=='object'){
-		        throw TypeError('events must be an object');
-		      }
-
-		      var reducers= options.reducers;
-		      var index= findTargetIndex.call(emitter, target);
-		      var observer;
-
-		      if(index===-1){
-		        observer= new TargetObserver(emitter, target, options);
-		      }else {
-		        observer= emitter._observers[index];
-		      }
-
-		      var keys= ownKeys(events);
-		      var len= keys.length;
-		      var event;
-		      var isSingleReducer= typeof reducers==='function';
-
-		      for(var i=0; i<len; i++){
-		        event= keys[i];
-		        observer.subscribe(
-		            event,
-		            events[event] || event,
-		            isSingleReducer ? reducers : reducers && reducers[event]
-		        );
-		      }
-		    }
-
-		    isArray(events)?
-		        listen(toObject(events)) :
-		        (typeof events==='string'? listen(toObject(events.split(/\s+/))): listen(events));
-
-		    return this;
-		  };
-
-		  EventEmitter.prototype.stopListeningTo = function (target, event) {
-		    var observers = this._observers;
-
-		    if(!observers){
-		      return false;
-		    }
-
-		    var i = observers.length;
-		    var observer;
-		    var matched= false;
-
-		    if(target && typeof target!=='object'){
-		      throw TypeError('target should be an object');
-		    }
-
-		    while (i-- > 0) {
-		      observer = observers[i];
-		      if (!target || observer._target === target) {
-		        observer.unsubscribe(event);
-		        matched= true;
-		      }
-		    }
-
-		    return matched;
-		  };
-
-		  // By default EventEmitters will print a warning if more than
-		  // 10 listeners are added to it. This is a useful default which
-		  // helps finding memory leaks.
-		  //
-		  // Obviously not all Emitters should be limited to 10. This function allows
-		  // that to be increased. Set to zero for unlimited.
-
-		  EventEmitter.prototype.delimiter = '.';
-
-		  EventEmitter.prototype.setMaxListeners = function(n) {
-		    if (n !== undefined$1) {
-		      this._maxListeners = n;
-		      if (!this._conf) this._conf = {};
-		      this._conf.maxListeners = n;
-		    }
-		  };
-
-		  EventEmitter.prototype.getMaxListeners = function() {
-		    return this._maxListeners;
-		  };
-
-		  EventEmitter.prototype.event = '';
-
-		  EventEmitter.prototype.once = function(event, fn, options) {
-		    return this._once(event, fn, false, options);
-		  };
-
-		  EventEmitter.prototype.prependOnceListener = function(event, fn, options) {
-		    return this._once(event, fn, true, options);
-		  };
-
-		  EventEmitter.prototype._once = function(event, fn, prepend, options) {
-		    return this._many(event, 1, fn, prepend, options);
-		  };
-
-		  EventEmitter.prototype.many = function(event, ttl, fn, options) {
-		    return this._many(event, ttl, fn, false, options);
-		  };
-
-		  EventEmitter.prototype.prependMany = function(event, ttl, fn, options) {
-		    return this._many(event, ttl, fn, true, options);
-		  };
-
-		  EventEmitter.prototype._many = function(event, ttl, fn, prepend, options) {
-		    var self = this;
-
-		    if (typeof fn !== 'function') {
-		      throw new Error('many only accepts instances of Function');
-		    }
-
-		    function listener() {
-		      if (--ttl === 0) {
-		        self.off(event, listener);
-		      }
-		      return fn.apply(this, arguments);
-		    }
-
-		    listener._origin = fn;
-
-		    return this._on(event, listener, prepend, options);
-		  };
-
-		  EventEmitter.prototype.emit = function() {
-		    if (!this._events && !this._all) {
-		      return false;
-		    }
-
-		    this._events || init.call(this);
-
-		    var type = arguments[0], ns, wildcard= this.wildcard;
-		    var args,l,i,j, containsSymbol;
-
-		    if (type === 'newListener' && !this._newListener) {
-		      if (!this._events.newListener) {
-		        return false;
-		      }
-		    }
-
-		    if (wildcard) {
-		      ns= type;
-		      if(type!=='newListener' && type!=='removeListener'){
-		        if (typeof type === 'object') {
-		          l = type.length;
-		          if (symbolsSupported) {
-		            for (i = 0; i < l; i++) {
-		              if (typeof type[i] === 'symbol') {
-		                containsSymbol = true;
-		                break;
-		              }
-		            }
-		          }
-		          if (!containsSymbol) {
-		            type = type.join(this.delimiter);
-		          }
-		        }
-		      }
-		    }
-
-		    var al = arguments.length;
-		    var handler;
-
-		    if (this._all && this._all.length) {
-		      handler = this._all.slice();
-
-		      for (i = 0, l = handler.length; i < l; i++) {
-		        this.event = type;
-		        switch (al) {
-		        case 1:
-		          handler[i].call(this, type);
-		          break;
-		        case 2:
-		          handler[i].call(this, type, arguments[1]);
-		          break;
-		        case 3:
-		          handler[i].call(this, type, arguments[1], arguments[2]);
-		          break;
-		        default:
-		          handler[i].apply(this, arguments);
-		        }
-		      }
-		    }
-
-		    if (wildcard) {
-		      handler = [];
-		      searchListenerTree.call(this, handler, ns, this.listenerTree, 0, l);
-		    } else {
-		      handler = this._events[type];
-		      if (typeof handler === 'function') {
-		        this.event = type;
-		        switch (al) {
-		        case 1:
-		          handler.call(this);
-		          break;
-		        case 2:
-		          handler.call(this, arguments[1]);
-		          break;
-		        case 3:
-		          handler.call(this, arguments[1], arguments[2]);
-		          break;
-		        default:
-		          args = new Array(al - 1);
-		          for (j = 1; j < al; j++) args[j - 1] = arguments[j];
-		          handler.apply(this, args);
-		        }
-		        return true;
-		      } else if (handler) {
-		        // need to make copy of handlers because list can change in the middle
-		        // of emit call
-		        handler = handler.slice();
-		      }
-		    }
-
-		    if (handler && handler.length) {
-		      if (al > 3) {
-		        args = new Array(al - 1);
-		        for (j = 1; j < al; j++) args[j - 1] = arguments[j];
-		      }
-		      for (i = 0, l = handler.length; i < l; i++) {
-		        this.event = type;
-		        switch (al) {
-		        case 1:
-		          handler[i].call(this);
-		          break;
-		        case 2:
-		          handler[i].call(this, arguments[1]);
-		          break;
-		        case 3:
-		          handler[i].call(this, arguments[1], arguments[2]);
-		          break;
-		        default:
-		          handler[i].apply(this, args);
-		        }
-		      }
-		      return true;
-		    } else if (!this.ignoreErrors && !this._all && type === 'error') {
-		      if (arguments[1] instanceof Error) {
-		        throw arguments[1]; // Unhandled 'error' event
-		      } else {
-		        throw new Error("Uncaught, unspecified 'error' event.");
-		      }
-		    }
-
-		    return !!this._all;
-		  };
-
-		  EventEmitter.prototype.emitAsync = function() {
-		    if (!this._events && !this._all) {
-		      return false;
-		    }
-
-		    this._events || init.call(this);
-
-		    var type = arguments[0], wildcard= this.wildcard, ns, containsSymbol;
-		    var args,l,i,j;
-
-		    if (type === 'newListener' && !this._newListener) {
-		        if (!this._events.newListener) { return Promise.resolve([false]); }
-		    }
-
-		    if (wildcard) {
-		      ns= type;
-		      if(type!=='newListener' && type!=='removeListener'){
-		        if (typeof type === 'object') {
-		          l = type.length;
-		          if (symbolsSupported) {
-		            for (i = 0; i < l; i++) {
-		              if (typeof type[i] === 'symbol') {
-		                containsSymbol = true;
-		                break;
-		              }
-		            }
-		          }
-		          if (!containsSymbol) {
-		            type = type.join(this.delimiter);
-		          }
-		        }
-		      }
-		    }
-
-		    var promises= [];
-
-		    var al = arguments.length;
-		    var handler;
-
-		    if (this._all) {
-		      for (i = 0, l = this._all.length; i < l; i++) {
-		        this.event = type;
-		        switch (al) {
-		        case 1:
-		          promises.push(this._all[i].call(this, type));
-		          break;
-		        case 2:
-		          promises.push(this._all[i].call(this, type, arguments[1]));
-		          break;
-		        case 3:
-		          promises.push(this._all[i].call(this, type, arguments[1], arguments[2]));
-		          break;
-		        default:
-		          promises.push(this._all[i].apply(this, arguments));
-		        }
-		      }
-		    }
-
-		    if (wildcard) {
-		      handler = [];
-		      searchListenerTree.call(this, handler, ns, this.listenerTree, 0);
-		    } else {
-		      handler = this._events[type];
-		    }
-
-		    if (typeof handler === 'function') {
-		      this.event = type;
-		      switch (al) {
-		      case 1:
-		        promises.push(handler.call(this));
-		        break;
-		      case 2:
-		        promises.push(handler.call(this, arguments[1]));
-		        break;
-		      case 3:
-		        promises.push(handler.call(this, arguments[1], arguments[2]));
-		        break;
-		      default:
-		        args = new Array(al - 1);
-		        for (j = 1; j < al; j++) args[j - 1] = arguments[j];
-		        promises.push(handler.apply(this, args));
-		      }
-		    } else if (handler && handler.length) {
-		      handler = handler.slice();
-		      if (al > 3) {
-		        args = new Array(al - 1);
-		        for (j = 1; j < al; j++) args[j - 1] = arguments[j];
-		      }
-		      for (i = 0, l = handler.length; i < l; i++) {
-		        this.event = type;
-		        switch (al) {
-		        case 1:
-		          promises.push(handler[i].call(this));
-		          break;
-		        case 2:
-		          promises.push(handler[i].call(this, arguments[1]));
-		          break;
-		        case 3:
-		          promises.push(handler[i].call(this, arguments[1], arguments[2]));
-		          break;
-		        default:
-		          promises.push(handler[i].apply(this, args));
-		        }
-		      }
-		    } else if (!this.ignoreErrors && !this._all && type === 'error') {
-		      if (arguments[1] instanceof Error) {
-		        return Promise.reject(arguments[1]); // Unhandled 'error' event
-		      } else {
-		        return Promise.reject("Uncaught, unspecified 'error' event.");
-		      }
-		    }
-
-		    return Promise.all(promises);
-		  };
-
-		  EventEmitter.prototype.on = function(type, listener, options) {
-		    return this._on(type, listener, false, options);
-		  };
-
-		  EventEmitter.prototype.prependListener = function(type, listener, options) {
-		    return this._on(type, listener, true, options);
-		  };
-
-		  EventEmitter.prototype.onAny = function(fn) {
-		    return this._onAny(fn, false);
-		  };
-
-		  EventEmitter.prototype.prependAny = function(fn) {
-		    return this._onAny(fn, true);
-		  };
-
-		  EventEmitter.prototype.addListener = EventEmitter.prototype.on;
-
-		  EventEmitter.prototype._onAny = function(fn, prepend){
-		    if (typeof fn !== 'function') {
-		      throw new Error('onAny only accepts instances of Function');
-		    }
-
-		    if (!this._all) {
-		      this._all = [];
-		    }
-
-		    // Add the function to the event listener collection.
-		    if(prepend){
-		      this._all.unshift(fn);
-		    }else {
-		      this._all.push(fn);
-		    }
-
-		    return this;
-		  };
-
-		  EventEmitter.prototype._on = function(type, listener, prepend, options) {
-		    if (typeof type === 'function') {
-		      this._onAny(type, listener);
-		      return this;
-		    }
-
-		    if (typeof listener !== 'function') {
-		      throw new Error('on only accepts instances of Function');
-		    }
-		    this._events || init.call(this);
-
-		    var returnValue= this, temp;
-
-		    if (options !== undefined$1) {
-		      temp = setupListener.call(this, type, listener, options);
-		      listener = temp[0];
-		      returnValue = temp[1];
-		    }
-
-		    // To avoid recursion in the case that type == "newListeners"! Before
-		    // adding it to the listeners, first emit "newListeners".
-		    if (this._newListener) {
-		      this.emit('newListener', type, listener);
-		    }
-
-		    if (this.wildcard) {
-		      growListenerTree.call(this, type, listener, prepend);
-		      return returnValue;
-		    }
-
-		    if (!this._events[type]) {
-		      // Optimize the case of one listener. Don't need the extra array object.
-		      this._events[type] = listener;
-		    } else {
-		      if (typeof this._events[type] === 'function') {
-		        // Change to array.
-		        this._events[type] = [this._events[type]];
-		      }
-
-		      // If we've already got an array, just add
-		      if(prepend){
-		        this._events[type].unshift(listener);
-		      }else {
-		        this._events[type].push(listener);
-		      }
-
-		      // Check for listener leak
-		      if (
-		        !this._events[type].warned &&
-		        this._maxListeners > 0 &&
-		        this._events[type].length > this._maxListeners
-		      ) {
-		        this._events[type].warned = true;
-		        logPossibleMemoryLeak.call(this, this._events[type].length, type);
-		      }
-		    }
-
-		    return returnValue;
-		  };
-
-		  EventEmitter.prototype.off = function(type, listener) {
-		    if (typeof listener !== 'function') {
-		      throw new Error('removeListener only takes instances of Function');
-		    }
-
-		    var handlers,leafs=[];
-
-		    if(this.wildcard) {
-		      var ns = typeof type === 'string' ? type.split(this.delimiter) : type.slice();
-		      leafs = searchListenerTree.call(this, null, ns, this.listenerTree, 0);
-		      if(!leafs) return this;
-		    } else {
-		      // does not use listeners(), so no side effect of creating _events[type]
-		      if (!this._events[type]) return this;
-		      handlers = this._events[type];
-		      leafs.push({_listeners:handlers});
-		    }
-
-		    for (var iLeaf=0; iLeaf<leafs.length; iLeaf++) {
-		      var leaf = leafs[iLeaf];
-		      handlers = leaf._listeners;
-		      if (isArray(handlers)) {
-
-		        var position = -1;
-
-		        for (var i = 0, length = handlers.length; i < length; i++) {
-		          if (handlers[i] === listener ||
-		            (handlers[i].listener && handlers[i].listener === listener) ||
-		            (handlers[i]._origin && handlers[i]._origin === listener)) {
-		            position = i;
-		            break;
-		          }
-		        }
-
-		        if (position < 0) {
-		          continue;
-		        }
-
-		        if(this.wildcard) {
-		          leaf._listeners.splice(position, 1);
-		        }
-		        else {
-		          this._events[type].splice(position, 1);
-		        }
-
-		        if (handlers.length === 0) {
-		          if(this.wildcard) {
-		            delete leaf._listeners;
-		          }
-		          else {
-		            delete this._events[type];
-		          }
-		        }
-		        if (this._removeListener)
-		          this.emit("removeListener", type, listener);
-
-		        return this;
-		      }
-		      else if (handlers === listener ||
-		        (handlers.listener && handlers.listener === listener) ||
-		        (handlers._origin && handlers._origin === listener)) {
-		        if(this.wildcard) {
-		          delete leaf._listeners;
-		        }
-		        else {
-		          delete this._events[type];
-		        }
-		        if (this._removeListener)
-		          this.emit("removeListener", type, listener);
-		      }
-		    }
-
-		    this.listenerTree && recursivelyGarbageCollect(this.listenerTree);
-
-		    return this;
-		  };
-
-		  EventEmitter.prototype.offAny = function(fn) {
-		    var i = 0, l = 0, fns;
-		    if (fn && this._all && this._all.length > 0) {
-		      fns = this._all;
-		      for(i = 0, l = fns.length; i < l; i++) {
-		        if(fn === fns[i]) {
-		          fns.splice(i, 1);
-		          if (this._removeListener)
-		            this.emit("removeListenerAny", fn);
-		          return this;
-		        }
-		      }
-		    } else {
-		      fns = this._all;
-		      if (this._removeListener) {
-		        for(i = 0, l = fns.length; i < l; i++)
-		          this.emit("removeListenerAny", fns[i]);
-		      }
-		      this._all = [];
-		    }
-		    return this;
-		  };
-
-		  EventEmitter.prototype.removeListener = EventEmitter.prototype.off;
-
-		  EventEmitter.prototype.removeAllListeners = function (type) {
-		    if (type === undefined$1) {
-		      !this._events || init.call(this);
-		      return this;
-		    }
-
-		    if (this.wildcard) {
-		      var leafs = searchListenerTree.call(this, null, type, this.listenerTree, 0), leaf, i;
-		      if (!leafs) return this;
-		      for (i = 0; i < leafs.length; i++) {
-		        leaf = leafs[i];
-		        leaf._listeners = null;
-		      }
-		      this.listenerTree && recursivelyGarbageCollect(this.listenerTree);
-		    } else if (this._events) {
-		      this._events[type] = null;
-		    }
-		    return this;
-		  };
-
-		  EventEmitter.prototype.listeners = function (type) {
-		    var _events = this._events;
-		    var keys, listeners, allListeners;
-		    var i;
-		    var listenerTree;
-
-		    if (type === undefined$1) {
-		      if (this.wildcard) {
-		        throw Error('event name required for wildcard emitter');
-		      }
-
-		      if (!_events) {
-		        return [];
-		      }
-
-		      keys = ownKeys(_events);
-		      i = keys.length;
-		      allListeners = [];
-		      while (i-- > 0) {
-		        listeners = _events[keys[i]];
-		        if (typeof listeners === 'function') {
-		          allListeners.push(listeners);
-		        } else {
-		          allListeners.push.apply(allListeners, listeners);
-		        }
-		      }
-		      return allListeners;
-		    } else {
-		      if (this.wildcard) {
-		        listenerTree= this.listenerTree;
-		        if(!listenerTree) return [];
-		        var handlers = [];
-		        var ns = typeof type === 'string' ? type.split(this.delimiter) : type.slice();
-		        searchListenerTree.call(this, handlers, ns, listenerTree, 0);
-		        return handlers;
-		      }
-
-		      if (!_events) {
-		        return [];
-		      }
-
-		      listeners = _events[type];
-
-		      if (!listeners) {
-		        return [];
-		      }
-		      return typeof listeners === 'function' ? [listeners] : listeners;
-		    }
-		  };
-
-		  EventEmitter.prototype.eventNames = function(nsAsArray){
-		    var _events= this._events;
-		    return this.wildcard? collectTreeEvents.call(this, this.listenerTree, [], null, nsAsArray) : (_events? ownKeys(_events) : []);
-		  };
-
-		  EventEmitter.prototype.listenerCount = function(type) {
-		    return this.listeners(type).length;
-		  };
-
-		  EventEmitter.prototype.hasListeners = function (type) {
-		    if (this.wildcard) {
-		      var handlers = [];
-		      var ns = typeof type === 'string' ? type.split(this.delimiter) : type.slice();
-		      searchListenerTree.call(this, handlers, ns, this.listenerTree, 0);
-		      return handlers.length > 0;
-		    }
-
-		    var _events = this._events;
-		    var _all = this._all;
-
-		    return !!(_all && _all.length || _events && (type === undefined$1 ? ownKeys(_events).length : _events[type]));
-		  };
-
-		  EventEmitter.prototype.listenersAny = function() {
-
-		    if(this._all) {
-		      return this._all;
-		    }
-		    else {
-		      return [];
-		    }
-
-		  };
-
-		  EventEmitter.prototype.waitFor = function (event, options) {
-		    var self = this;
-		    var type = typeof options;
-		    if (type === 'number') {
-		      options = {timeout: options};
-		    } else if (type === 'function') {
-		      options = {filter: options};
-		    }
-
-		    options= resolveOptions(options, {
-		      timeout: 0,
-		      filter: undefined$1,
-		      handleError: false,
-		      Promise: Promise,
-		      overload: false
-		    }, {
-		      filter: functionReducer,
-		      Promise: constructorReducer
-		    });
-
-		    return makeCancelablePromise(options.Promise, function (resolve, reject, onCancel) {
-		      function listener() {
-		        var filter= options.filter;
-		        if (filter && !filter.apply(self, arguments)) {
-		          return;
-		        }
-		        self.off(event, listener);
-		        if (options.handleError) {
-		          var err = arguments[0];
-		          err ? reject(err) : resolve(toArray.apply(null, arguments).slice(1));
-		        } else {
-		          resolve(toArray.apply(null, arguments));
-		        }
-		      }
-
-		      onCancel(function(){
-		        self.off(event, listener);
-		      });
-
-		      self._on(event, listener, false);
-		    }, {
-		      timeout: options.timeout,
-		      overload: options.overload
-		    })
-		  };
-
-		  function once(emitter, name, options) {
-		    options= resolveOptions(options, {
-		      Promise: Promise,
-		      timeout: 0,
-		      overload: false
-		    }, {
-		      Promise: constructorReducer
-		    });
-
-		    var _Promise= options.Promise;
-
-		    return makeCancelablePromise(_Promise, function(resolve, reject, onCancel){
-		      var handler;
-		      if (typeof emitter.addEventListener === 'function') {
-		        handler=  function () {
-		          resolve(toArray.apply(null, arguments));
-		        };
-
-		        onCancel(function(){
-		          emitter.removeEventListener(name, handler);
-		        });
-
-		        emitter.addEventListener(
-		            name,
-		            handler,
-		            {once: true}
-		        );
-		        return;
-		      }
-
-		      var eventListener = function(){
-		        errorListener && emitter.removeListener('error', errorListener);
-		        resolve(toArray.apply(null, arguments));
-		      };
-
-		      var errorListener;
-
-		      if (name !== 'error') {
-		        errorListener = function (err){
-		          emitter.removeListener(name, eventListener);
-		          reject(err);
-		        };
-
-		        emitter.once('error', errorListener);
-		      }
-
-		      onCancel(function(){
-		        errorListener && emitter.removeListener('error', errorListener);
-		        emitter.removeListener(name, eventListener);
-		      });
-
-		      emitter.once(name, eventListener);
-		    }, {
-		      timeout: options.timeout,
-		      overload: options.overload
-		    });
-		  }
-
-		  var prototype= EventEmitter.prototype;
-
-		  Object.defineProperties(EventEmitter, {
-		    defaultMaxListeners: {
-		      get: function () {
-		        return prototype._maxListeners;
-		      },
-		      set: function (n) {
-		        if (typeof n !== 'number' || n < 0 || Number.isNaN(n)) {
-		          throw TypeError('n must be a non-negative number')
-		        }
-		        prototype._maxListeners = n;
-		      },
-		      enumerable: true
-		    },
-		    once: {
-		      value: once,
-		      writable: true,
-		      configurable: true
-		    }
-		  });
-
-		  Object.defineProperties(prototype, {
-		      _maxListeners: {
-		          value: defaultMaxListeners,
-		          writable: true,
-		          configurable: true
-		      },
-		      _observers: {value: null, writable: true, configurable: true}
-		  });
-
-		  if (typeof undefined$1 === 'function' && undefined$1.amd) {
-		     // AMD. Register as an anonymous module.
-		    undefined$1(function() {
-		      return EventEmitter;
-		    });
-		  } else {
-		    // CommonJS
-		    module.exports = EventEmitter;
-		  }
-		}(); 
-	} (eventemitter2, eventemitter2.exports));
-
-	var eventemitter2Exports = eventemitter2.exports;
-	var EventEmitter2 = /*@__PURE__*/getDefaultExportFromCjs(eventemitter2Exports);
+	  var hasOwnProperty= Object.hasOwnProperty;
+	  var isArray = Array.isArray ? Array.isArray : function _isArray(obj) {
+	    return Object.prototype.toString.call(obj) === "[object Array]";
+	  };
+	  var defaultMaxListeners = 10;
+	  var nextTickSupported= typeof process=='object' && typeof process.nextTick=='function';
+	  var symbolsSupported= typeof Symbol==='function';
+	  var reflectSupported= typeof Reflect === 'object';
+	  var setImmediateSupported= typeof setImmediate === 'function';
+	  var _setImmediate= setImmediateSupported ? setImmediate : setTimeout;
+	  var ownKeys= symbolsSupported? (reflectSupported && typeof Reflect.ownKeys==='function'? Reflect.ownKeys : function(obj){
+	    var arr= Object.getOwnPropertyNames(obj);
+	    arr.push.apply(arr, Object.getOwnPropertySymbols(obj));
+	    return arr;
+	  }) : Object.keys;
+
+	  function init() {
+	    this._events = {};
+	    if (this._conf) {
+	      configure.call(this, this._conf);
+	    }
+	  }
+
+	  function configure(conf) {
+	    if (conf) {
+	      this._conf = conf;
+
+	      conf.delimiter && (this.delimiter = conf.delimiter);
+
+	      if(conf.maxListeners!==undefined$1){
+	          this._maxListeners= conf.maxListeners;
+	      }
+
+	      conf.wildcard && (this.wildcard = conf.wildcard);
+	      conf.newListener && (this._newListener = conf.newListener);
+	      conf.removeListener && (this._removeListener = conf.removeListener);
+	      conf.verboseMemoryLeak && (this.verboseMemoryLeak = conf.verboseMemoryLeak);
+	      conf.ignoreErrors && (this.ignoreErrors = conf.ignoreErrors);
+
+	      if (this.wildcard) {
+	        this.listenerTree = {};
+	      }
+	    }
+	  }
+
+	  function logPossibleMemoryLeak(count, eventName) {
+	    var errorMsg = '(node) warning: possible EventEmitter memory ' +
+	        'leak detected. ' + count + ' listeners added. ' +
+	        'Use emitter.setMaxListeners() to increase limit.';
+
+	    if(this.verboseMemoryLeak){
+	      errorMsg += ' Event name: ' + eventName + '.';
+	    }
+
+	    if(typeof process !== 'undefined' && process.emitWarning){
+	      var e = new Error(errorMsg);
+	      e.name = 'MaxListenersExceededWarning';
+	      e.emitter = this;
+	      e.count = count;
+	      process.emitWarning(e);
+	    } else {
+	      console.error(errorMsg);
+
+	      if (console.trace){
+	        console.trace();
+	      }
+	    }
+	  }
+
+	  var toArray = function (a, b, c) {
+	    var n = arguments.length;
+	    switch (n) {
+	      case 0:
+	        return [];
+	      case 1:
+	        return [a];
+	      case 2:
+	        return [a, b];
+	      case 3:
+	        return [a, b, c];
+	      default:
+	        var arr = new Array(n);
+	        while (n--) {
+	          arr[n] = arguments[n];
+	        }
+	        return arr;
+	    }
+	  };
+
+	  function toObject(keys, values) {
+	    var obj = {};
+	    var key;
+	    var len = keys.length;
+	    var valuesCount = values ? value.length : 0;
+	    for (var i = 0; i < len; i++) {
+	      key = keys[i];
+	      obj[key] = i < valuesCount ? values[i] : undefined$1;
+	    }
+	    return obj;
+	  }
+
+	  function TargetObserver(emitter, target, options) {
+	    this._emitter = emitter;
+	    this._target = target;
+	    this._listeners = {};
+	    this._listenersCount = 0;
+
+	    var on, off;
+
+	    if (options.on || options.off) {
+	      on = options.on;
+	      off = options.off;
+	    }
+
+	    if (target.addEventListener) {
+	      on = target.addEventListener;
+	      off = target.removeEventListener;
+	    } else if (target.addListener) {
+	      on = target.addListener;
+	      off = target.removeListener;
+	    } else if (target.on) {
+	      on = target.on;
+	      off = target.off;
+	    }
+
+	    if (!on && !off) {
+	      throw Error('target does not implement any known event API');
+	    }
+
+	    if (typeof on !== 'function') {
+	      throw TypeError('on method must be a function');
+	    }
+
+	    if (typeof off !== 'function') {
+	      throw TypeError('off method must be a function');
+	    }
+
+	    this._on = on;
+	    this._off = off;
+
+	    var _observers= emitter._observers;
+	    if(_observers){
+	      _observers.push(this);
+	    }else {
+	      emitter._observers= [this];
+	    }
+	  }
+
+	  Object.assign(TargetObserver.prototype, {
+	    subscribe: function(event, localEvent, reducer){
+	      var observer= this;
+	      var target= this._target;
+	      var emitter= this._emitter;
+	      var listeners= this._listeners;
+	      var handler= function(){
+	        var args= toArray.apply(null, arguments);
+	        var eventObj= {
+	          data: args,
+	          name: localEvent,
+	          original: event
+	        };
+	        if(reducer){
+	          var result= reducer.call(target, eventObj);
+	          if(result!==false){
+	            emitter.emit.apply(emitter, [eventObj.name].concat(args));
+	          }
+	          return;
+	        }
+	        emitter.emit.apply(emitter, [localEvent].concat(args));
+	      };
+
+
+	      if(listeners[event]){
+	        throw Error('Event \'' + event + '\' is already listening');
+	      }
+
+	      this._listenersCount++;
+
+	      if(emitter._newListener && emitter._removeListener && !observer._onNewListener){
+
+	        this._onNewListener = function (_event) {
+	          if (_event === localEvent && listeners[event] === null) {
+	            listeners[event] = handler;
+	            observer._on.call(target, event, handler);
+	          }
+	        };
+
+	        emitter.on('newListener', this._onNewListener);
+
+	        this._onRemoveListener= function(_event){
+	          if(_event === localEvent && !emitter.hasListeners(_event) && listeners[event]){
+	            listeners[event]= null;
+	            observer._off.call(target, event, handler);
+	          }
+	        };
+
+	        listeners[event]= null;
+
+	        emitter.on('removeListener', this._onRemoveListener);
+	      }else {
+	        listeners[event]= handler;
+	        observer._on.call(target, event, handler);
+	      }
+	    },
+
+	    unsubscribe: function(event){
+	      var observer= this;
+	      var listeners= this._listeners;
+	      var emitter= this._emitter;
+	      var handler;
+	      var events;
+	      var off= this._off;
+	      var target= this._target;
+	      var i;
+
+	      if(event && typeof event!=='string'){
+	        throw TypeError('event must be a string');
+	      }
+
+	      function clearRefs(){
+	        if(observer._onNewListener){
+	          emitter.off('newListener', observer._onNewListener);
+	          emitter.off('removeListener', observer._onRemoveListener);
+	          observer._onNewListener= null;
+	          observer._onRemoveListener= null;
+	        }
+	        var index= findTargetIndex.call(emitter, observer);
+	        emitter._observers.splice(index, 1);
+	      }
+
+	      if(event){
+	        handler= listeners[event];
+	        if(!handler) return;
+	        off.call(target, event, handler);
+	        delete listeners[event];
+	        if(!--this._listenersCount){
+	          clearRefs();
+	        }
+	      }else {
+	        events= ownKeys(listeners);
+	        i= events.length;
+	        while(i-->0){
+	          event= events[i];
+	          off.call(target, event, listeners[event]);
+	        }
+	        this._listeners= {};
+	        this._listenersCount= 0;
+	        clearRefs();
+	      }
+	    }
+	  });
+
+	  function resolveOptions(options, schema, reducers, allowUnknown) {
+	    var computedOptions = Object.assign({}, schema);
+
+	    if (!options) return computedOptions;
+
+	    if (typeof options !== 'object') {
+	      throw TypeError('options must be an object')
+	    }
+
+	    var keys = Object.keys(options);
+	    var length = keys.length;
+	    var option, value;
+	    var reducer;
+
+	    function reject(reason) {
+	      throw Error('Invalid "' + option + '" option value' + (reason ? '. Reason: ' + reason : ''))
+	    }
+
+	    for (var i = 0; i < length; i++) {
+	      option = keys[i];
+	      if (!allowUnknown && !hasOwnProperty.call(schema, option)) {
+	        throw Error('Unknown "' + option + '" option');
+	      }
+	      value = options[option];
+	      if (value !== undefined$1) {
+	        reducer = reducers[option];
+	        computedOptions[option] = reducer ? reducer(value, reject) : value;
+	      }
+	    }
+	    return computedOptions;
+	  }
+
+	  function constructorReducer(value, reject) {
+	    if (typeof value !== 'function' || !value.hasOwnProperty('prototype')) {
+	      reject('value must be a constructor');
+	    }
+	    return value;
+	  }
+
+	  function makeTypeReducer(types) {
+	    var message= 'value must be type of ' + types.join('|');
+	    var len= types.length;
+	    var firstType= types[0];
+	    var secondType= types[1];
+
+	    if (len === 1) {
+	      return function (v, reject) {
+	        if (typeof v === firstType) {
+	          return v;
+	        }
+	        reject(message);
+	      }
+	    }
+
+	    if (len === 2) {
+	      return function (v, reject) {
+	        var kind= typeof v;
+	        if (kind === firstType || kind === secondType) return v;
+	        reject(message);
+	      }
+	    }
+
+	    return function (v, reject) {
+	      var kind = typeof v;
+	      var i = len;
+	      while (i-- > 0) {
+	        if (kind === types[i]) return v;
+	      }
+	      reject(message);
+	    }
+	  }
+
+	  var functionReducer= makeTypeReducer(['function']);
+
+	  var objectFunctionReducer= makeTypeReducer(['object', 'function']);
+
+	  function makeCancelablePromise(Promise, executor, options) {
+	    var isCancelable;
+	    var callbacks;
+	    var timer= 0;
+	    var subscriptionClosed;
+
+	    var promise = new Promise(function (resolve, reject, onCancel) {
+	      options= resolveOptions(options, {
+	        timeout: 0,
+	        overload: false
+	      }, {
+	        timeout: function(value, reject){
+	          value*= 1;
+	          if (typeof value !== 'number' || value < 0 || !Number.isFinite(value)) {
+	            reject('timeout must be a positive number');
+	          }
+	          return value;
+	        }
+	      });
+
+	      isCancelable = !options.overload && typeof Promise.prototype.cancel === 'function' && typeof onCancel === 'function';
+
+	      function cleanup() {
+	        if (callbacks) {
+	          callbacks = null;
+	        }
+	        if (timer) {
+	          clearTimeout(timer);
+	          timer = 0;
+	        }
+	      }
+
+	      var _resolve= function(value){
+	        cleanup();
+	        resolve(value);
+	      };
+
+	      var _reject= function(err){
+	        cleanup();
+	        reject(err);
+	      };
+
+	      if (isCancelable) {
+	        executor(_resolve, _reject, onCancel);
+	      } else {
+	        callbacks = [function(reason){
+	          _reject(reason || Error('canceled'));
+	        }];
+	        executor(_resolve, _reject, function (cb) {
+	          if (subscriptionClosed) {
+	            throw Error('Unable to subscribe on cancel event asynchronously')
+	          }
+	          if (typeof cb !== 'function') {
+	            throw TypeError('onCancel callback must be a function');
+	          }
+	          callbacks.push(cb);
+	        });
+	        subscriptionClosed= true;
+	      }
+
+	      if (options.timeout > 0) {
+	        timer= setTimeout(function(){
+	          var reason= Error('timeout');
+	          reason.code = 'ETIMEDOUT';
+	          timer= 0;
+	          promise.cancel(reason);
+	          reject(reason);
+	        }, options.timeout);
+	      }
+	    });
+
+	    if (!isCancelable) {
+	      promise.cancel = function (reason) {
+	        if (!callbacks) {
+	          return;
+	        }
+	        var length = callbacks.length;
+	        for (var i = 1; i < length; i++) {
+	          callbacks[i](reason);
+	        }
+	        // internal callback to reject the promise
+	        callbacks[0](reason);
+	        callbacks = null;
+	      };
+	    }
+
+	    return promise;
+	  }
+
+	  function findTargetIndex(observer) {
+	    var observers = this._observers;
+	    if(!observers){
+	      return -1;
+	    }
+	    var len = observers.length;
+	    for (var i = 0; i < len; i++) {
+	      if (observers[i]._target === observer) return i;
+	    }
+	    return -1;
+	  }
+
+	  // Attention, function return type now is array, always !
+	  // It has zero elements if no any matches found and one or more
+	  // elements (leafs) if there are matches
+	  //
+	  function searchListenerTree(handlers, type, tree, i, typeLength) {
+	    if (!tree) {
+	      return null;
+	    }
+
+	    if (i === 0) {
+	      var kind = typeof type;
+	      if (kind === 'string') {
+	        var ns, n, l = 0, j = 0, delimiter = this.delimiter, dl = delimiter.length;
+	        if ((n = type.indexOf(delimiter)) !== -1) {
+	          ns = new Array(5);
+	          do {
+	            ns[l++] = type.slice(j, n);
+	            j = n + dl;
+	          } while ((n = type.indexOf(delimiter, j)) !== -1);
+
+	          ns[l++] = type.slice(j);
+	          type = ns;
+	          typeLength = l;
+	        } else {
+	          type = [type];
+	          typeLength = 1;
+	        }
+	      } else if (kind === 'object') {
+	        typeLength = type.length;
+	      } else {
+	        type = [type];
+	        typeLength = 1;
+	      }
+	    }
+
+	    var listeners= null, branch, xTree, xxTree, isolatedBranch, endReached, currentType = type[i],
+	        nextType = type[i + 1], branches, _listeners;
+
+	    if (i === typeLength && tree._listeners) {
+	      //
+	      // If at the end of the event(s) list and the tree has listeners
+	      // invoke those listeners.
+	      //
+	      if (typeof tree._listeners === 'function') {
+	        handlers && handlers.push(tree._listeners);
+	        return [tree];
+	      } else {
+	        handlers && handlers.push.apply(handlers, tree._listeners);
+	        return [tree];
+	      }
+	    }
+
+	    if (currentType === '*') {
+	      //
+	      // If the event emitted is '*' at this part
+	      // or there is a concrete match at this patch
+	      //
+	      branches= ownKeys(tree);
+	      n= branches.length;
+	      while(n-->0){
+	        branch= branches[n];
+	        if (branch !== '_listeners') {
+	          _listeners = searchListenerTree(handlers, type, tree[branch], i + 1, typeLength);
+	          if(_listeners){
+	            if(listeners){
+	              listeners.push.apply(listeners, _listeners);
+	            }else {
+	              listeners = _listeners;
+	            }
+	          }
+	        }
+	      }
+	      return listeners;
+	    } else if (currentType === '**') {
+	      endReached = (i + 1 === typeLength || (i + 2 === typeLength && nextType === '*'));
+	      if (endReached && tree._listeners) {
+	        // The next element has a _listeners, add it to the handlers.
+	        listeners = searchListenerTree(handlers, type, tree, typeLength, typeLength);
+	      }
+
+	      branches= ownKeys(tree);
+	      n= branches.length;
+	      while(n-->0){
+	        branch= branches[n];
+	        if (branch !== '_listeners') {
+	          if (branch === '*' || branch === '**') {
+	            if (tree[branch]._listeners && !endReached) {
+	              _listeners = searchListenerTree(handlers, type, tree[branch], typeLength, typeLength);
+	              if(_listeners){
+	                if(listeners){
+	                  listeners.push.apply(listeners, _listeners);
+	                }else {
+	                  listeners = _listeners;
+	                }
+	              }
+	            }
+	            _listeners = searchListenerTree(handlers, type, tree[branch], i, typeLength);
+	          } else if (branch === nextType) {
+	            _listeners = searchListenerTree(handlers, type, tree[branch], i + 2, typeLength);
+	          } else {
+	            // No match on this one, shift into the tree but not in the type array.
+	            _listeners = searchListenerTree(handlers, type, tree[branch], i, typeLength);
+	          }
+	          if(_listeners){
+	            if(listeners){
+	              listeners.push.apply(listeners, _listeners);
+	            }else {
+	              listeners = _listeners;
+	            }
+	          }
+	        }
+	      }
+	      return listeners;
+	    }else if (tree[currentType]) {
+	      listeners= searchListenerTree(handlers, type, tree[currentType], i + 1, typeLength);
+	    }
+
+	      xTree = tree['*'];
+	    if (xTree) {
+	      //
+	      // If the listener tree will allow any match for this part,
+	      // then recursively explore all branches of the tree
+	      //
+	      searchListenerTree(handlers, type, xTree, i + 1, typeLength);
+	    }
+
+	    xxTree = tree['**'];
+	    if (xxTree) {
+	      if (i < typeLength) {
+	        if (xxTree._listeners) {
+	          // If we have a listener on a '**', it will catch all, so add its handler.
+	          searchListenerTree(handlers, type, xxTree, typeLength, typeLength);
+	        }
+
+	        // Build arrays of matching next branches and others.
+	        branches= ownKeys(xxTree);
+	        n= branches.length;
+	        while(n-->0){
+	          branch= branches[n];
+	          if (branch !== '_listeners') {
+	            if (branch === nextType) {
+	              // We know the next element will match, so jump twice.
+	              searchListenerTree(handlers, type, xxTree[branch], i + 2, typeLength);
+	            } else if (branch === currentType) {
+	              // Current node matches, move into the tree.
+	              searchListenerTree(handlers, type, xxTree[branch], i + 1, typeLength);
+	            } else {
+	              isolatedBranch = {};
+	              isolatedBranch[branch] = xxTree[branch];
+	              searchListenerTree(handlers, type, {'**': isolatedBranch}, i + 1, typeLength);
+	            }
+	          }
+	        }
+	      } else if (xxTree._listeners) {
+	        // We have reached the end and still on a '**'
+	        searchListenerTree(handlers, type, xxTree, typeLength, typeLength);
+	      } else if (xxTree['*'] && xxTree['*']._listeners) {
+	        searchListenerTree(handlers, type, xxTree['*'], typeLength, typeLength);
+	      }
+	    }
+
+	    return listeners;
+	  }
+
+	  function growListenerTree(type, listener, prepend) {
+	    var len = 0, j = 0, i, delimiter = this.delimiter, dl= delimiter.length, ns;
+
+	    if(typeof type==='string') {
+	      if ((i = type.indexOf(delimiter)) !== -1) {
+	        ns = new Array(5);
+	        do {
+	          ns[len++] = type.slice(j, i);
+	          j = i + dl;
+	        } while ((i = type.indexOf(delimiter, j)) !== -1);
+
+	        ns[len++] = type.slice(j);
+	      }else {
+	        ns= [type];
+	        len= 1;
+	      }
+	    }else {
+	      ns= type;
+	      len= type.length;
+	    }
+
+	    //
+	    // Looks for two consecutive '**', if so, don't add the event at all.
+	    //
+	    if (len > 1) {
+	      for (i = 0; i + 1 < len; i++) {
+	        if (ns[i] === '**' && ns[i + 1] === '**') {
+	          return;
+	        }
+	      }
+	    }
+
+
+
+	    var tree = this.listenerTree, name;
+
+	    for (i = 0; i < len; i++) {
+	      name = ns[i];
+
+	      tree = tree[name] || (tree[name] = {});
+
+	      if (i === len - 1) {
+	        if (!tree._listeners) {
+	          tree._listeners = listener;
+	        } else {
+	          if (typeof tree._listeners === 'function') {
+	            tree._listeners = [tree._listeners];
+	          }
+
+	          if (prepend) {
+	            tree._listeners.unshift(listener);
+	          } else {
+	            tree._listeners.push(listener);
+	          }
+
+	          if (
+	              !tree._listeners.warned &&
+	              this._maxListeners > 0 &&
+	              tree._listeners.length > this._maxListeners
+	          ) {
+	            tree._listeners.warned = true;
+	            logPossibleMemoryLeak.call(this, tree._listeners.length, name);
+	          }
+	        }
+	        return true;
+	      }
+	    }
+
+	    return true;
+	  }
+
+	  function collectTreeEvents(tree, events, root, asArray){
+	     var branches= ownKeys(tree);
+	     var i= branches.length;
+	     var branch, branchName, path;
+	     var hasListeners= tree['_listeners'];
+	     var isArrayPath;
+
+	     while(i-->0){
+	         branchName= branches[i];
+
+	         branch= tree[branchName];
+
+	         if(branchName==='_listeners'){
+	             path= root;
+	         }else {
+	             path = root ? root.concat(branchName) : [branchName];
+	         }
+
+	         isArrayPath= asArray || typeof branchName==='symbol';
+
+	         hasListeners && events.push(isArrayPath? path : path.join(this.delimiter));
+
+	         if(typeof branch==='object'){
+	             collectTreeEvents.call(this, branch, events, path, isArrayPath);
+	         }
+	     }
+
+	     return events;
+	  }
+
+	  function recursivelyGarbageCollect(root) {
+	    var keys = ownKeys(root);
+	    var i= keys.length;
+	    var obj, key, flag;
+	    while(i-->0){
+	      key = keys[i];
+	      obj = root[key];
+
+	      if(obj){
+	          flag= true;
+	          if(key !== '_listeners' && !recursivelyGarbageCollect(obj)){
+	             delete root[key];
+	          }
+	      }
+	    }
+
+	    return flag;
+	  }
+
+	  function Listener(emitter, event, listener){
+	    this.emitter= emitter;
+	    this.event= event;
+	    this.listener= listener;
+	  }
+
+	  Listener.prototype.off= function(){
+	    this.emitter.off(this.event, this.listener);
+	    return this;
+	  };
+
+	  function setupListener(event, listener, options){
+	      if (options === true) {
+	        promisify = true;
+	      } else if (options === false) {
+	        async = true;
+	      } else {
+	        if (!options || typeof options !== 'object') {
+	          throw TypeError('options should be an object or true');
+	        }
+	        var async = options.async;
+	        var promisify = options.promisify;
+	        var nextTick = options.nextTick;
+	        var objectify = options.objectify;
+	      }
+
+	      if (async || nextTick || promisify) {
+	        var _listener = listener;
+	        var _origin = listener._origin || listener;
+
+	        if (nextTick && !nextTickSupported) {
+	          throw Error('process.nextTick is not supported');
+	        }
+
+	        if (promisify === undefined$1) {
+	          promisify = listener.constructor.name === 'AsyncFunction';
+	        }
+
+	        listener = function () {
+	          var args = arguments;
+	          var context = this;
+	          var event = this.event;
+
+	          return promisify ? (nextTick ? Promise.resolve() : new Promise(function (resolve) {
+	            _setImmediate(resolve);
+	          }).then(function () {
+	            context.event = event;
+	            return _listener.apply(context, args)
+	          })) : (nextTick ? process.nextTick : _setImmediate)(function () {
+	            context.event = event;
+	            _listener.apply(context, args);
+	          });
+	        };
+
+	        listener._async = true;
+	        listener._origin = _origin;
+	      }
+
+	    return [listener, objectify? new Listener(this, event, listener): this];
+	  }
+
+	  function EventEmitter(conf) {
+	    this._events = {};
+	    this._newListener = false;
+	    this._removeListener = false;
+	    this.verboseMemoryLeak = false;
+	    configure.call(this, conf);
+	  }
+
+	  EventEmitter.EventEmitter2 = EventEmitter; // backwards compatibility for exporting EventEmitter property
+
+	  EventEmitter.prototype.listenTo= function(target, events, options){
+	    if(typeof target!=='object'){
+	      throw TypeError('target musts be an object');
+	    }
+
+	    var emitter= this;
+
+	    options = resolveOptions(options, {
+	      on: undefined$1,
+	      off: undefined$1,
+	      reducers: undefined$1
+	    }, {
+	      on: functionReducer,
+	      off: functionReducer,
+	      reducers: objectFunctionReducer
+	    });
+
+	    function listen(events){
+	      if(typeof events!=='object'){
+	        throw TypeError('events must be an object');
+	      }
+
+	      var reducers= options.reducers;
+	      var index= findTargetIndex.call(emitter, target);
+	      var observer;
+
+	      if(index===-1){
+	        observer= new TargetObserver(emitter, target, options);
+	      }else {
+	        observer= emitter._observers[index];
+	      }
+
+	      var keys= ownKeys(events);
+	      var len= keys.length;
+	      var event;
+	      var isSingleReducer= typeof reducers==='function';
+
+	      for(var i=0; i<len; i++){
+	        event= keys[i];
+	        observer.subscribe(
+	            event,
+	            events[event] || event,
+	            isSingleReducer ? reducers : reducers && reducers[event]
+	        );
+	      }
+	    }
+
+	    isArray(events)?
+	        listen(toObject(events)) :
+	        (typeof events==='string'? listen(toObject(events.split(/\s+/))): listen(events));
+
+	    return this;
+	  };
+
+	  EventEmitter.prototype.stopListeningTo = function (target, event) {
+	    var observers = this._observers;
+
+	    if(!observers){
+	      return false;
+	    }
+
+	    var i = observers.length;
+	    var observer;
+	    var matched= false;
+
+	    if(target && typeof target!=='object'){
+	      throw TypeError('target should be an object');
+	    }
+
+	    while (i-- > 0) {
+	      observer = observers[i];
+	      if (!target || observer._target === target) {
+	        observer.unsubscribe(event);
+	        matched= true;
+	      }
+	    }
+
+	    return matched;
+	  };
+
+	  // By default EventEmitters will print a warning if more than
+	  // 10 listeners are added to it. This is a useful default which
+	  // helps finding memory leaks.
+	  //
+	  // Obviously not all Emitters should be limited to 10. This function allows
+	  // that to be increased. Set to zero for unlimited.
+
+	  EventEmitter.prototype.delimiter = '.';
+
+	  EventEmitter.prototype.setMaxListeners = function(n) {
+	    if (n !== undefined$1) {
+	      this._maxListeners = n;
+	      if (!this._conf) this._conf = {};
+	      this._conf.maxListeners = n;
+	    }
+	  };
+
+	  EventEmitter.prototype.getMaxListeners = function() {
+	    return this._maxListeners;
+	  };
+
+	  EventEmitter.prototype.event = '';
+
+	  EventEmitter.prototype.once = function(event, fn, options) {
+	    return this._once(event, fn, false, options);
+	  };
+
+	  EventEmitter.prototype.prependOnceListener = function(event, fn, options) {
+	    return this._once(event, fn, true, options);
+	  };
+
+	  EventEmitter.prototype._once = function(event, fn, prepend, options) {
+	    return this._many(event, 1, fn, prepend, options);
+	  };
+
+	  EventEmitter.prototype.many = function(event, ttl, fn, options) {
+	    return this._many(event, ttl, fn, false, options);
+	  };
+
+	  EventEmitter.prototype.prependMany = function(event, ttl, fn, options) {
+	    return this._many(event, ttl, fn, true, options);
+	  };
+
+	  EventEmitter.prototype._many = function(event, ttl, fn, prepend, options) {
+	    var self = this;
+
+	    if (typeof fn !== 'function') {
+	      throw new Error('many only accepts instances of Function');
+	    }
+
+	    function listener() {
+	      if (--ttl === 0) {
+	        self.off(event, listener);
+	      }
+	      return fn.apply(this, arguments);
+	    }
+
+	    listener._origin = fn;
+
+	    return this._on(event, listener, prepend, options);
+	  };
+
+	  EventEmitter.prototype.emit = function() {
+	    if (!this._events && !this._all) {
+	      return false;
+	    }
+
+	    this._events || init.call(this);
+
+	    var type = arguments[0], ns, wildcard= this.wildcard;
+	    var args,l,i,j, containsSymbol;
+
+	    if (type === 'newListener' && !this._newListener) {
+	      if (!this._events.newListener) {
+	        return false;
+	      }
+	    }
+
+	    if (wildcard) {
+	      ns= type;
+	      if(type!=='newListener' && type!=='removeListener'){
+	        if (typeof type === 'object') {
+	          l = type.length;
+	          if (symbolsSupported) {
+	            for (i = 0; i < l; i++) {
+	              if (typeof type[i] === 'symbol') {
+	                containsSymbol = true;
+	                break;
+	              }
+	            }
+	          }
+	          if (!containsSymbol) {
+	            type = type.join(this.delimiter);
+	          }
+	        }
+	      }
+	    }
+
+	    var al = arguments.length;
+	    var handler;
+
+	    if (this._all && this._all.length) {
+	      handler = this._all.slice();
+
+	      for (i = 0, l = handler.length; i < l; i++) {
+	        this.event = type;
+	        switch (al) {
+	        case 1:
+	          handler[i].call(this, type);
+	          break;
+	        case 2:
+	          handler[i].call(this, type, arguments[1]);
+	          break;
+	        case 3:
+	          handler[i].call(this, type, arguments[1], arguments[2]);
+	          break;
+	        default:
+	          handler[i].apply(this, arguments);
+	        }
+	      }
+	    }
+
+	    if (wildcard) {
+	      handler = [];
+	      searchListenerTree.call(this, handler, ns, this.listenerTree, 0, l);
+	    } else {
+	      handler = this._events[type];
+	      if (typeof handler === 'function') {
+	        this.event = type;
+	        switch (al) {
+	        case 1:
+	          handler.call(this);
+	          break;
+	        case 2:
+	          handler.call(this, arguments[1]);
+	          break;
+	        case 3:
+	          handler.call(this, arguments[1], arguments[2]);
+	          break;
+	        default:
+	          args = new Array(al - 1);
+	          for (j = 1; j < al; j++) args[j - 1] = arguments[j];
+	          handler.apply(this, args);
+	        }
+	        return true;
+	      } else if (handler) {
+	        // need to make copy of handlers because list can change in the middle
+	        // of emit call
+	        handler = handler.slice();
+	      }
+	    }
+
+	    if (handler && handler.length) {
+	      if (al > 3) {
+	        args = new Array(al - 1);
+	        for (j = 1; j < al; j++) args[j - 1] = arguments[j];
+	      }
+	      for (i = 0, l = handler.length; i < l; i++) {
+	        this.event = type;
+	        switch (al) {
+	        case 1:
+	          handler[i].call(this);
+	          break;
+	        case 2:
+	          handler[i].call(this, arguments[1]);
+	          break;
+	        case 3:
+	          handler[i].call(this, arguments[1], arguments[2]);
+	          break;
+	        default:
+	          handler[i].apply(this, args);
+	        }
+	      }
+	      return true;
+	    } else if (!this.ignoreErrors && !this._all && type === 'error') {
+	      if (arguments[1] instanceof Error) {
+	        throw arguments[1]; // Unhandled 'error' event
+	      } else {
+	        throw new Error("Uncaught, unspecified 'error' event.");
+	      }
+	    }
+
+	    return !!this._all;
+	  };
+
+	  EventEmitter.prototype.emitAsync = function() {
+	    if (!this._events && !this._all) {
+	      return false;
+	    }
+
+	    this._events || init.call(this);
+
+	    var type = arguments[0], wildcard= this.wildcard, ns, containsSymbol;
+	    var args,l,i,j;
+
+	    if (type === 'newListener' && !this._newListener) {
+	        if (!this._events.newListener) { return Promise.resolve([false]); }
+	    }
+
+	    if (wildcard) {
+	      ns= type;
+	      if(type!=='newListener' && type!=='removeListener'){
+	        if (typeof type === 'object') {
+	          l = type.length;
+	          if (symbolsSupported) {
+	            for (i = 0; i < l; i++) {
+	              if (typeof type[i] === 'symbol') {
+	                containsSymbol = true;
+	                break;
+	              }
+	            }
+	          }
+	          if (!containsSymbol) {
+	            type = type.join(this.delimiter);
+	          }
+	        }
+	      }
+	    }
+
+	    var promises= [];
+
+	    var al = arguments.length;
+	    var handler;
+
+	    if (this._all) {
+	      for (i = 0, l = this._all.length; i < l; i++) {
+	        this.event = type;
+	        switch (al) {
+	        case 1:
+	          promises.push(this._all[i].call(this, type));
+	          break;
+	        case 2:
+	          promises.push(this._all[i].call(this, type, arguments[1]));
+	          break;
+	        case 3:
+	          promises.push(this._all[i].call(this, type, arguments[1], arguments[2]));
+	          break;
+	        default:
+	          promises.push(this._all[i].apply(this, arguments));
+	        }
+	      }
+	    }
+
+	    if (wildcard) {
+	      handler = [];
+	      searchListenerTree.call(this, handler, ns, this.listenerTree, 0);
+	    } else {
+	      handler = this._events[type];
+	    }
+
+	    if (typeof handler === 'function') {
+	      this.event = type;
+	      switch (al) {
+	      case 1:
+	        promises.push(handler.call(this));
+	        break;
+	      case 2:
+	        promises.push(handler.call(this, arguments[1]));
+	        break;
+	      case 3:
+	        promises.push(handler.call(this, arguments[1], arguments[2]));
+	        break;
+	      default:
+	        args = new Array(al - 1);
+	        for (j = 1; j < al; j++) args[j - 1] = arguments[j];
+	        promises.push(handler.apply(this, args));
+	      }
+	    } else if (handler && handler.length) {
+	      handler = handler.slice();
+	      if (al > 3) {
+	        args = new Array(al - 1);
+	        for (j = 1; j < al; j++) args[j - 1] = arguments[j];
+	      }
+	      for (i = 0, l = handler.length; i < l; i++) {
+	        this.event = type;
+	        switch (al) {
+	        case 1:
+	          promises.push(handler[i].call(this));
+	          break;
+	        case 2:
+	          promises.push(handler[i].call(this, arguments[1]));
+	          break;
+	        case 3:
+	          promises.push(handler[i].call(this, arguments[1], arguments[2]));
+	          break;
+	        default:
+	          promises.push(handler[i].apply(this, args));
+	        }
+	      }
+	    } else if (!this.ignoreErrors && !this._all && type === 'error') {
+	      if (arguments[1] instanceof Error) {
+	        return Promise.reject(arguments[1]); // Unhandled 'error' event
+	      } else {
+	        return Promise.reject("Uncaught, unspecified 'error' event.");
+	      }
+	    }
+
+	    return Promise.all(promises);
+	  };
+
+	  EventEmitter.prototype.on = function(type, listener, options) {
+	    return this._on(type, listener, false, options);
+	  };
+
+	  EventEmitter.prototype.prependListener = function(type, listener, options) {
+	    return this._on(type, listener, true, options);
+	  };
+
+	  EventEmitter.prototype.onAny = function(fn) {
+	    return this._onAny(fn, false);
+	  };
+
+	  EventEmitter.prototype.prependAny = function(fn) {
+	    return this._onAny(fn, true);
+	  };
+
+	  EventEmitter.prototype.addListener = EventEmitter.prototype.on;
+
+	  EventEmitter.prototype._onAny = function(fn, prepend){
+	    if (typeof fn !== 'function') {
+	      throw new Error('onAny only accepts instances of Function');
+	    }
+
+	    if (!this._all) {
+	      this._all = [];
+	    }
+
+	    // Add the function to the event listener collection.
+	    if(prepend){
+	      this._all.unshift(fn);
+	    }else {
+	      this._all.push(fn);
+	    }
+
+	    return this;
+	  };
+
+	  EventEmitter.prototype._on = function(type, listener, prepend, options) {
+	    if (typeof type === 'function') {
+	      this._onAny(type, listener);
+	      return this;
+	    }
+
+	    if (typeof listener !== 'function') {
+	      throw new Error('on only accepts instances of Function');
+	    }
+	    this._events || init.call(this);
+
+	    var returnValue= this, temp;
+
+	    if (options !== undefined$1) {
+	      temp = setupListener.call(this, type, listener, options);
+	      listener = temp[0];
+	      returnValue = temp[1];
+	    }
+
+	    // To avoid recursion in the case that type == "newListeners"! Before
+	    // adding it to the listeners, first emit "newListeners".
+	    if (this._newListener) {
+	      this.emit('newListener', type, listener);
+	    }
+
+	    if (this.wildcard) {
+	      growListenerTree.call(this, type, listener, prepend);
+	      return returnValue;
+	    }
+
+	    if (!this._events[type]) {
+	      // Optimize the case of one listener. Don't need the extra array object.
+	      this._events[type] = listener;
+	    } else {
+	      if (typeof this._events[type] === 'function') {
+	        // Change to array.
+	        this._events[type] = [this._events[type]];
+	      }
+
+	      // If we've already got an array, just add
+	      if(prepend){
+	        this._events[type].unshift(listener);
+	      }else {
+	        this._events[type].push(listener);
+	      }
+
+	      // Check for listener leak
+	      if (
+	        !this._events[type].warned &&
+	        this._maxListeners > 0 &&
+	        this._events[type].length > this._maxListeners
+	      ) {
+	        this._events[type].warned = true;
+	        logPossibleMemoryLeak.call(this, this._events[type].length, type);
+	      }
+	    }
+
+	    return returnValue;
+	  };
+
+	  EventEmitter.prototype.off = function(type, listener) {
+	    if (typeof listener !== 'function') {
+	      throw new Error('removeListener only takes instances of Function');
+	    }
+
+	    var handlers,leafs=[];
+
+	    if(this.wildcard) {
+	      var ns = typeof type === 'string' ? type.split(this.delimiter) : type.slice();
+	      leafs = searchListenerTree.call(this, null, ns, this.listenerTree, 0);
+	      if(!leafs) return this;
+	    } else {
+	      // does not use listeners(), so no side effect of creating _events[type]
+	      if (!this._events[type]) return this;
+	      handlers = this._events[type];
+	      leafs.push({_listeners:handlers});
+	    }
+
+	    for (var iLeaf=0; iLeaf<leafs.length; iLeaf++) {
+	      var leaf = leafs[iLeaf];
+	      handlers = leaf._listeners;
+	      if (isArray(handlers)) {
+
+	        var position = -1;
+
+	        for (var i = 0, length = handlers.length; i < length; i++) {
+	          if (handlers[i] === listener ||
+	            (handlers[i].listener && handlers[i].listener === listener) ||
+	            (handlers[i]._origin && handlers[i]._origin === listener)) {
+	            position = i;
+	            break;
+	          }
+	        }
+
+	        if (position < 0) {
+	          continue;
+	        }
+
+	        if(this.wildcard) {
+	          leaf._listeners.splice(position, 1);
+	        }
+	        else {
+	          this._events[type].splice(position, 1);
+	        }
+
+	        if (handlers.length === 0) {
+	          if(this.wildcard) {
+	            delete leaf._listeners;
+	          }
+	          else {
+	            delete this._events[type];
+	          }
+	        }
+	        if (this._removeListener)
+	          this.emit("removeListener", type, listener);
+
+	        return this;
+	      }
+	      else if (handlers === listener ||
+	        (handlers.listener && handlers.listener === listener) ||
+	        (handlers._origin && handlers._origin === listener)) {
+	        if(this.wildcard) {
+	          delete leaf._listeners;
+	        }
+	        else {
+	          delete this._events[type];
+	        }
+	        if (this._removeListener)
+	          this.emit("removeListener", type, listener);
+	      }
+	    }
+
+	    this.listenerTree && recursivelyGarbageCollect(this.listenerTree);
+
+	    return this;
+	  };
+
+	  EventEmitter.prototype.offAny = function(fn) {
+	    var i = 0, l = 0, fns;
+	    if (fn && this._all && this._all.length > 0) {
+	      fns = this._all;
+	      for(i = 0, l = fns.length; i < l; i++) {
+	        if(fn === fns[i]) {
+	          fns.splice(i, 1);
+	          if (this._removeListener)
+	            this.emit("removeListenerAny", fn);
+	          return this;
+	        }
+	      }
+	    } else {
+	      fns = this._all;
+	      if (this._removeListener) {
+	        for(i = 0, l = fns.length; i < l; i++)
+	          this.emit("removeListenerAny", fns[i]);
+	      }
+	      this._all = [];
+	    }
+	    return this;
+	  };
+
+	  EventEmitter.prototype.removeListener = EventEmitter.prototype.off;
+
+	  EventEmitter.prototype.removeAllListeners = function (type) {
+	    if (type === undefined$1) {
+	      !this._events || init.call(this);
+	      return this;
+	    }
+
+	    if (this.wildcard) {
+	      var leafs = searchListenerTree.call(this, null, type, this.listenerTree, 0), leaf, i;
+	      if (!leafs) return this;
+	      for (i = 0; i < leafs.length; i++) {
+	        leaf = leafs[i];
+	        leaf._listeners = null;
+	      }
+	      this.listenerTree && recursivelyGarbageCollect(this.listenerTree);
+	    } else if (this._events) {
+	      this._events[type] = null;
+	    }
+	    return this;
+	  };
+
+	  EventEmitter.prototype.listeners = function (type) {
+	    var _events = this._events;
+	    var keys, listeners, allListeners;
+	    var i;
+	    var listenerTree;
+
+	    if (type === undefined$1) {
+	      if (this.wildcard) {
+	        throw Error('event name required for wildcard emitter');
+	      }
+
+	      if (!_events) {
+	        return [];
+	      }
+
+	      keys = ownKeys(_events);
+	      i = keys.length;
+	      allListeners = [];
+	      while (i-- > 0) {
+	        listeners = _events[keys[i]];
+	        if (typeof listeners === 'function') {
+	          allListeners.push(listeners);
+	        } else {
+	          allListeners.push.apply(allListeners, listeners);
+	        }
+	      }
+	      return allListeners;
+	    } else {
+	      if (this.wildcard) {
+	        listenerTree= this.listenerTree;
+	        if(!listenerTree) return [];
+	        var handlers = [];
+	        var ns = typeof type === 'string' ? type.split(this.delimiter) : type.slice();
+	        searchListenerTree.call(this, handlers, ns, listenerTree, 0);
+	        return handlers;
+	      }
+
+	      if (!_events) {
+	        return [];
+	      }
+
+	      listeners = _events[type];
+
+	      if (!listeners) {
+	        return [];
+	      }
+	      return typeof listeners === 'function' ? [listeners] : listeners;
+	    }
+	  };
+
+	  EventEmitter.prototype.eventNames = function(nsAsArray){
+	    var _events= this._events;
+	    return this.wildcard? collectTreeEvents.call(this, this.listenerTree, [], null, nsAsArray) : (_events? ownKeys(_events) : []);
+	  };
+
+	  EventEmitter.prototype.listenerCount = function(type) {
+	    return this.listeners(type).length;
+	  };
+
+	  EventEmitter.prototype.hasListeners = function (type) {
+	    if (this.wildcard) {
+	      var handlers = [];
+	      var ns = typeof type === 'string' ? type.split(this.delimiter) : type.slice();
+	      searchListenerTree.call(this, handlers, ns, this.listenerTree, 0);
+	      return handlers.length > 0;
+	    }
+
+	    var _events = this._events;
+	    var _all = this._all;
+
+	    return !!(_all && _all.length || _events && (type === undefined$1 ? ownKeys(_events).length : _events[type]));
+	  };
+
+	  EventEmitter.prototype.listenersAny = function() {
+
+	    if(this._all) {
+	      return this._all;
+	    }
+	    else {
+	      return [];
+	    }
+
+	  };
+
+	  EventEmitter.prototype.waitFor = function (event, options) {
+	    var self = this;
+	    var type = typeof options;
+	    if (type === 'number') {
+	      options = {timeout: options};
+	    } else if (type === 'function') {
+	      options = {filter: options};
+	    }
+
+	    options= resolveOptions(options, {
+	      timeout: 0,
+	      filter: undefined$1,
+	      handleError: false,
+	      Promise: Promise,
+	      overload: false
+	    }, {
+	      filter: functionReducer,
+	      Promise: constructorReducer
+	    });
+
+	    return makeCancelablePromise(options.Promise, function (resolve, reject, onCancel) {
+	      function listener() {
+	        var filter= options.filter;
+	        if (filter && !filter.apply(self, arguments)) {
+	          return;
+	        }
+	        self.off(event, listener);
+	        if (options.handleError) {
+	          var err = arguments[0];
+	          err ? reject(err) : resolve(toArray.apply(null, arguments).slice(1));
+	        } else {
+	          resolve(toArray.apply(null, arguments));
+	        }
+	      }
+
+	      onCancel(function(){
+	        self.off(event, listener);
+	      });
+
+	      self._on(event, listener, false);
+	    }, {
+	      timeout: options.timeout,
+	      overload: options.overload
+	    })
+	  };
+
+	  function once(emitter, name, options) {
+	    options= resolveOptions(options, {
+	      Promise: Promise,
+	      timeout: 0,
+	      overload: false
+	    }, {
+	      Promise: constructorReducer
+	    });
+
+	    var _Promise= options.Promise;
+
+	    return makeCancelablePromise(_Promise, function(resolve, reject, onCancel){
+	      var handler;
+	      if (typeof emitter.addEventListener === 'function') {
+	        handler=  function () {
+	          resolve(toArray.apply(null, arguments));
+	        };
+
+	        onCancel(function(){
+	          emitter.removeEventListener(name, handler);
+	        });
+
+	        emitter.addEventListener(
+	            name,
+	            handler,
+	            {once: true}
+	        );
+	        return;
+	      }
+
+	      var eventListener = function(){
+	        errorListener && emitter.removeListener('error', errorListener);
+	        resolve(toArray.apply(null, arguments));
+	      };
+
+	      var errorListener;
+
+	      if (name !== 'error') {
+	        errorListener = function (err){
+	          emitter.removeListener(name, eventListener);
+	          reject(err);
+	        };
+
+	        emitter.once('error', errorListener);
+	      }
+
+	      onCancel(function(){
+	        errorListener && emitter.removeListener('error', errorListener);
+	        emitter.removeListener(name, eventListener);
+	      });
+
+	      emitter.once(name, eventListener);
+	    }, {
+	      timeout: options.timeout,
+	      overload: options.overload
+	    });
+	  }
+
+	  var prototype= EventEmitter.prototype;
+
+	  Object.defineProperties(EventEmitter, {
+	    defaultMaxListeners: {
+	      get: function () {
+	        return prototype._maxListeners;
+	      },
+	      set: function (n) {
+	        if (typeof n !== 'number' || n < 0 || Number.isNaN(n)) {
+	          throw TypeError('n must be a non-negative number')
+	        }
+	        prototype._maxListeners = n;
+	      },
+	      enumerable: true
+	    },
+	    once: {
+	      value: once,
+	      writable: true,
+	      configurable: true
+	    }
+	  });
+
+	  Object.defineProperties(prototype, {
+	      _maxListeners: {
+	          value: defaultMaxListeners,
+	          writable: true,
+	          configurable: true
+	      },
+	      _observers: {value: null, writable: true, configurable: true}
+	  });
+
+	  if (typeof undefined$1 === 'function' && undefined$1.amd) {
+	     // AMD. Register as an anonymous module.
+	    undefined$1(function() {
+	      return EventEmitter;
+	    });
+	  } else {
+	    // CommonJS
+	    module.exports = EventEmitter;
+	  }
+	}();
+	}(eventemitter2));
+
+	var EventEmitter2 = eventemitter2.exports;
 
 	/**
-	 * @fileOverview
 	 * @author David Gossow - dgossow@willowgarage.com
 	 */
 
@@ -55155,7 +55104,6 @@ var ROS3D = (function (exports, ROSLIB) {
 	}
 
 	/**
-	 * @fileOverview
 	 * @author David Gossow - dgossow@willowgarage.com
 	 */
 
@@ -55236,7 +55184,7 @@ var ROS3D = (function (exports, ROSLIB) {
 	   */
 	  unsubscribe() {
 	    if (this.updateTopic) {
-	      this.updateTopic.unsubscribe(this.processUpdate);
+	      this.updateTopic.unsubscribe();
 	    }
 	    if (this.feedbackTopic) {
 	      this.feedbackTopic.unadvertise();
@@ -55365,7 +55313,6 @@ var ROS3D = (function (exports, ROSLIB) {
 	}
 
 	/**
-	 * @fileOverview
 	 * @author Jihoon Lee - jihoonlee.in@gmail.com
 	 * @author Russell Toris - rctoris@wpi.edu
 	 */
@@ -55436,7 +55383,6 @@ var ROS3D = (function (exports, ROSLIB) {
 	}
 
 	/**
-	 * @fileOverview
 	 * @author Russell Toris - rctoris@wpi.edu
 	 * @author Nils Berg - berg.nils@gmail.com
 	 */
@@ -55490,13 +55436,12 @@ var ROS3D = (function (exports, ROSLIB) {
 
 	  processMessage(arrayMessage){
 	    arrayMessage.markers.forEach(function(message) {
-	      var key = message.ns + message.id;
 	      if(message.action === 0) {
 	        var updated = false;
-	        if(key in this.markers) { // "MODIFY"
-	          updated = this.markers[key].children[0].update(message);
+	        if(message.ns + message.id in this.markers) { // "MODIFY"
+	          updated = this.markers[message.ns + message.id].children[0].update(message);
 	          if(!updated) { // "REMOVE"
-	            this.removeMarker(key);
+	            this.removeMarker(message.ns + message.id);
 	          }
 	        }
 	        if(!updated) { // "ADD"
@@ -55504,19 +55449,19 @@ var ROS3D = (function (exports, ROSLIB) {
 	            message : message,
 	            path : this.path,
 	          });
-	          this.markers[key] = new SceneNode({
+	          this.markers[message.ns + message.id] = new SceneNode({
 	            frameID : message.header.frame_id,
 	            tfClient : this.tfClient,
 	            object : newMarker
 	          });
-	          this.rootObject.add(this.markers[key]);
+	          this.rootObject.add(this.markers[message.ns + message.id]);
 	        }
 	      }
 	      else if(message.action === 1) { // "DEPRECATED"
 	        console.warn('Received marker message with deprecated action identifier "1"');
 	      }
 	      else if(message.action === 2) { // "DELETE"
-	        this.removeMarker(key);
+	        this.removeMarker(message.ns + message.id);
 	      }
 	      else if(message.action === 3) { // "DELETE ALL"
 	        for (var m in this.markers){
@@ -55534,7 +55479,7 @@ var ROS3D = (function (exports, ROSLIB) {
 
 	  unsubscribe(){
 	    if(this.rosTopic){
-	      this.rosTopic.unsubscribe(this.processMessage);
+	      this.rosTopic.unsubscribe();
 	    }
 	  };
 
@@ -55553,7 +55498,6 @@ var ROS3D = (function (exports, ROSLIB) {
 	}
 
 	/**
-	 * @fileOverview
 	 * @author Russell Toris - rctoris@wpi.edu
 	 */
 
@@ -55596,7 +55540,7 @@ var ROS3D = (function (exports, ROSLIB) {
 
 	  unsubscribe(){
 	    if(this.rosTopic){
-	      this.rosTopic.unsubscribe(this.processMessage);
+	      this.rosTopic.unsubscribe();
 	    }
 	  };
 
@@ -55627,11 +55571,10 @@ var ROS3D = (function (exports, ROSLIB) {
 
 	  processMessage(message){
 	    // remove old marker from Three.Object3D children buffer
-	    var key = message.ns + message.id;
-	    var oldNode = this.markers[key];
-	    this.updatedTime[key] = new Date().getTime();
+	    var oldNode = this.markers[message.ns + message.id];
+	    this.updatedTime[message.ns + message.id] = new Date().getTime();
 	    if (oldNode) {
-	      this.removeMarker(key);
+	      this.removeMarker(message.ns + message.id);
 
 	    } else if (this.lifetime) {
 	      this.checkTime(message.ns + message.id);
@@ -55643,12 +55586,12 @@ var ROS3D = (function (exports, ROSLIB) {
 	        path : this.path,
 	      });
 
-	      this.markers[key] = new SceneNode({
+	      this.markers[message.ns + message.id] = new SceneNode({
 	        frameID : message.header.frame_id,
 	        tfClient : this.tfClient,
 	        object : newMarker
 	      });
-	      this.rootObject.add(this.markers[key]);
+	      this.rootObject.add(this.markers[message.ns + message.id]);
 	    }
 
 	    this.emit('change');
@@ -55669,7 +55612,6 @@ var ROS3D = (function (exports, ROSLIB) {
 	}
 
 	/**
-	 * @fileOverview
 	 * @author Jihoon Lee - lee@magazino.eu
 	 */
 
@@ -55719,7 +55661,7 @@ var ROS3D = (function (exports, ROSLIB) {
 	  };
 
 	  /*
-	  setLength( length, headLength, headWidth ) {
+	  setLength ( length, headLength, headWidth ) {
 	  	if ( headLength === undefined ) {
 	      headLength = 0.2 * length;
 	    }
@@ -55739,7 +55681,6 @@ var ROS3D = (function (exports, ROSLIB) {
 	}
 
 	/**
-	 * @fileOverview
 	 * @author David Gossow - dgossow@willowgarage.com
 	 */
 
@@ -55841,7 +55782,6 @@ var ROS3D = (function (exports, ROSLIB) {
 	}
 
 	/**
-	 * @fileOverview
 	 * @author Russell Toris - rctoris@wpi.edu
 	 */
 
@@ -55892,7 +55832,6 @@ var ROS3D = (function (exports, ROSLIB) {
 	}
 
 	/**
-	 * @fileOverview
 	 * @author Russell Toris - rctoris@wpi.edu
 	 */
 
@@ -55913,7 +55852,6 @@ var ROS3D = (function (exports, ROSLIB) {
 	    var message = options.message;
 	    var opacity = options.opacity || 1.0;
 	    var color = options.color || {r:255,g:255,b:255,a:255};
-
 	    // create the geometry
 	    var info = message.info;
 	    var origin = info.origin;
@@ -55961,6 +55899,8 @@ var ROS3D = (function (exports, ROSLIB) {
 	    this.material = material;
 	    this.texture = texture;
 
+
+//        var arrTst = [];
 	    for ( var row = 0; row < height; row++) {
 	      for ( var col = 0; col < width; col++) {
 
@@ -55969,10 +55909,18 @@ var ROS3D = (function (exports, ROSLIB) {
 	        var mapI = col + (invRow * width);
 	        // determine the value
 	        var val = this.getValue(mapI, invRow, col, data);
+//	        if (arrTst.includes(val) == false ){
+//	            arrTst.push(val)
+//	        }
 
 	        // determine the color
 	        var color = this.getColor(mapI, invRow, col, val);
-
+//	        if (val != -1){
+//                console.log("val")
+//                console.log(val)
+//                console.log("color")
+//                console.log(color)
+//            }
 	        // determine the index into the image data array
 	        var i = (col + (row * width)) * 4;
 
@@ -55980,6 +55928,8 @@ var ROS3D = (function (exports, ROSLIB) {
 	        imageData.set(color, i);
 	      }
 	    }
+//	    console.log("GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG")
+//	    console.log(arrTst)
 
 	    texture.needsUpdate = true;
 
@@ -56022,7 +55972,6 @@ var ROS3D = (function (exports, ROSLIB) {
 	}
 
 	/**
-	 * @fileOverview
 	 * @author Russell Toris - rctoris@wpi.edu
 	 */
 
@@ -56071,7 +56020,7 @@ var ROS3D = (function (exports, ROSLIB) {
 
 	  unsubscribe(){
 	    if(this.rosTopic){
-	      this.rosTopic.unsubscribe(this.processMessage);
+	      this.rosTopic.unsubscribe();
 	    }
 	  };
 
@@ -56094,13 +56043,11 @@ var ROS3D = (function (exports, ROSLIB) {
 	    // check for an old map
 	    if (this.currentGrid) {
 	      // check if it there is a tf client
-	      if (this.tfClient) {
+	      if (this.currentGrid.tfClient) {
 	        // grid is of type ROS3D.SceneNode
-	        this.sceneNode.unsubscribeTf();
-	        this.sceneNode.remove(this.currentGrid);
-	      } else {
-	        this.rootObject.remove(this.currentGrid);
+	        this.currentGrid.unsubscribeTf();
 	      }
+	      this.sceneNode.remove(this.currentGrid);
 	      this.currentGrid.dispose();
 	    }
 
@@ -56133,897 +56080,12 @@ var ROS3D = (function (exports, ROSLIB) {
 
 	    // check if we should unsubscribe
 	    if (!this.continuous) {
-	      this.rosTopic.unsubscribe(this.processMessage);
+	      this.rosTopic.unsubscribe();
 	    }
 	  };
 	}
 
 	/**
-	 * @fileOverview
-	 * @author Peter Sari - sari@photoneo.com
-	 */
-
-	class OcTreeBaseNode {
-
-	  /**
-	   * Base node type that represents one voxel as a node of the tree
-	   */
-	  
-	  constructor() {
-	    this._children = [null, null, null, null, null, null, null, null];
-	    this.value = null;
-	  };
-
-	  createChildNodeAt(newNode, index) {
-	    this._children[index % 8] = newNode;
-	  };
-
-	  hasChildAt(index) {
-	    return this._children[index % 8] !== null;
-	  };
-
-	  getChildAt(index) {
-	    return this._children[index % 8];
-	  };
-
-	  isLeafNode() {
-	    for (let i = 0; i < 8; ++i) {
-	      if (this._children[i] !== null) { return false; }
-	    }
-	    return true;
-	  };
-
-	  hasChildren() {
-	    for (let i = 0; i < 8; ++i) {
-	      if (this._children[i] !== null) { return true; }
-	    }
-	    return false;
-	  };
-	}
-
-	/**
-	 * @fileOverview
-	 * @author Peter Sari - sari@photoneo.com
-	 */
-
-	/**
-	 * Toggles voxel visibility
-	 *
-	 *    * `occupied` - only voxels that are above or equal to the occupation threshold are shown
-	 *    * `free` - only voxels that are below the occupation threshold are shown
-	 *    * `all` - all allocated voxels are shown
-	 */
-	var OcTreeVoxelRenderMode = {
-	  OCCUPIED: 'occupied',
-	  FREE: 'free',
-	  ALL: 'all',
-	};
-
-	/**
-	 * Coloring modes for each voxel
-	 *
-	 *     * 'solid' - voxels will have a single solid color set by the tree globally
-	 *     * 'occupancy' - voxels are false colored by their occupancy value. Fall back for `solid` if not available.
-	 *     * 'color' - voxels will colorized by their
-	 */
-	var OcTreeColorMode = {
-	  SOLID: 'solid',
-	  OCCUPANCY: 'occupancy',
-	  COLOR: 'color'
-	};
-
-	// ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- -----
-
-	/**
-	 Quick and dirty helper class
-	 to read ArrayBuffer in a streamed data-like fashion with mixed types in it
-	*/
-	function InStream(data, isLittleEndian) {
-	  this.buffer = data.buffer;
-	  this.length = data.length;
-	  this.isLittleEndian = (typeof isLittleEndian !== 'undefined') ? !!isLittleEndian : true;
-	  this._dataView = new DataView(this.buffer);
-	  this._cursor = 0;
-
-	  // Creates a set of wrapper functions for DataView
-	  // also flattens all dependencies
-	  [
-	    { kind: 'Int8', width: 1 },
-	    { kind: 'Uint8', width: 1 },
-	    { kind: 'Int16', width: 2 },
-	    { kind: 'Uint16', width: 2 },
-	    { kind: 'Int32', width: 4 },
-	    { kind: 'Uint32', width: 4 },
-	    { kind: 'BigInt64', width: 8 },
-	    { kind: 'BigUint64', width: 8 },
-	    { kind: 'Float32', width: 4 },
-	    { kind: 'Float64', width: 8 },
-	  ]
-	    .forEach(wrap => {
-	      const interfaceFunction = 'read' + wrap.kind;
-	      const wrappedFunction = 'get' + wrap.kind;       // Function name which going to be wrapped from DataView
-
-	      this[interfaceFunction] = () => {
-	        if (this._cursor + wrap.width > this.length) { throw new Error('Cannot read data stream. Overflow. Len=' + this.length + ' crsr=' + this._cursor); }
-	        const returningValue = this._dataView[wrappedFunction](this._cursor, this.isLittleEndian);
-	        this._cursor += wrap.width;
-	        return returningValue;
-	      };
-	    });
-
-	  Object.defineProperty(this, 'isEnd', { get: () => this.cursor >= this.data.length });
-	  return this;
-	}
-	// ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- -----
-
-	class OcTreeBase {
-
-	  /**
-	   * Represensta a BaseTree that can be build from ros message and create a THREE node from it.
-	   * Due a tree can be represented different ways in a message, this class is also a base class to
-	   * represent specialized versions fo the ree.
-	   *
-	   * @constructor
-	   * @param options - object with following keys:
-	   *
-	   *    * resolution - the size of leaf nodes in meter
-	   *    * color - color of the visualized map (if solid coloring option was set)
-	   *    * voxelRenderMode - toggle between rendering modes @see ROS3D.OcTreeVoxelRenderMode
-	   */
-	  constructor(options) {
-
-	    this.resolution = (typeof options.resolution !== 'undefined') ? options.resolution : 1.;
-	    this.color = new THREE.Color((typeof options.color !== 'undefined') ? options.color : 'green');
-	    this.opacity = (typeof options.opacity !== 'undefined') ? options.opacity : 1.;
-
-	    this.voxelRenderMode = (typeof options.voxelRenderMode !== 'undefined') ? options.voxelRenderMode : OcTreeVoxelRenderMode.OCCUPIED;
-
-	    this._rootNode = null;
-	    this._treeDepth = 16;
-	    this._treeMaxKeyVal = 32768;
-
-	    this._BINARY_UNALLOCATED = 0b00;
-	    this._BINARY_LEAF_FREE = 0b01;
-	    this._BINARY_LEAF_OCCUPIED = 0b10;
-	    this._BINARY_HAS_CHILDREN = 0b11;
-
-	    this._BINARY_CHILD_BUILD_TABLE = {};
-
-	    this._BINARY_CHILD_BUILD_TABLE[this._BINARY_LEAF_FREE] = function (child) {
-	      child.value = this._defaultFreeValue;
-	    };
-
-	    this._BINARY_CHILD_BUILD_TABLE[this._BINARY_LEAF_OCCUPIED] = function (child) {
-	      child.value = this._defaultOccupiedValue;
-	    };
-
-	    this._BINARY_CHILD_BUILD_TABLE[this._BINARY_HAS_CHILDREN] = function (child) {
-	      child.value = null;
-	    };
-
-	    /**
-	     * Table which we are building the geometry data from.
-	     */
-	    this._FACES = [
-	      { // 0. left (x=0)
-	        normal: [-1, 0, 0,],
-	        vertices: [
-	          [0, 1, 0],
-	          [0, 0, 0],
-	          [0, 1, 1],
-	          [0, 0, 1],
-	        ],
-	        childIndex: [
-	          0b001,
-	          0b011,
-	          0b101,
-	          0b111
-	        ]
-	      },
-	      { // 1. right (x=1)
-	        normal: [1, 0, 0,],
-	        vertices: [
-	          [1, 1, 1],
-	          [1, 0, 1],
-	          [1, 1, 0],
-	          [1, 0, 0],
-	        ],
-
-	        childIndex: [
-	          0b000,
-	          0b010,
-	          0b100,
-	          0b110
-	        ]
-	      },
-	      { // 2. bottom (y=0)
-	        normal: [0, -1, 0,],
-	        vertices: [
-	          [1, 0, 1],
-	          [0, 0, 1],
-	          [1, 0, 0],
-	          [0, 0, 0],
-	        ],
-	        childIndex: [
-	          0b010,
-	          0b011,
-	          0b110,
-	          0b111
-	        ]
-	      },
-	      { // 3. top (y=1)
-	        normal: [0, 1, 0,],
-	        vertices: [
-	          [0, 1, 1],
-	          [1, 1, 1],
-	          [0, 1, 0],
-	          [1, 1, 0],
-	        ],
-	        childIndex: [
-	          0b000,
-	          0b001,
-	          0b100,
-	          0b101
-	        ]
-	      },
-	      { // 4. back (z=0)
-	        normal: [0, 0, -1,],
-	        vertices: [
-	          [1, 0, 0],
-	          [0, 0, 0],
-	          [1, 1, 0],
-	          [0, 1, 0],
-	        ],
-	        childIndex: [
-	          0b100,
-	          0b101,
-	          0b110,
-	          0b111
-	        ]
-	      },
-	      { // 5.front (z=1)
-	        normal: [0, 0, 1,],
-	        vertices: [
-	          [0, 0, 1],
-	          [1, 0, 1],
-	          [0, 1, 1],
-	          [1, 1, 1],
-	        ],
-	        childIndex: [
-	          0b000,
-	          0b001,
-	          0b010,
-	          0b011
-	        ]
-	      },
-	    ];
-
-	    // Table of voxel size for each level of the tree
-	    this.nodeSizeTable = new Array(this._treeDepth);
-	    let _val = this.resolution;
-	    for (let i = this._treeDepth - 1; i >= 0; --i) {
-	      this.nodeSizeTable[i] = _val;
-	      _val = 2. * _val;
-	    }
-
-	    this._defaultOccupiedValue = true;
-	    this._defaultFreeValue = false;
-
-	    this.object = null;
-	  };
-
-
-	  /*
-	   * Finds a key in a given depth. Search is performed on the lowest level by default.
-	   * @return the node at given position, null if not found
-	   */
-	  searchAtDepth(key, depth) {
-	    depth = (typeof depth !== 'undefined') ? (depth > 0 ? depth : this._treeDepth) : this._treeDepth;
-
-	    const keyAtDepth = this._adjustKeyAtDepth(key, depth);
-	    const diff = this._treeDepth - depth;
-	    let currentNode = this._rootNode;
-
-	    // follow nodes down to requested level (for diff = 0 it's the last level)
-	    // Return the closest node, or null if not any
-
-	    for (let i = (this._treeDepth - 1); i >= diff; --i) {
-	      const pos = this._computeChildIdx(keyAtDepth, i);
-	      if (currentNode.hasChildAt(pos)) {
-	        currentNode = currentNode.getChildAt(pos);
-	      } else {
-	        // we expected a child but did not get it
-	        // is the current node a leaf already?
-	        if (!currentNode.hasChildren()) { return currentNode; }
-	        // it is not, search failed
-	        return null;
-	      }
-	    }
-
-	    return currentNode;
-
-	  };
-
-	  /**
-	   *
-	   */
-	  _computeCoordFromKey(key) {
-	    return key.map(keyVal => this.resolution * (keyVal - this._treeMaxKeyVal));
-	  };
-
-	  _computeChildIdx(key, depth) {
-	    let pos = 0;
-	    if (key[0] & (1 << depth)) { pos += 1; }
-	    if (key[1] & (1 << depth)) { pos += 2; }
-	    if (key[2] & (1 << depth)) { pos += 4; }
-
-	    return pos;
-	  };
-
-	  _computeKeyFromChildIdx(index, offset, depth) {
-	    const diff = this._treeDepth - depth - 1;
-
-	    return [
-	      offset[0] + (!!(index & 1) << diff),
-	      offset[1] + (!!(index & 2) << diff),
-	      offset[2] + (!!(index & 4) << diff),
-	    ];
-
-	  };
-
-	  _adjustKeyAtDepth(key, depth) {
-	    // generate appropriate key_at_depth for queried depth
-	    let diff = this._treeDepth - depth;
-	    if (diff === 0) { return key; }
-
-	    return key.map(keyVal => (((keyVal - this._treeMaxKeyVal) >> diff) << diff) + (1 << (diff - 1)) + this._treeMaxKeyVal);
-	  };
-
-	  _newNode() { return new OcTreeBaseNode(); };
-
-	  /*
-	   * Reads and builds a tree which was represented in a binary form from a message
-	   * Binary form only contains the tree structure to be allocated, all the data of voxels are stripped,
-	   * occupation is represented as a binary value.
-	   * Each node is represented as a 2-bit value which makes up the 8 child nodes of the parent (16 bits in total)
-	   * starting with the root node.
-	   */
-
-	  readBinary(data) {
-	    if (this._rootNode !== null) {
-	      delete this._rootNode;
-	    }
-	    this._rootNode = this._newNode();
-
-	    let dataStream = new InStream(data, true);
-
-	    let stack = new Array();
-	    stack.push(this._rootNode);
-
-	    while (stack.length > 0) {
-	      let node = stack.pop();
-
-	      // 2 bits per children, 16 bit total
-	      const childAllocationMap = dataStream.readUint16();
-
-	      // Insert all children and leaves
-	      let index = 8;
-	      while (index !== 0) {
-	        --index;
-	        const allocation = (childAllocationMap & (0b11 << (2 * index))) >> (2 * index);
-
-	        if (allocation !== this._BINARY_UNALLOCATED) {
-	          let child = this._newNode();
-
-	          const fn = this._BINARY_CHILD_BUILD_TABLE[allocation].bind(this);
-	          fn(child);
-
-	          node.createChildNodeAt(child, index);
-	          if (allocation === this._BINARY_HAS_CHILDREN) { stack.push(child); }
-	        }
-	      }
-	    }
-
-	  };
-
-	  /**
-	   * Reads a full tree (with node data) from a message.
-	   * A pacjet starts with the node data, followed by the allocation map of their children.
-	   * Each type of tree has different data structure @see ROS3DJS.OcTreeBase._readNodeData
-	   */
-	  read(data) {
-	    if (this._rootNode !== null) {
-	      delete this._rootNode;
-	    }
-
-	    this._rootNode = this._newNode();
-
-	    let dataStream = new InStream(data, true);
-
-	    let stack = new Array();
-	    stack.push(this._rootNode);
-
-	    while (stack.length > 0) {
-	      let node = stack.pop();
-
-	      // Data comes first
-	      this._readNodeData(dataStream, node);
-
-	      const childAllocationMap = dataStream.readUint8();
-
-	      // Insert all children and leaves
-	      let index = 8;
-	      while (index !== 0) {
-	        --index;
-	        const hasChild = childAllocationMap & (1 << index);
-	        if (hasChild) {
-	          let child = this._newNode();
-	          child.value = null;
-	          node.createChildNodeAt(child, index);
-	          stack.push(child);
-	        }
-	      }
-	    }
-
-	  };
-
-	  /**
-	   * Abstract function; Reads and sets data of a node
-	   */
-	  _readNodeData(dataStream, node) {
-	    // This needs to be implemented by specialized tree
-	    console.error('Not implemented');
-	  };
-
-	  /**
-	  * Builds up THREE.js geometry from tree data.
-	  */
-	  buildGeometry() {
-	    console.assert(this._rootNode !== null, 'No tree data');
-	    const { vertices, normals, colors, indices } = this._buildFaces();
-
-	    const geometry = new THREE.BufferGeometry();
-
-	    const material = new THREE.MeshBasicMaterial({
-	      color: 'white',
-	      flatShading: true,
-	      vertexColors: THREE.VertexColors,
-	      transparent: this.opacity < 1.0,
-	      opacity: this.opacity
-	    });
-
-	    geometry.addAttribute('position', new THREE.BufferAttribute(new Float32Array(vertices), 3));
-	    geometry.addAttribute('normal', new THREE.BufferAttribute(new Float32Array(normals), 3));
-	    geometry.addAttribute('color', new THREE.BufferAttribute(new Float32Array(colors), 3));
-
-	    geometry.setIndex(indices);
-
-	    const mesh = new THREE.Mesh(geometry, material);
-	    this.object = new THREE.Object3D();
-	    this.object.add(mesh);
-	  };
-
-	  _traverseLeaves(callback) {
-	    let stack = new Array();
-	    stack.push({ node: this._rootNode, depth: 0, key: [0, 0, 0] });
-
-	    while (stack.length > 0) {
-	      let current = stack.pop();
-	      if (current.node.isLeafNode()) {
-	        callback(current.node, current.key, current.depth - 1);
-	      } else {
-	        for (let index = 0; index < 8; ++index) {
-	          if (current.node.hasChildAt(index)) {
-	            const key = this._computeKeyFromChildIdx(index, current.key, current.depth);
-	            stack.push({
-	              node: current.node.getChildAt(index),
-	              depth: current.depth + 1,
-	              key
-	            });
-	          }
-	        }
-	      }
-	    }
-	  };
-
-	  /**
-	   * Abstract function; to implement different coloring schemes
-	   */
-	  _obtainColor(node) {
-	    return this.color;
-	  };
-
-	  _checkOccupied(node) {
-	    return node.value !== false;
-	  };
-
-	  _buildFaces() {
-	    let geometry = {
-	      vertices: [],
-	      indices: [],
-	      normals: [],
-	      colors: [],
-
-	      _insertFace: function (face, pos, size, color) {
-	        const indexCount = this.vertices.length / 3;
-
-	        face.vertices.forEach(function(vertex) {
-	          this.vertices.push(
-	            pos[0] + vertex[0] * size,
-	            pos[1] + vertex[1] * size,
-	            pos[2] + vertex[2] * size
-	          );
-	        });
-
-	        const colorArr = [color.r, color.g, color.b];
-
-	        this.colors.push(...colorArr, ...colorArr, ...colorArr, ...colorArr);
-	        this.normals.push(...face.normal, ...face.normal, ...face.normal, ...face.normal);
-
-	        this.indices.push(
-	          indexCount, indexCount + 1, indexCount + 2,
-	          indexCount + 2, indexCount + 1, indexCount + 3
-	        );
-	      },
-
-	      _checkNeighborsTouchingFace: function (face, neighborNode, voxelRenderMode) {
-	        // Finds if there's not a node at a given position, aka a 'hole'
-	        let stack = new Array();
-	        stack.push(neighborNode);
-	        while (stack.length !== 0) {
-	          const node = stack.pop();
-	          if (node.hasChildren()) {
-	            face.childIndex.forEach(function(childIndex) {
-	              if (node.hasChildAt(childIndex)) {
-	                const child = node.getChildAt(childIndex);
-
-	                // filter occupancy
-	                const isOccupied = this._checkOccupied(node);
-	                const isNeedsToRender = (isOccupied && voxelRenderMode === ROS3D.OcTreeVoxelRenderMode.OCCUPIED) || (!isOccupied && voxelRenderMode === OcTreeVoxelRenderMode.FREE);
-
-	                if (isNeedsToRender) { stack.push(child); }
-	              }
-	              else {
-	                return true;
-	              }
-	            });
-	          }
-	        }
-	        return false;
-	      }
-
-	    };
-
-	    this._traverseLeaves((node, key, depth) => {
-	      const pos = this._computeCoordFromKey(key);
-	      const size = this.nodeSizeTable[depth];
-	      const diff = this._treeDepth - depth;
-
-	      const isOccupied = this._checkOccupied(node);
-
-	      // By default it will show ALL
-	      // Hide free voxels if set
-	      if (!isOccupied && this.voxelRenderMode === OcTreeVoxelRenderMode.OCCUPIED) { return; }
-
-	      // Hide occuped voxels if set.
-	      if (isOccupied && this.voxelRenderMode === OcTreeVoxelRenderMode.FREE) { return; }
-
-	      this._FACES.forEach(function(face) {
-	        // Add geometry where there is no neighbor voxel
-	        const neighborKey = [
-	          key[0] + face.normal[0] * diff * diff,
-	          key[1] + face.normal[1] * diff * diff,
-	          key[2] + face.normal[2] * diff * diff,
-	        ];
-	        const neighborNode = this.searchAtDepth(neighborKey);
-	        if (neighborNode === null) {
-	          // 1. Simply add geometry where there is no neighbors
-	          geometry._insertFace(face, pos, size, this._obtainColor(node));
-	        } else if (depth < this._treeDepth) {
-	          // 2. Special case, when a node (voxel) is not on the lowest level
-	          // of the tree, but also need to add a geometry, because might
-	          // not be "fully covered" by neighboring voxels on the lowest level
-
-	          if (geometry._checkNeighborsTouchingFace(face, neighborNode, this.voxelRenderMode)) ;
-	        }
-
-	      });
-
-	    });
-
-	    // return geometry;
-	    return {
-	      vertices: geometry.vertices,
-	      normals: geometry.normals,
-	      colors: geometry.colors,
-	      indices: geometry.indices
-	    };
-
-	  };
-	}
-
-	/**
-	 * @fileOverview
-	 * @author Peter Sari - sari@photoneo.com
-	 */
-
-	class OcTree extends OcTreeBase {
-
-	  /**
-	   * Specilaization of BaseOcTree
-	   *
-	   * @constructor
-	   * @param options - object with following keys:
-	   *    * inherited from BaseOctree
-	   *    * occupancyThreshold (optional) - threshold value that separates occupied and free voxels from each other. (Default: 0)
-	   *    * colorMode (optional) - Coloring mode @see ROS3D.OcTreeColorMode.
-	   *    * palette (optional) - Palette used for false-coloring (default: predefined palette)
-	   *    * paletteSclae (optional) - Scale of palette to represent a wider range of values (default: 1.)
-	   */
-	  
-	  constructor(options) {
-	    super(options);
-
-	    this._defaultOccupiedValue = 1.;
-	    this._defaultFreeValue = -1.;
-
-	    this.occupancyThreshold = (typeof options.occupancyThreshold !== 'undefined') ? options.occupancyThreshold : 0.0000001;
-
-	    this.useFlatColoring = (typeof options.colorMode !== 'undefined') && options.colorMode === OcTreeColorMode.SOLID;
-
-	    this.palette = (typeof options.palette !== 'undefined') ? options.palette.map(color => new THREE.Color(color)) :
-	      [
-	        { r: 0, g: 0, b: 128, }, // dark blue (low)
-	        { r: 0, g: 255, b: 0, }, // green
-	        { r: 255, g: 255, b: 0, }, // yellow (mid)
-	        { r: 255, g: 128, b: 0, }, // orange
-	        { r: 255, g: 0, b: 0, } // red (high)
-	      ];
-
-	    this.paletteScale = (typeof options.paletteScale !== 'undefined') ? options.paletteScale : 1.;
-	  };
-
-
-	  _readNodeData(dataStream, node) {
-	    node.value = dataStream.readFloat32();
-	  };
-
-	  _obtainColor(node) {
-	    if (this.useFlatColoring) {
-	      return this.color;
-	    }
-
-	    // Use a simple sigmoid curve to fit values from -inf..inf into 0..1 range
-	    const value = 1. / (1. + Math.exp(-node.value * this.paletteScale)) * this.palette.length; // Normalize
-
-	    const intVal = Math.trunc(value);
-	    const fracVal = value - intVal;
-
-	    if (intVal < 0) { return this.palette[0]; }
-	    if (intVal >= this.palette.length - 1) { return this.palette[this.palette.length - 1]; }
-
-	    // Simple lerp
-	    return {
-	      r: fracVal * this.palette[intVal].r + (1. - fracVal) * this.palette[intVal + 1].r,
-	      g: fracVal * this.palette[intVal].g + (1. - fracVal) * this.palette[intVal + 1].g,
-	      b: fracVal * this.palette[intVal].b + (1. - fracVal) * this.palette[intVal + 1].b,
-	    };
-
-	  };
-
-	  _checkOccupied(node) {
-	    return node.value >= this.occupancyThreshold;
-	  };
-	}
-
-	class ColorOcTree extends OcTree {
-
-	  /**
-	   * @fileOverview
-	   * @author Peter Sari - sari@photoneo.com
-	   */
-	  
-	  constructor(options) {
-	    super(options);
-	    this.useOwnColor = (typeof options.palette !== 'undefined') && options.colorMode === OcTreeColorMode.COLOR;
-	  };
-
-
-	  _readNodeData(dataStream, node) {
-	    node.value = dataStream.readFloat32(); // occupancy
-	    node.color = {
-	      r: dataStream.readUint8(), // red
-	      g: dataStream.readUint8(), // green
-	      b: dataStream.readUint8(), // blue
-	    };
-
-	  };
-
-	  _obtainColor(node) {
-	    if (!this.useOwnColor) { return OcTree.prototype._obtainColor.call(this, node); }
-	    return node.color;
-	  };
-	}
-
-	/**
-	 * @fileOverview
-	 * @author Peter Sari - sari@photoneo.com
-	 */
-
-	class OcTreeClient extends EventEmitter2 {
-
-	  /**
-	   * An OcTree client that listens to a given OcTree topic.
-	   *
-	   * Emits the following events:
-	   *
-	   * 'change' - there was an update or change in the marker
-	   *
-	   * @constructor
-	   * @param options - object with following keys:
-	   *
-	   *    * ros - the ROSLIB.Ros connection handle
-	   *    * topic (optional) - the map topic to listen to
-	   *    * continuous (optional) - if the map should be continuously loaded (e.g., for SLAM)
-	   *    * tfClient (optional) - the TF client handle to use for a scene node
-	   *    * compression (optional) - message compression (default: 'cbor')
-	   *    * rootObject (optional) - the root object to add this marker to
-	   *    * offsetPose (optional) - offset pose of the mao visualization, e.g. for z-offset (ROSLIB.Pose type)
-	   *    * colorMode (optional)) - colorization mode for each voxels @see RORS3D.OcTreeColorMode (default 'color')
-	   *    * color (optional) - color of the visualized map (if solid coloring option was set). Can be any value accepted by THREE.Color
-	   *    * opacity (optional) - opacity of the visualized grid (0.0 == fully transparent, 1.0 == opaque)
-	   *    * palette (optional) - list of RGB colors to be used as palette (THREE.Color)
-	   *    * paletteScale (optional) - scale favtor of palette to cover wider range of values. (default: 1)
-	   *    * voxelRenderMode (optional)- toggle between rendering modes @see ROS3D.OcTreeVoxelRenderMode. (default `occupid`)
-	   *
-	   */
-	  
-	  constructor(options) {
-	    super();
-	    options = options || {};
-	    this.ros = options.ros;
-	    this.topicName = options.topic || '/octomap';
-	    this.compression = options.compression || 'cbor';
-	    this.continuous = options.continuous;
-	    this.tfClient = options.tfClient;
-	    this.rootObject = options.rootObject || new THREE.Object3D();
-	    this.offsetPose = options.offsetPose || new ROSLIB__namespace.Pose();
-
-	    // Options passed to converter
-	    this.options = {};
-
-	    // Append only when it was set, otherwise defaults are provided by the underlying layer
-	    if (typeof options.color !== 'undefined') { this.options['color'] = options.color; }
-	    if (typeof options.opacity !== 'undefined') { this.options['opacity'] = options.opacity; }
-	    if (typeof options.colorMode !== 'undefined') { this.options['colorMode'] = options.colorMode; }
-	    if (typeof options.palette !== 'undefined') { this.options['palette'] = options.palette; }
-	    if (typeof options.paletteScale !== 'undefined') { this.options['paletteScale'] = options.palette; }
-	    if (typeof options.voxelRenderMode !== 'undefined') { this.options['voxelRenderMode'] = options.voxelRenderMode; }
-
-	    // current grid that is displayed
-	    this.currentMap = null;
-
-	    // subscribe to the topic
-	    this.rosTopic = undefined;
-	    this.subscribe();
-	  };
-
-
-	  unsubscribe() {
-	    if (this.rosTopic) {
-	      this.rosTopic.unsubscribe(this.processMessage);
-	    }
-	  };
-
-	  subscribe() {
-	    this.unsubscribe();
-	    // subscribe to the topic
-	    this.rosTopic = new ROSLIB__namespace.Topic({
-	      ros: this.ros,
-	      name: this.topicName,
-	      messageType: 'octomap_msgs/Octomap',
-	      queue_length: 1,
-	      compression: this.compression
-	    });
-	    this.rosTopic.subscribe(this.processMessage.bind(this));
-	  };
-
-	  processMessage(message) {
-	    // check for an old map
-	    if (this.currentMap) {
-	      if (this.currentMap.tfClient) {
-	        this.currentMap.unsubscribeTf();
-	      }
-	    }
-
-	    this._processMessagePrivate(message);
-
-	    if (!this.continuous) {
-	      this.rosTopic.unsubscribe(this.processMessage);
-	    }
-
-	  };
-
-
-	  _loadOcTree(message) {
-
-	    return new Promise(
-	      function (resolve, reject) {
-
-	        // 1. Create the corresponding octree object from message
-	        const options = Object.assign({
-	          resolution: message.resolution,
-	        }, this.options);
-
-	        let newOcTree = null;
-	        {
-	          if (message.binary) {
-	            newOcTree = new OcTreeBase(
-	              options
-	            );
-	            newOcTree.readBinary(message.data);
-	          } else {
-
-	            const ctorTable = {
-	              'OcTree': OcTree,
-	              'ColorOcTree': ColorOcTree,
-	            };
-
-	            if (message.id in ctorTable) {
-	              console.log(message.id, ctorTable);
-
-	              newOcTree = new ctorTable[message.id](
-	                options
-	              );
-
-	              newOcTree.read(message.data);
-	            }
-
-	          }
-	        }
-
-
-	        {
-	          newOcTree.buildGeometry();
-	        }
-
-	        resolve(newOcTree);
-	      }.bind(this));
-
-	  };
-
-	  _processMessagePrivate(message) {
-	    let promise = this._loadOcTree(message);
-
-	    promise.then(
-	      // 3. Replace geometry
-	      function (newOcTree) {
-	        // check if we care about the scene
-	        const oldNode = this.sceneNode;
-	        if (this.tfClient) {
-	          this.currentMap = newOcTree;
-	          this.sceneNode = new SceneNode({
-	            frameID: message.header.frame_id,
-	            tfClient: this.tfClient,
-	            object: newOcTree.object,
-	            pose: this.offsetPose
-	          });
-	        } else {
-	          this.sceneNode = newOcTree.object;
-	          this.currentMap = newOcTree;
-	        }
-
-	        this.rootObject.remove(oldNode);
-	        this.rootObject.add(this.sceneNode);
-
-	        this.emit('change');
-	      }.bind(this)
-	    );
-	  };
-	}
-
-	/**
-	 * @fileOverview
 	 * @author David V. Lu!! - davidvlu@gmail.com
 	 */
 
@@ -57066,7 +56128,7 @@ var ROS3D = (function (exports, ROSLIB) {
 
 	  unsubscribe(){
 	    if(this.rosTopic){
-	      this.rosTopic.unsubscribe(this.processMessage);
+	      this.rosTopic.unsubscribe();
 	    }
 	  };
 
@@ -57111,7 +56173,6 @@ var ROS3D = (function (exports, ROSLIB) {
 	}
 
 	/**
-	 * @fileOverview
 	 * @author David V. Lu!! - davidvlu@gmail.com
 	 */
 
@@ -57148,7 +56209,7 @@ var ROS3D = (function (exports, ROSLIB) {
 
 	  unsubscribe(){
 	    if(this.rosTopic){
-	      this.rosTopic.unsubscribe(this.processMessage);
+	      this.rosTopic.unsubscribe();
 	    }
 	  };
 
@@ -57193,7 +56254,6 @@ var ROS3D = (function (exports, ROSLIB) {
 	}
 
 	/**
-	 * @fileOverview
 	 * @author David V. Lu!! - davidvlu@gmail.com
 	 */
 
@@ -57231,7 +56291,7 @@ var ROS3D = (function (exports, ROSLIB) {
 
 	  unsubscribe(){
 	    if(this.rosTopic){
-	      this.rosTopic.unsubscribe(this.processMessage);
+	      this.rosTopic.unsubscribe();
 	    }
 	  };
 
@@ -57270,7 +56330,6 @@ var ROS3D = (function (exports, ROSLIB) {
 	}
 
 	/**
-	 * @fileOverview
 	 * @author David V. Lu!! - davidvlu@gmail.com
 	 */
 
@@ -57307,7 +56366,7 @@ var ROS3D = (function (exports, ROSLIB) {
 
 	  unsubscribe(){
 	    if(this.rosTopic){
-	      this.rosTopic.unsubscribe(this.processMessage);
+	      this.rosTopic.unsubscribe();
 	    }
 	  };
 
@@ -57355,7 +56414,6 @@ var ROS3D = (function (exports, ROSLIB) {
 	}
 
 	/**
-	 * @fileOverview
 	 * @author David V. Lu!! - davidvlu@gmail.com
 	 */
 
@@ -57395,7 +56453,7 @@ var ROS3D = (function (exports, ROSLIB) {
 
 	  unsubscribe(){
 	    if(this.rosTopic){
-	      this.rosTopic.unsubscribe(this.processMessage);
+	      this.rosTopic.unsubscribe();
 	    }
 	  };
 
@@ -57439,7 +56497,6 @@ var ROS3D = (function (exports, ROSLIB) {
 	}
 
 	/**
-	 * @fileOverview
 	 * @author David V. Lu!! - davidvlu@gmail.com
 	 */
 
@@ -57477,7 +56534,7 @@ var ROS3D = (function (exports, ROSLIB) {
 
 	  unsubscribe(){
 	    if(this.rosTopic){
-	      this.rosTopic.unsubscribe(this.processMessage);
+	      this.rosTopic.unsubscribe();
 	    }
 	  };
 
@@ -57543,7 +56600,6 @@ var ROS3D = (function (exports, ROSLIB) {
 	}
 
 	/**
-	 * @fileOverview
 	 * @author David V. Lu!! - davidvlu@gmail.com
 	 */
 
@@ -57579,7 +56635,7 @@ var ROS3D = (function (exports, ROSLIB) {
 
 	  unsubscribe(){
 	    if(this.rosTopic){
-	      this.rosTopic.unsubscribe(this.processMessage);
+	      this.rosTopic.unsubscribe();
 	    }
 	  };
 
@@ -57623,7 +56679,6 @@ var ROS3D = (function (exports, ROSLIB) {
 	}
 
 	/**
-	 * @fileOverview
 	 * @author David V. Lu!! - davidvlu@gmail.com
 	 * @author Mathieu Bredif - mathieu.bredif@ign.fr
 	 */
@@ -57744,7 +56799,6 @@ var ROS3D = (function (exports, ROSLIB) {
 	}
 
 	/**
-	 * @fileOverview
 	 * @author David V. Lu!! - davidvlu@gmail.com
 	 */
 
@@ -57781,7 +56835,7 @@ var ROS3D = (function (exports, ROSLIB) {
 
 	  unsubscribe(){
 	    if(this.rosTopic){
-	      this.rosTopic.unsubscribe(this.processMessage);
+	      this.rosTopic.unsubscribe();
 	    }
 	  };
 
@@ -57819,7 +56873,6 @@ var ROS3D = (function (exports, ROSLIB) {
 	}
 
 	/**
-	 * @fileOverview
 	 * @author Mathieu Bredif - mathieu.bredif@ign.fr
 	 */
 
@@ -57874,7 +56927,7 @@ var ROS3D = (function (exports, ROSLIB) {
 
 	  unsubscribe(){
 	    if(this.rosTopic){
-	      this.rosTopic.unsubscribe(this.processMessage);
+	      this.rosTopic.unsubscribe();
 	    }
 	  };
 
@@ -57918,7 +56971,6 @@ var ROS3D = (function (exports, ROSLIB) {
 	}
 
 	/**
-	 * @fileOverview
 	 * @author David V. Lu!! - davidvlu@gmail.com
 	 * @author Mathieu Bredif - mathieu.bredif@ign.fr
 	 */
@@ -57996,7 +57048,7 @@ var ROS3D = (function (exports, ROSLIB) {
 
 	  unsubscribe(){
 	    if(this.rosTopic){
-	      this.rosTopic.unsubscribe(this.processMessage);
+	      this.rosTopic.unsubscribe();
 	    }
 	  };
 
@@ -58058,7 +57110,6 @@ var ROS3D = (function (exports, ROSLIB) {
 	}
 
 	/**
-	 * @fileOverview
 	 * @author Jihoon Lee - jihoon.lee@kakaobrain.com
 	 */
 	class TFAxes extends THREE.Object3D {
@@ -58111,7 +57162,6 @@ var ROS3D = (function (exports, ROSLIB) {
 	}
 
 	/**
-	 * @fileOverview
 	 * @author Jihoon Lee - jihoonlee.in@gmail.com
 	 * @author Russell Toris - rctoris@wpi.edu
 	 */
@@ -58237,7 +57287,7 @@ var ROS3D = (function (exports, ROSLIB) {
 	  };
 
 
-	  unsubscribeTf() {
+	  unsubscribeTf () {
 	    this.children.forEach(function(n) {
 	      if (typeof n.unsubscribeTf === 'function') { n.unsubscribeTf(); }
 	    });
@@ -58245,7 +57295,6 @@ var ROS3D = (function (exports, ROSLIB) {
 	}
 
 	/**
-	 * @fileOverview
 	 * @author Jihoon Lee - jihoonlee.in@gmail.com
 	 * @author Russell Toris - rctoris@wpi.edu
 	 */
@@ -58307,7 +57356,6 @@ var ROS3D = (function (exports, ROSLIB) {
 	}
 
 	/**
-	 * @fileOverview
 	 * @author David Gossow - dgossow@willowgarage.com
 	 */
 
@@ -58337,12 +57385,8 @@ var ROS3D = (function (exports, ROSLIB) {
 	   * @param event - the event that contains the target of the mouseover
 	   */
 	  onMouseOver(event) {
-          console.log("onmouseover")
-          console.log(event)
-          console.log(event.currentTarget)
 	    this.hoverObjs[event.currentTarget.uuid] = event.currentTarget;
 	  };
-
 
 	  /**
 	   * Remove the current target of the mouseover from the hover list.
@@ -58405,7 +57449,7 @@ var ROS3D = (function (exports, ROSLIB) {
 	   *
 	   * @param scene - the object to traverse
 	   */
-	  makeEverythingInvisible(scene) {
+	  makeEverythingInvisible (scene) {
 	    scene.traverse(function(currentObject) {
 	      if ( currentObject instanceof THREE.Mesh || currentObject instanceof THREE.Line
 	           || currentObject instanceof THREE.Sprite ) {
@@ -58422,7 +57466,7 @@ var ROS3D = (function (exports, ROSLIB) {
 	   *
 	   * @param scene - the object to traverse
 	   */
-	  makeHighlightedVisible(scene) {
+	  makeHighlightedVisible (scene) {
 	    var makeVisible = function(currentObject) {
 	        if ( currentObject instanceof THREE.Mesh || currentObject instanceof THREE.Line
 	             || currentObject instanceof THREE.Sprite ) {
@@ -58444,7 +57488,7 @@ var ROS3D = (function (exports, ROSLIB) {
 	   *
 	   * @param scene - the object to traverse
 	   */
-	  restoreVisibility(scene) {
+	  restoreVisibility (scene) {
 	    scene.traverse(function(currentObject) {
 	      if (currentObject.hasOwnProperty('previousVisibility')) {
 	        currentObject.visible = currentObject.previousVisibility;
@@ -58454,7 +57498,6 @@ var ROS3D = (function (exports, ROSLIB) {
 	}
 
 	/**
-	 * @fileOverview
 	 * @author David Gossow - dgossow@willowgarage.com
 	 */
 
@@ -58679,7 +57722,6 @@ var ROS3D = (function (exports, ROSLIB) {
 	}
 
 	/**
-	 * @fileOverview
 	 * @author David Gossow - dgossow@willowgarage.com
 	 * @author Xueqiao Xu - xueqiaoxu@gmail.com
 	 * @author Mr.doob - http://mrdoob.com
@@ -58772,8 +57814,6 @@ var ROS3D = (function (exports, ROSLIB) {
 	     * @param event3D - the 3D event to handle
 	     */
 	    function onMouseDown(event3D) {
-            console.log("this");
-            console.log(this);
 	      var event = event3D.domEvent;
 	      event.preventDefault();
 
@@ -59200,7 +58240,6 @@ var ROS3D = (function (exports, ROSLIB) {
 	}
 
 	/**
-	 * @fileOverview
 	 * @author David Gossow - dgossow@willowgarage.com
 	 * @author Russell Toris - rctoris@wpi.edu
 	 * @author Jihoon Lee - jihoonlee.in@gmail.com
@@ -59265,7 +58304,20 @@ var ROS3D = (function (exports, ROSLIB) {
 	    this.scene = new THREE.Scene();
 
 	    // create the global camera
-	    this.camera = new THREE.PerspectiveCamera(40, width / height, near, far);
+	    //////// moje start
+	    var ortho_width = 800;
+       var ortho_height = 200;
+       var ortho_aspect_ratio = ortho_width / ortho_height;
+       var ortho_view_size = 100;
+       var orthozoom = 100;
+       var orthCam = new THREE.OrthographicCamera( (-ortho_aspect_ratio*ortho_view_size)/orthozoom,
+                                                   (ortho_aspect_ratio*ortho_view_size)/orthozoom,
+                                                   ortho_view_size/orthozoom,
+                                                   -ortho_view_size/orthozoom ,
+                                                   1, 1000 );
+	    this.camera = orthCam;
+        //////////////// moje end
+	    // this.camera = new THREE.PerspectiveCamera(40, width / height, near, far);
 	    this.camera.position.x = cameraPosition.x;
 	    this.camera.position.y = cameraPosition.y;
 	    this.camera.position.z = cameraPosition.z;
@@ -59385,7 +58437,6 @@ var ROS3D = (function (exports, ROSLIB) {
 	exports.Arrow = Arrow;
 	exports.Arrow2 = Arrow2;
 	exports.Axes = Axes;
-	exports.ColorOcTree = ColorOcTree;
 	exports.DepthCloud = DepthCloud;
 	exports.Grid = Grid;
 	exports.Highlighter = Highlighter;
@@ -59433,8 +58484,6 @@ var ROS3D = (function (exports, ROSLIB) {
 	exports.MeshResource = MeshResource;
 	exports.MouseHandler = MouseHandler;
 	exports.NavSatFix = NavSatFix;
-	exports.OcTree = OcTree;
-	exports.OcTreeClient = OcTreeClient;
 	exports.OccupancyGrid = OccupancyGrid;
 	exports.OccupancyGridClient = OccupancyGridClient;
 	exports.Odometry = Odometry;
@@ -59462,4 +58511,4 @@ var ROS3D = (function (exports, ROSLIB) {
 
 	return exports;
 
-})({}, ROSLIB);
+}({}, ROSLIB));

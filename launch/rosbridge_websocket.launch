@@ -13,7 +13,7 @@
   <arg name="unregister_timeout" default="10" />
   <arg name="websocket_external_port" default="None" />
 
-  <arg name="use_compression" default="false" />
+  <arg name="use_compression" default="true" />
 
   <arg name="authenticate" default="false" />
 

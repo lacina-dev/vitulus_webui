@@ -103,6 +103,16 @@ if __name__ == '__main__':
         def mob_diagnostics():
             return render_template('mob/diagnostics.html', ros_ip=host)
 
+
+        @app.route("/mob/map_view")
+        def mob_view():
+            return render_template('mob/map_view.html', ros_ip=host)
+
+
+        @app.route("/orthotest")
+        def orthotest():
+            return render_template('orthotest.html', ros_ip=host)
+
         server = ServerThread(app, host, port)
         server.start()
         rospy.loginfo("Initialising webnode node...")

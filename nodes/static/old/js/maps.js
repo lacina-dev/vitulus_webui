@@ -850,7 +850,6 @@ window.onload = function() {
             } else {
                 span_map_indoor.textContent = "outdoor";
             }
-
         });
 
 
@@ -1341,7 +1340,7 @@ window.onload = function() {
         tfClient: tfClientMap,
         rootObject: viewer.scene,
         topic: '/ground_cloud',
-        material: { size: 0.05, color: 0x71ff02 }
+        material: { size: 2, color: 0x71ff02 }
     });
 
 
@@ -1706,7 +1705,6 @@ window.onload = function() {
         name : '/move_base_flex/exe_path/cancel',
         messageType : 'actionlib_msgs/GoalID'
     });
-
     cancelGoalTopic.advertise();
 
     cancel_goal_btn.onclick = function() {

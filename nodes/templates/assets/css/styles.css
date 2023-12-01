@@ -145,3 +145,20 @@
   }
 }
 
+.no-event {
+  pointer-events: none;
+}
+
+.all-events {
+  pointer-events: auto;
+}
+
+.status-panels {
+  /*padding: 1px;*/
+  /*padding-left: 3px;*/
+  /*padding-right: 4px;*/
+  background: var(--bs-gray-900);
+  border-radius: 5px;
+  border: 1px solid var(--bs-primary);
+}
+
