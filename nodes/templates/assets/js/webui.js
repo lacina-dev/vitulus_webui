@@ -5,7 +5,7 @@ btns.forEach(btn => {
        setTimeout(function () {        
            btn.blur();
            btn.classList.remove("active");
-        }, 100);
+        }, 700);
    });
 });
 

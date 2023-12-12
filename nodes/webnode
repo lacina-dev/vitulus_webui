@@ -1,19 +1,15 @@
 #!/usr/bin/env python3
+
 import rospy
-import tf
-from tf.transformations import euler_from_quaternion
-from nav_msgs.msg import Odometry
-from flask import Flask, render_template, request, Blueprint, send_from_directory
-import os
+from flask import Flask, render_template, send_from_directory
 import threading
 import sys
 import signal
 from werkzeug.serving import make_server
 
 port = 7777
-# host = os.environ["ROS_IP"]
-# host = "10.254.254.254"
 host = "0.0.0.0"
+
 
 class ServerThread(threading.Thread):
 
@@ -40,32 +36,18 @@ if __name__ == '__main__':
     signal.signal(signal.SIGINT, signal_handler)
 
     try:
+    # if True:
 
         rospy.init_node('webnode', anonymous=True)
         # app = Flask(__name__, static_url_path='/assets')
         app = Flask(__name__,
                     static_url_path='/assets',
-                    static_folder='templates/assets',
-                    template_folder='templates')
-
-        # bp = Blueprint('pwa', __name__, url_prefix='')
-
+                    static_folder='/home/vitulus/catkin_ws/src/vitulus/vitulus_webui/nodes/templates/assets',
+                    template_folder='/home/vitulus/catkin_ws/src/vitulus/vitulus_webui/nodes/templates')
 
         @app.route('/manifest.json')
         def manifest():
-            return send_from_directory('templates', 'manifest.json')
-
-        @app.route("/old")
-        def index():
-            return render_template('index.html', ros_ip=host)
-
-        @app.route("/navi")
-        def navi():
-            return render_template('nav.html', ros_ip=host)
-
-        @app.route("/dashboard")
-        def dashboard():
-            return render_template('dashboard.html', ros_ip=host)
+            return send_from_directory('/home/vitulus/catkin_ws/src/vitulus/vitulus_webui/nodes/templates', 'manifest.json')
 
         @app.route("/map_edit")
         def map_edit():
@@ -73,45 +55,11 @@ if __name__ == '__main__':
 
         @app.route("/")
         def nav():
-            return render_template('maps.html', ros_ip=host)
+            return render_template('map_view.html', ros_ip=host)
 
-        @app.route("/mobjoy")
-        def mobjoy():
-            return render_template('mobJoyMow.html', ros_ip=host)
-
-        @app.route("/mob/imu_calibration")
+        @app.route("/imu_calibration")
         def mob_imu_calibration():
-            return render_template('mob/imu_calibration.html', ros_ip=host)
-
-        @app.route("/mob/dashboard")
-        def mob_dashboard():
-            return render_template('mob/dashboard.html', ros_ip=host)
-
-        @app.route("/mob/power_module")
-        def mob_power_module():
-            return render_template('mob/power_module.html', ros_ip=host)
-
-        @app.route("/mob/motors")
-        def mob_motors():
-            return render_template('mob/motors.html', ros_ip=host)
-
-        @app.route("/mob/mower")
-        def mob_mower():
-            return render_template('mob/mower.html', ros_ip=host)
-
-        @app.route("/mob/diagnostics")
-        def mob_diagnostics():
-            return render_template('mob/diagnostics.html', ros_ip=host)
-
-
-        @app.route("/mob/map_view")
-        def mob_view():
-            return render_template('mob/map_view.html', ros_ip=host)
-
-
-        @app.route("/orthotest")
-        def orthotest():
-            return render_template('orthotest.html', ros_ip=host)
+            return render_template('imu_calibration.html', ros_ip=host)
 
         server = ServerThread(app, host, port)
         server.start()
@@ -121,5 +69,6 @@ if __name__ == '__main__':
 
     except rospy.ROSInterruptException:
         print("Webnode doesn't start!!!!!")
+
 
 

@@ -68,7 +68,7 @@ install(DIRECTORY launch
 
 
 catkin_install_python(PROGRAMS
-  #nodes/ups_manager
+  nodes/webnode
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 

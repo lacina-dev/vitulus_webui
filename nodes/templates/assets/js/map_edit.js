@@ -5,7 +5,9 @@ window.onload = function() {
     var ros;
     ros = new ROSLIB.Ros({url: "ws://" + location.hostname + ":9090"});
 
-     var listenerMapMeta = new ROSLIB.Topic({
+    let active_map_file_name = "";
+
+    var listenerMapMeta = new ROSLIB.Topic({
         ros : ros,
         name : '/web_plan/map_metadata',
         messageType : 'nav_msgs/MapMetaData'
@@ -15,6 +17,7 @@ window.onload = function() {
         console.log(message);
     });
 
+
     var viewer;
     var gridClient;
     var wait_for_map = true;
@@ -23,19 +26,20 @@ window.onload = function() {
     scale_plus_btn = document.getElementById("scale_plus");
     scale_minus_btn = document.getElementById("scale_minus");
     div_map = document.getElementById("map");
-    console.log(div_map);
-    width = (div_map.clientWidth-4);
-    height = (div_map.clientHeight-8);
+    div_map_frame = document.getElementById("map_frame");
+    div_map_width = div_map.offsetWidth;
+    div_map_height = div_map.offsetHeight;
     var initiate = true;
-    console.log(width);
-    console.log(height);
+    console.log(div_map_width);
+    console.log(div_map_height);
 
 
     // Create the main viewer.  ////////////////////////////////////////////////////////////////////////////////////////
     viewer = new ROS2D.Viewer({
       divID : 'map',
-      width : width,
-      height : height
+      width : div_map_width,
+      height : div_map_height,
+      background: '#232f37'
     });
 
     // Add zoom to the viewer.
@@ -48,14 +52,12 @@ window.onload = function() {
     });
 
 
-
-
-    // Grid client.  //////////////////////////////////////////////////////////////////////////////////////////
+    // Grid client.  ////////////////////////////////////////////////////////////////////////////////
+    // div_map_height = div_map.innerHeight;//////////
     gridClient = new ROS2D.OccupancyGridClient({
       ros : ros,
       topic: '/web_plan/map_show',
       rootObject : viewer.scene,
-      // Use this property in case of continuous updates
       continuous: true
     });
 
@@ -68,23 +70,37 @@ window.onload = function() {
     });
     gridClient.rootObject.addChild(coveragePath);
 
+
     // Grid client on change  //////////////////////////////////////////////////////////////////////////////////////////
     gridClient.on('change', function() {
         if (initiate){
-            if (gridClient.currentGrid.width > gridClient.currentGrid.height){
-               viewer.scaleToDimensions(gridClient.currentGrid.width, gridClient.currentGrid.width);
-            }else{
-               viewer.scaleToDimensions(gridClient.currentGrid.height, gridClient.currentGrid.height);
-            }
-            viewer.shift(gridClient.currentGrid.pose.position.x, gridClient.currentGrid.pose.position.y);
+            resize();
             initiate = false;
         }
-
-      // registerMouseHandlers();
-      // console.log(viewer);
-      // console.log(gridClient);
-      // console.log(viewer.scene.children[1]);
     });
+
+    function resize() {
+        console.log("RESIZE");
+        div_map_width = div_map.offsetWidth;
+        div_map_height = div_map.offsetHeight;
+        viewer.width = div_map_width;
+        viewer.height = div_map_height;
+        viewer.scene.canvas.width = div_map_width;
+        viewer.scene.canvas.height = div_map_height;
+        if (initiate) {
+            panView.startPan(viewer.scene.x, viewer.scene.y);
+            panView.pan(div_map_width/2, div_map_height/2);
+            zoomView.startZoom(div_map_width/2, div_map_height/2);
+            zoomView.zoom(40);
+            initiate = false;
+        }
+    }
+
+
+    window.addEventListener('resize', function(event){
+        resize();
+    });
+
 
     // Polygon setup
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -92,7 +108,7 @@ window.onload = function() {
     var polygon_enabled = false
     var clickedPolygon = false;
     var selectedPointIndex = null;
-    // Callback functions when there is mouse interaction with the polygon  ////////////////////////////////////////////
+    // Callback functions when there is mouse interaction with the polygon
     var pointCallBack = function(type, event, index) {
         if (polygon_enabled == false){
           if (type === 'mousedown') {
@@ -116,7 +132,7 @@ window.onload = function() {
       clickedPolygon = true;
     }
 
-    // Create the polygon  /////////////////////////////////////////////////////////////////////////////////////////////
+    // Create the polygon
     var polygon = new ROS2D.PolygonMarker({
       lineColor : createjs.Graphics.getRGB(100, 100, 255, 1),
       pointSize : 0.2,
@@ -129,7 +145,7 @@ window.onload = function() {
     viewer.scene.addChild(polygon);
     viewer.scene.removeChild(polygon);
 
-    // Event listeners for mouse interaction with the stage  ///////////////////////////////////////////////////////////
+    // Event listeners for mouse interaction with the stage
     viewer.scene.mouseMoveOutside = false; // doesn't seem to work
 
     function registerMouseHandlers() {
@@ -172,6 +188,8 @@ window.onload = function() {
 					}
 					else if (panKey === true) {
 						panView.pan(event.stageX, event.stageY);
+                        console.log("viewer.scene.children[0].x: " + viewer.scene.children[0].x + " viewer.scene.children[0].y: " + viewer.scene.children[0].y);
+                        console.log("wiever.scene.x: " + viewer.scene.x + " viewer.scene.y: " + viewer.scene.y);
 					}
 				}
           }
@@ -194,10 +212,8 @@ window.onload = function() {
           }
           else if (viewer.scene.mouseInBounds === true && clickedPolygon === false && zoomKey === false && panKey === false) {
             var pos = viewer.scene.globalToRos(event.stageX, event.stageY);
-            // console.log(pos);
             polygon.addPoint(pos);
             console.log("point added");
-            // console.log(polygon);
           } else {
               if (mouseDown === true) {
 					if (zoomKey === true) {
@@ -216,31 +232,28 @@ window.onload = function() {
     registerMouseHandlers();
 
 
-
     // Map tools ///////////////////////////////////////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    // Map edit log  ///////////////////////////////////////////////////////////////////////////////////////////////////
-    function planner_log() {
-        var div_log = document.getElementById("div_log")
-        var logTopic = new ROSLIB.Topic({
-            ros: ros,
-            name: '/web_plan/log',
-            messageType: 'std_msgs/String'
-        });
-        logTopic.subscribe(function (message) {
-            console.log("MapEdit log:" + message.data);
-            div_log.textContent = message.data;
-        });
+    // Map edit log
+    var div_log = document.getElementById("div_log")
+    var logTopic = new ROSLIB.Topic({
+        ros: ros,
+        name: '/web_plan/log',
+        messageType: 'std_msgs/String'
+    });
+    logTopic.subscribe(function (message) {
+        console.log("MapEdit log:" + message.data);
+        div_log.textContent = message.data;
+    });
 
-        input_obstacle_margin = document.getElementById("input_obstacle_margin");
-        input_fill_free = document.getElementById("input_fill_free");
-        input_fill_shape = document.getElementById("input_fill_shape");
-        btn_assemble_map = document.getElementById("btn_assemble_map");
-    }
-    planner_log();
+    input_obstacle_margin = document.getElementById("input_obstacle_margin");
+    input_fill_free = document.getElementById("input_fill_free");
+    input_fill_shape = document.getElementById("input_fill_shape");
+    btn_assemble_map = document.getElementById("btn_assemble_map");
 
-    // get map data  ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    // get map data
     function get_map_data() {
         var topic_map_data = new ROSLIB.Topic({
             ros: ros,
@@ -255,7 +268,7 @@ window.onload = function() {
     }
     get_map_data();
 
-    // assembly map  ///////////////////////////////////////////////////////////////////////////////////////////////////
+    // assembly map
     function assemble_map() {
         var topic_assemble_map = new ROSLIB.Topic({
             ros: ros,
@@ -278,6 +291,7 @@ window.onload = function() {
     };
     assemble_map();
 
+
     // Map show ////////////////////////////////////////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     function show_map() {
@@ -288,7 +302,7 @@ window.onload = function() {
         });
         topic_show_fill_map.advertise();
 
-        // show free fill  //////////////////////////////////////////////////////////////////////////////////////////////////
+        // show free fill
         btn_show_fill = document.getElementById("btn_show_fill");
         btn_show_fill.onclick = function () {
             var msg = new ROSLIB.Message({
@@ -296,7 +310,7 @@ window.onload = function() {
             });
             topic_show_fill_map.publish(msg);
         }
-        // show free poly  /////////////////////////////////////////////////////////////////////////////////////////////////
+        // show free poly
         btn_show_free_poly = document.getElementById("btn_show_free_poly");
         btn_show_free_poly.onclick = function () {
             var msg = new ROSLIB.Message({
@@ -304,7 +318,7 @@ window.onload = function() {
             });
             topic_show_fill_map.publish(msg);
         }
-        // show obstacle poly  /////////////////////////////////////////////////////////////////////////////////////////////
+        // show obstacle poly
         btn_show_obstacles_poly = document.getElementById("btn_show_obstacles_poly");
         btn_show_obstacles_poly.onclick = function () {
             var msg = new ROSLIB.Message({
@@ -312,15 +326,16 @@ window.onload = function() {
             });
             topic_show_fill_map.publish(msg);
         }
-        // show obstacle margin  ///////////////////////////////////////////////////////////////////////////////////////////
-        btn_show_obstacle_margin = document.getElementById("btn_show_obstacle_margin");
-        btn_show_obstacle_margin.onclick = function () {
-            var msg = new ROSLIB.Message({
-                data: "obstacle_margin",
-            });
-            topic_show_fill_map.publish(msg);
-        }
-        // show assembled_lite   ///////////////////////////////////////////////////////////////////////////////////////////////
+        // show obstacle margin
+        // btn_show_obstacle_margin = document.getElementById("btn_show_obstacle_margin");
+        // btn_show_obstacle_margin.onclick = function () {
+        //     var msg = new ROSLIB.Message({
+        //         data: "obstacle_margin",
+        //     });
+        //     topic_show_fill_map.publish(msg);
+        // }
+
+        // show assembled_lite
         btn_show_assembled_lite = document.getElementById("btn_show_assembled_lite");
         btn_show_assembled_lite.onclick = function () {
             var msg = new ROSLIB.Message({
@@ -328,7 +343,7 @@ window.onload = function() {
             });
             topic_show_fill_map.publish(msg);
         }
-        // // show coverage path  /////////////////////////////////////////////////////////////////////////////////////////////
+        // // show coverage path
         // btn_show_coverage_path = document.getElementById("btn_show_coverage_path");
         // btn_show_coverage_path.onclick = function() {
         //     var msg = new ROSLIB.Message({
@@ -336,7 +351,8 @@ window.onload = function() {
         //     });
         //     topic_show_fill_map.publish(msg);
         // }
-        // show original  //////////////////////////////////////////////////////////////////////////////////////////////////
+
+        // show original
         btn_show_original = document.getElementById("btn_show_original");
         btn_show_original.onclick = function () {
             var msg = new ROSLIB.Message({
@@ -344,7 +360,8 @@ window.onload = function() {
             });
             topic_show_fill_map.publish(msg);
         }
-        // show assembled  /////////////////////////////////////////////////////////////////////////////////////////////////
+
+        // show assembled
         btn_show_assembled = document.getElementById("btn_show_assembled");
         btn_show_assembled.onclick = function () {
             var msg = new ROSLIB.Message({
@@ -352,7 +369,8 @@ window.onload = function() {
             });
             topic_show_fill_map.publish(msg);
         }
-        // show zone map  /////////////////////////////////////////////////////////////////////////////////////////////////
+
+        // show zone map
         btn_show_zone_map = document.getElementById("btn_show_zone_map");
         btn_show_zone_map.onclick = function () {
             var msg = new ROSLIB.Message({
@@ -360,7 +378,8 @@ window.onload = function() {
             });
             topic_show_fill_map.publish(msg);
         }
-        // show zone_border_path map  /////////////////////////////////////////////////////////////////////////////////////////////////
+
+        // show zone_border_path map
         btn_show_zone_border_path = document.getElementById("btn_show_zone_border_path");
         btn_show_zone_border_path.onclick = function () {
             var msg = new ROSLIB.Message({
@@ -368,7 +387,8 @@ window.onload = function() {
             });
             topic_show_fill_map.publish(msg);
         }
-        // show zone_navi map  /////////////////////////////////////////////////////////////////////////////////////////////////
+
+        // show zone_navi map
         btn_show_zone_navi = document.getElementById("btn_show_zone_navi");
         btn_show_zone_navi.onclick = function () {
             var msg = new ROSLIB.Message({
@@ -379,6 +399,7 @@ window.onload = function() {
 
     }
     show_map();
+
 
     // Polygons  ///////////////////////////////////////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -411,7 +432,7 @@ window.onload = function() {
     //     }
     // };
 
-    // Polygon elements  ///////////////////////////////////////////////////////////////////////////////////////////////
+    // Polygon elements
     var input_poly_template_name = document.getElementById("input_poly_template_name");
     var input_poly_template_type = document.getElementById("input_poly_template_type");
     var div_poly_list = document.getElementById("div_poly_list");
@@ -423,13 +444,13 @@ window.onload = function() {
     var div_poly_template_style_attr = div_poly_template.getAttribute('style');
     div_poly_template.setAttribute('style', div_poly_template_style_attr + 'display:none !important');
 
-    // New map polygon  ////////////////////////////////////////////////////////////////////////////////////////////////
+    // New polygon
     btn_new_poly.onclick = function() {
         div_poly_template.setAttribute('style', div_poly_template_style_attr + 'display:flex');
         viewer.scene.addChild(polygon);
     }
 
-    // Cancel polygon  /////////////////////////////////////////////////////////////////////////////////////////////////
+    // Cancel polygon
     btn_poly_template_cancel.onclick = function() {
         div_poly_template.setAttribute('style', div_poly_template_style_attr + 'display:none !important');
         viewer.scene.removeChild(polygon);
@@ -439,7 +460,7 @@ window.onload = function() {
         polygon.fillShape.graphics._oldInstructions = [];
     }
 
-    // Save polygon ////////////////////////////////////////////////////////////////////////////////////////////////////
+    // Save polygon
     var topic_save_poly = new ROSLIB.Topic({
             ros : ros,
             name : '/web_plan/save_polygon',
@@ -488,7 +509,7 @@ window.onload = function() {
         }
     }
 
-    // Remove polygon from list by name  ///////////////////////////////////////////////////////////////////////////////
+    // Remove polygon from list by name
     var topic_remove_poly = new ROSLIB.Topic({
         ros : ros,
         name : '/web_plan/remove_polygon',
@@ -503,7 +524,7 @@ window.onload = function() {
         topic_remove_poly.publish(msg);
     }
 
-    // Edit polygon from list by name //////////////////////////////////////////////////////////////////////////////////
+    // Edit polygon from list by name
     this.editPoly = function(poly_name){
         for (let i in current_poly_list){
             if (current_poly_list[i].name === poly_name){
@@ -527,7 +548,7 @@ window.onload = function() {
         }
     }
 
-    // load polygon list ///////////////////////////////////////////////////////////////////////////////////////////////
+    // load polygon list
     var polyListTopic = new ROSLIB.Topic({
         ros : ros,
         name : '/web_plan/polygon_list',
@@ -536,349 +557,452 @@ window.onload = function() {
 
     var current_poly_list = [];
     polyListTopic.subscribe(function(message) {
-        console.log("Poly list:");
         current_poly_list = message.polygon_list;
         var html_poly_list ='';
         for (let poly in message.polygon_list){
-            console.log(message.polygon_list[poly]);
             let poly_name = message.polygon_list[poly].name;
             let poly_type = message.polygon_list[poly].type;
-            html_poly_list += `<div class="d-flex align-items-center" id="div_poly" style="border-bottom: 1px solid #444444;padding-right: 2px;padding-left: 6px;padding-bottom: 2px;padding-top: 2px;">
-                                    <div class="d-flex" style="">
-                                        <span id="span_poly_name_${poly_name}" style="margin-right: 6px;width: 155px;">${poly_name}</span>
-                                        <span class="text-nowrap_${poly_name}" id="span_poly_type" style="margin-right: 12px;">${poly_type}</span>
-                                    </div>
-                                    <div class="btn-group btn-group-sm d-flex ml-auto" role="group">
-                                        <button class="btn btn-outline-info d-inline-flex btn-sm-s" id="btn_poly_edit_${poly_name}" onClick="editPoly('${poly_name}')" type="button">Edit</button>
-                                        <button class="btn btn-outline-danger  d-inline-flex btn-sm-s" id="btn_poly_remove"_${poly_name} onClick="removePoly('${poly_name}')"="button">Remove</button>
-                                    </div>
-                                </div>`;
+            html_poly_list += `
+                <div id="div_poly" class="d-flex align-items-center" style="border-bottom: 1px solid #444444;padding-right: 2px;padding-left: 6px;padding-bottom: 2px;padding-top: 2px;">
+                    <div class="d-flex">
+                        <span id="span_poly_name" style="margin-right: 6px;width: 155px;font-size: 13.2px;">
+                            ${poly_name}
+                        </span>
+                        <span id="span_poly_type" class="text-nowrap" style="margin-right: 12px;font-size: 13.2px;">
+                            ${poly_type}
+                        </span>
+                    </div>
+                    <div class="btn-group btn-group-sm d-flex ms-auto" role="group">
+                        <button id="btn_poly_edit" class="btn btn-outline-info d-inline-flex btn-sm-s" type="button" onclick="editPoly(&#39;${poly_name}&#39;)">Edit</button>
+                        <button id="btn_poly_remove" class="btn btn-outline-danger d-inline-flex btn-sm-s" type="button" onclick="removePoly(&#39;${poly_name}&#39;)">Remove</button>
+                    </div>
+                </div>
+`;
             div_poly_list.innerHTML = html_poly_list;
-
-
         }
         if (message.polygon_list.length == 0){
             div_poly_list.innerHTML = "";
         }
     });
-
-    };
+    }
     map_polygons();
+
 
     // Zones     ///////////////////////////////////////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    function map_zones() {
-        // Zone elements  ///////////////////////////////////////////////////////////////////////////////////////////////
-        var input_zone_template_name = document.getElementById("input_zone_template_name");
-        var input_zone_template_cut_height = document.getElementById("input_zone_template_cut_height");
-        var input_zone_template_rpm = document.getElementById("input_zone_template_rpm");
-        var input_zone_template_border_path = document.getElementById("input_zone_template_border_path");
-        var input_zone_template_coverage_path = document.getElementById("input_zone_template_coverage_path");
-        var input_zone_template_path_distance = document.getElementById("input_zone_template_path_distance");
-        var input_zone_template_simplify = document.getElementById("input_zone_template_simplify");
-        var span_path_name = document.getElementById("span_path_name");
-        var span_path_type = document.getElementById("span_path_type");
-        var span_zone_name = document.getElementById("span_zone_name");
-        var span_zone_height = document.getElementById("span_zone_height");
-        var span_zone_rpm = document.getElementById("span_zone_rpm");
-        var span_zone_area = document.getElementById("span_zone_area");
-        var btn_new_zone = document.getElementById("btn_new_zone");
-        var btn_zone_template_save = document.getElementById("btn_zone_template_save");
-        var btn_zone_template_cancel = document.getElementById("btn_zone_template_cancel");
-        var btn_zone_draw_border_path = document.getElementById("btn_zone_draw_border_path");
-        var btn_zone_draw_coverage_path = document.getElementById("btn_zone_draw_coverage_path");
-        var btn_path_publish = document.getElementById("btn_path_publish");
-        var btn_path_remove = document.getElementById("btn_path_remove");
-        var btn_zone_edit = document.getElementById("btn_zone_edit");
-        var btn_zone_remove = document.getElementById("btn_zone_remove");
-        var panel_zones = document.getElementById("panel_zones");
-        var div_zone_template = document.getElementById("div_zone_template");
-        // var div_path_list = document.getElementById("div_path_list");
-        var header_zone_template_coverage_path = document.getElementById("header_zone_template_coverage_path");
-        var header_zone_template_border_path = document.getElementById("header_zone_template_border_path");
-        var header_zone_template_path_list = document.getElementById("header_zone_template_path_list");
-        var div_zone_list = document.getElementById("div_zone_list");
 
-        // Init zone template //////////////////////////////////////////////////////////////////////////////////////////////
-        var zone_template_style_attr = div_zone_template.getAttribute('style');
-        var header_zone_template_coverage_path_style_attr = header_zone_template_coverage_path.getAttribute('style');
-        var header_zone_template_border_path_style_attr = header_zone_template_border_path.getAttribute('style');
-        // var header_zone_template_path_list_style_attr = header_zone_template_path_list.getAttribute('style');
+    // Zone elements
+    var input_zone_template_name = document.getElementById("input_zone_template_name");
+    var input_zone_template_cut_height = document.getElementById("input_zone_template_cut_height");
+    var input_zone_template_rpm = document.getElementById("input_zone_template_rpm");
+    var input_zone_template_border_path = document.getElementById("input_zone_template_border_path");
+    var input_zone_template_coverage_path = document.getElementById("input_zone_template_coverage_path");
+    var input_zone_template_path_distance = document.getElementById("input_zone_template_path_distance");
+    var input_zone_template_simplify = document.getElementById("input_zone_template_simplify");
+    var btn_new_zone = document.getElementById("btn_new_zone");
+    var btn_zone_template_save = document.getElementById("btn_zone_template_save");
+    var btn_zone_template_cancel = document.getElementById("btn_zone_template_cancel");
+    var div_zone_template = document.getElementById("div_zone_template");
+    // var div_path_list = document.getElementById("div_path_list");
+    var header_zone_template_coverage_path = document.getElementById("header_zone_template_coverage_path");
+    var header_zone_template_border_path = document.getElementById("header_zone_template_border_path");
+    var header_zone_template_path_list = document.getElementById("header_zone_template_path_list");
+    var div_zone_list = document.getElementById("div_zone_list");
+
+    // Init zone template
+    var zone_template_style_attr = div_zone_template.getAttribute('style');
+    var header_zone_template_coverage_path_style_attr = header_zone_template_coverage_path.getAttribute('style');
+    var header_zone_template_border_path_style_attr = header_zone_template_border_path.getAttribute('style');
+    // var header_zone_template_path_list_style_attr = header_zone_template_path_list.getAttribute('style');
+    div_zone_template.setAttribute('style', 'display:none !important');
+    div_zone_list.innerHTML = "";
+    var current_zone = null;
+
+
+    // Zone ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    // New zone
+    btn_new_zone.onclick = function () {
+        div_zone_template.setAttribute('style', zone_template_style_attr);
+        input_zone_template_name.value = "Zone";
+        input_zone_template_rpm.value = 3300;
+        input_zone_template_cut_height.value = 45;
+        input_zone_template_border_path.value = 2;
+        input_zone_template_coverage_path.value = 160;
+        input_zone_template_path_distance.value = 0.2;
+        input_zone_template_simplify.value = 0.1;
+        // header_zone_template_coverage_path.setAttribute('style', 'display:none !important');
+        // header_zone_template_border_path.setAttribute('style', 'display:none !important');
+        // header_zone_template_path_list.setAttribute('style', 'display:none !important');
+        // div_path_list.innerHTML = "";
+        polygon.pointContainer.children = [];
+        polygon.lineContainer.children = [];
+        polygon.fillShape.graphics._instructions = [];
+        polygon.fillShape.graphics._oldInstructions = [];
+        viewer.scene.addChild(polygon);
+    }
+
+    // Selected zone topic
+    var topic_selected_zone = new ROSLIB.Topic({
+        ros: ros,
+        name: '/web_plan/selected_zone',
+        messageType: 'std_msgs/String'
+    });
+    topic_selected_zone.advertise();
+
+    // Cancel zone
+    btn_zone_template_cancel.onclick = function () {
         div_zone_template.setAttribute('style', 'display:none !important');
-        div_zone_list.innerHTML = "";
-
-        var current_zone = null;
-
-
-        // Zone ///////////////////////////////////////////////////////////////////////////////////////////////////////////
-        ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-        // New zone ///////////////////////////////////////////////////////////////////////////////////////////////////////
-        btn_new_zone.onclick = function () {
-            div_zone_template.setAttribute('style', zone_template_style_attr);
-            input_zone_template_name.value = "Zone";
-            input_zone_template_rpm.value = 3300;
-            input_zone_template_cut_height.value = 45;
-            input_zone_template_border_path.value = 2;
-            input_zone_template_coverage_path.value = 160;
-            input_zone_template_path_distance.value = 0.2;
-            input_zone_template_simplify.value = 0.1;
-            // header_zone_template_coverage_path.setAttribute('style', 'display:none !important');
-            // header_zone_template_border_path.setAttribute('style', 'display:none !important');
-            // header_zone_template_path_list.setAttribute('style', 'display:none !important');
-            // div_path_list.innerHTML = "";
-            polygon.pointContainer.children = [];
-            polygon.lineContainer.children = [];
-            polygon.fillShape.graphics._instructions = [];
-            polygon.fillShape.graphics._oldInstructions = [];
-            viewer.scene.addChild(polygon);
-        }
-
-        // Selected zone topic /////////////////////////////////////////////////////////////////////////////////////////////////
-        var topic_selected_zone = new ROSLIB.Topic({
-            ros: ros,
-            name: '/web_plan/selected_zone',
-            messageType: 'std_msgs/String'
+        viewer.scene.removeChild(polygon);
+        polygon.pointContainer.children = [];
+        polygon.lineContainer.children = [];
+        polygon.fillShape.graphics._instructions = [];
+        polygon.fillShape.graphics._oldInstructions = [];
+        let msg = new ROSLIB.Message({
+            data: "cancel**cancel**"
         });
-        topic_selected_zone.advertise();
+        topic_selected_zone.publish(msg);
+    }
 
-        // Cancel zone ////////////////////////////////////////////////////////////////////////////////////////////////////
-        btn_zone_template_cancel.onclick = function () {
+    // Save zone topic
+    var topic_save_zone = new ROSLIB.Topic({
+        ros: ros,
+        name: '/web_plan/save_zone',
+        messageType: 'vitulus_msgs/MapEditZone'
+    });
+    topic_save_zone.advertise();
+
+    // Save zone
+    btn_zone_template_save.onclick = function () {
+        console.log(polygon.pointContainer.children.length);
+        if (polygon.pointContainer.children.length > 0) {
+            var points = [];
+            for (i in polygon.pointContainer.children) {
+                points.push({
+                    x: polygon.pointContainer.children[i].x,
+                    y: polygon.pointContainer.children[i].y * -1
+                });
+            }
+            console.log(points);
+            var msgPoly = new ROSLIB.Message({
+                header: {
+                    frame_id: "map"
+                },
+                polygon: {
+                    points: points
+                }
+            });
+            console.log(msgPoly);
+            var msg = new ROSLIB.Message({
+                header: {
+                    frame_id: "map"
+                },
+                name: input_zone_template_name.value,
+                area: 0,
+                type: 'normal',
+                cut_height: parseInt(input_zone_template_cut_height.value),
+                rpm: parseInt(input_zone_template_rpm.value),
+                border_paths: parseInt(input_zone_template_border_path.value),
+                coverage_angle: parseInt(input_zone_template_coverage_path.value),
+                paths_distance: parseFloat(input_zone_template_path_distance.value),
+                simplify: parseFloat(input_zone_template_simplify.value),
+                polygon: msgPoly,
+                paths: []
+            });
+            topic_save_zone.publish(msg);
+            console.log(msg);
+
+            // clean up
             div_zone_template.setAttribute('style', 'display:none !important');
             viewer.scene.removeChild(polygon);
             polygon.pointContainer.children = [];
             polygon.lineContainer.children = [];
             polygon.fillShape.graphics._instructions = [];
             polygon.fillShape.graphics._oldInstructions = [];
-            let msg = new ROSLIB.Message({
-                data: "cancel**cancel**"
-            });
-            topic_selected_zone.publish(msg);
+        } else {
+            div_log.textContent = "Draw the polygon on the map!";
         }
+    }
 
-        // Save zone topic /////////////////////////////////////////////////////////////////////////////////////////////////
-        var topic_save_zone = new ROSLIB.Topic({
-            ros: ros,
-            name: '/web_plan/save_zone',
-            messageType: 'vitulus_msgs/MapEditZone'
-        });
-        topic_save_zone.advertise();
+    // Get zone list
+    var zoneListTopic = new ROSLIB.Topic({
+        ros: ros,
+        name: '/web_plan/zone_list',
+        messageType: 'vitulus_msgs/MapEditZoneList'
+    });
 
-        // Save zone //////////////////////////////////////////////////////////////////////////////////////////////////////
-        btn_zone_template_save.onclick = function () {
-            console.log(polygon.pointContainer.children.length);
-            if (polygon.pointContainer.children.length > 0) {
-                var points = [];
-                for (i in polygon.pointContainer.children) {
-                    points.push({
-                        x: polygon.pointContainer.children[i].x,
-                        y: polygon.pointContainer.children[i].y * -1
-                    });
-                }
-                console.log(points);
-                var msgPoly = new ROSLIB.Message({
-                    header: {
-                        frame_id: "map"
-                    },
-                    polygon: {
-                        points: points
-                    }
-                });
-                console.log(msgPoly);
-                var msg = new ROSLIB.Message({
-                    header: {
-                        frame_id: "map"
-                    },
-                    name: input_zone_template_name.value,
-                    area: 0,
-                    type: 'normal',
-                    cut_height: parseInt(input_zone_template_cut_height.value),
-                    rpm: parseInt(input_zone_template_rpm.value),
-                    border_paths: parseInt(input_zone_template_border_path.value),
-                    coverage_angle: parseInt(input_zone_template_coverage_path.value),
-                    paths_distance: parseFloat(input_zone_template_path_distance.value),
-                    simplify: parseFloat(input_zone_template_simplify.value),
-                    polygon: msgPoly,
-                    paths: []
-                });
-                topic_save_zone.publish(msg);
-                console.log(msg);
+    var current_zone_list = [];
+    zoneListTopic.subscribe(function (message) {
+        // console.log("Zone list:");
+        current_zone_list = message.zone_list;
+        var html_zone_list = '';
+        for (let zone in message.zone_list) {
+            // console.log(message.zone_list[zone]);
+            let zone_name = message.zone_list[zone].name;
+            let zone_type = message.zone_list[zone].type;
+            let zone_area = message.zone_list[zone].area;
+            let zone_height = message.zone_list[zone].cut_height;
+            let zone_rpm = message.zone_list[zone].rpm;
+            html_zone_list += `
+                <div id="div_zone" class="d-flex align-items-center" style="border-bottom: 1px solid #444444;padding-right: 4px;padding-left: 6px;padding-bottom: 2px;padding-top: 2px;">
+                    <div class="d-flex"><span id="span_zone_name" style="margin-right: 6px;width: 155px;font-size: 13.2px;">${zone_name}</span><span id="span_zone_height" class="text-nowrap" style="margin-right: 12px;font-size: 13.2px;overflow: hidden;width: 45px;">${zone_height} mm</span><span id="span_zone_rpm" class="text-nowrap" style="margin-right: 12px;font-size: 13.2px;overflow: hidden;width: 62px;">${zone_rpm} rpm</span><span id="span_zone_area" class="text-nowrap" style="margin-right: 12px;font-size: 13.2px;overflow: hidden;width: 62px;">${zone_area} m2</span></div>
+                    <div class="btn-group btn-group-sm d-flex ms-auto" role="group"><button id="btn_zone_edit" class="btn btn-outline-info d-inline-flex btn-sm-s" type="button" onclick="editZone(&#39;${zone_name}&#39;)">Edit</button><button id="btn_zone_remove" class="btn btn-outline-danger d-inline-flex btn-sm-s" type="button" onclick="removeZone(&#39;${zone_name}&#39;)">Remove</button></div>
+                </div>
+            `;
+            div_zone_list.innerHTML = html_zone_list;
+        }
+        if (message.zone_list.length === 0) {
+            div_zone_list.innerHTML = "";
+        }
+    });
 
-                // clean up
-                div_zone_template.setAttribute('style', 'display:none !important');
+
+    // Edit zone from list by name
+    this.editZone = function (zone_name) {
+        for (let i in current_zone_list) {
+            if (current_zone_list[i].name === zone_name) {
+                let zone = current_zone_list[i];
+                console.log(zone);
+                div_zone_template.setAttribute('style', zone_template_style_attr);
                 viewer.scene.removeChild(polygon);
                 polygon.pointContainer.children = [];
                 polygon.lineContainer.children = [];
                 polygon.fillShape.graphics._instructions = [];
                 polygon.fillShape.graphics._oldInstructions = [];
-
-            } else {
-                div_log.textContent = "Draw the polygon on the map!";
-            }
-        }
-
-        // Get zone list //////////////////////////////////////////////////////////////////////////////////////////////////
-        var zoneListTopic = new ROSLIB.Topic({
-            ros: ros,
-            name: '/web_plan/zone_list',
-            messageType: 'vitulus_msgs/MapEditZoneList'
-        });
-
-        var current_zone_list = [];
-        zoneListTopic.subscribe(function (message) {
-            console.log("Zone list:");
-            current_zone_list = message.zone_list;
-            var html_zone_list = '';
-            for (let zone in message.zone_list) {
-                console.log(message.zone_list[zone]);
-                let zone_name = message.zone_list[zone].name;
-                let zone_type = message.zone_list[zone].type;
-                let zone_area = message.zone_list[zone].area;
-                let zone_height = message.zone_list[zone].cut_height;
-                let zone_rpm = message.zone_list[zone].rpm;
-                html_zone_list += `<div class="d-flex align-items-center" id="div_zone_${zone_name}" style="border-bottom: 1px solid #444444;padding-right: 2px;padding-left: 6px;padding-bottom: 2px;padding-top: 2px;">
-                                    <div class="d-flex">
-                                        <span id="span_zone_name_${zone_name}" style="margin-right: 6px;width: 155px;font-size: 13.2px;">${zone_name}</span>
-                                        <span class="text-nowrap" id="span_zone_height_${zone_name}" style="margin-right: 12px;font-size: 13.2px;">${zone_height} mm</span>
-                                        <span class="text-nowrap" id="span_zone_rpm_${zone_name}" style="margin-right: 12px;font-size: 13.2px;">${zone_rpm} rpm</span>
-                                        <span class="text-nowrap" id="span_zone_area_${zone_name}" style="margin-right: 12px;font-size: 13.2px;">${zone_area} m2</span>
-                                    </div>
-                                    <div class="btn-group btn-group-sm d-flex ml-auto" role="group">
-                                        <button class="btn btn-outline-info d-inline-flex btn-sm-s" id="btn_zone_edit_${zone_name}" onClick="editZone('${zone_name}')" type="button">Edit </button>
-                                        <button class="btn btn-outline-danger d-inline-flex btn-sm-s" id="btn_zone_remove_${zone_name}" onClick="removeZone('${zone_name}')" type="button">Remove </button>
-                                    </div>
-                                </div>`;
-                div_zone_list.innerHTML = html_zone_list;
-
-
-            }
-            if (message.zone_list.length === 0) {
-                div_zone_list.innerHTML = "";
-            }
-        });
-
-
-        // Edit zone from list by name /////////////////////////////////////////////////////////////////////////////////////
-        this.editZone = function (zone_name) {
-            for (let i in current_zone_list) {
-                if (current_zone_list[i].name === zone_name) {
-                    let zone = current_zone_list[i];
-                    console.log(zone);
-                    div_zone_template.setAttribute('style', zone_template_style_attr);
-                    // header_zone_template_coverage_path.setAttribute('style', header_zone_template_coverage_path_style_attr);
-                    // header_zone_template_border_path.setAttribute('style', header_zone_template_border_path_style_attr);
-                    // header_zone_template_path_list.setAttribute('style', header_zone_template_path_list_style_attr);
-                    viewer.scene.removeChild(polygon);
-                    polygon.pointContainer.children = [];
-                    polygon.lineContainer.children = [];
-                    polygon.fillShape.graphics._instructions = [];
-                    polygon.fillShape.graphics._oldInstructions = [];
-                    viewer.scene.addChild(polygon);
-                    for (let point in zone.polygon.polygon.points) {
-                        console.log("Point:");
-                        console.log(zone.polygon.polygon.points[point]);
-                        polygon.addPoint(zone.polygon.polygon.points[point]);
-                    }
-                    input_zone_template_name.value = zone.name;
-                    input_zone_template_rpm.value = zone.rpm;
-                    input_zone_template_cut_height.value = zone.cut_height;
-                    input_zone_template_border_path.value = zone.border_paths;
-                    input_zone_template_coverage_path.value = zone.coverage_angle;
-                    input_zone_template_path_distance.value = zone.paths_distance;
-                    let msg = new ROSLIB.Message({
-                        data: zone_name
-                    });
-                    topic_selected_zone.publish(msg);
+                viewer.scene.addChild(polygon);
+                for (let point in zone.polygon.polygon.points) {
+                    console.log("Point:");
+                    console.log(zone.polygon.polygon.points[point]);
+                    polygon.addPoint(zone.polygon.polygon.points[point]);
                 }
+                input_zone_template_name.value = zone.name;
+                input_zone_template_rpm.value = zone.rpm;
+                input_zone_template_cut_height.value = zone.cut_height;
+                input_zone_template_border_path.value = zone.border_paths;
+                input_zone_template_coverage_path.value = zone.coverage_angle;
+                input_zone_template_path_distance.value = zone.paths_distance;
+                let msg = new ROSLIB.Message({
+                    data: zone_name
+                });
+                topic_selected_zone.publish(msg);
             }
         }
+    }
 
-        // Remove zone from list by name  /////////////////////////////////////////////////////////////////////////////////
-        var topic_remove_zone = new ROSLIB.Topic({
-            ros: ros,
-            name: '/web_plan/remove_zone',
-            messageType: 'std_msgs/String'
+    // Remove zone from list by name
+    var topic_remove_zone = new ROSLIB.Topic({
+        ros: ros,
+        name: '/web_plan/remove_zone',
+        messageType: 'std_msgs/String'
+    });
+    topic_remove_zone.advertise();
+
+    this.removeZone = function (zone_name) {
+        let msg = new ROSLIB.Message({
+            data: zone_name,
         });
-        topic_remove_zone.advertise();
+        topic_remove_zone.publish(msg);
+    }
 
-        this.removeZone = function (zone_name) {
-            let msg = new ROSLIB.Message({
-                data: zone_name,
-            });
-            topic_remove_zone.publish(msg);
-        }
-    };
-    map_zones();
+
 
     // Programs     ///////////////////////////////////////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    function planner_programs() {
-        // Program elements  ///////////////////////////////////////////////////////////////////////////////////////////////
-        var div_program_template = document.getElementById("div_program_template");
-        var div_program_list = document.getElementById("div_program_list");
 
-        // Init program template //////////////////////////////////////////////////////////////////////////////////////////////
-        var program_template_style_attr = div_program_template.getAttribute('style');
-        div_program_template.setAttribute('style', 'display:none !important');
-        div_program_list.innerHTML = "";
+    // Program elements
+    var div_program_template = document.getElementById("div_program_template");
+    var div_program_list = document.getElementById("div_program_list");
+    var btn_program_new = document.getElementById("btn_program_new");
+    var input_program_add_zone = document.getElementById("input_program_add_zone");
+    var btn_program_add_zone = document.getElementById("btn_program_add_zone");
+    var btn_program_template_save = document.getElementById("btn_program_template_save");
+    var input_program_template_name = document.getElementById("input_program_template_name");
+    var span_program_template_zones = document.getElementById("span_program_template_zones");
+    var btn_program_template_cancel = document.getElementById("btn_program_template_cancel");
 
-        // Get program list //////////////////////////////////////////////////////////////////////////////////////////////////
-        var programListTopic = new ROSLIB.Topic({
-            ros: ros,
-            name: '/web_plan/program_list',
-            messageType: 'vitulus_msgs/PlannerProgramList'
-        });
+    // Init program template
+    var program_template_style_attr = div_program_template.getAttribute('style');
+    div_program_template.setAttribute('style', 'display:none !important');
+    div_program_list.innerHTML = "";
+    let selected_program_msg = new ROSLIB.Message({});
 
-        var current_program_list = [];
-        programListTopic.subscribe(function (message) {
-            console.log("Program list:");
-            current_program_list = message.program_list;
-            var html_program_list = '';
-            for (let program in message.program_list) {
-                console.log(message.program_list[program]);
-                let program_name = message.program_list[program].name;
-                let program_duration = message.program_list[program].last_duration_minutes;
-                let program_area = message.program_list[program].area;
-                html_program_list += `<div class="d-flex align-items-center" id="div_program_${program_name}" style="border-bottom: 1px solid #444444;padding-right: 2px;padding-left: 6px;padding-bottom: 2px;padding-top: 2px;">
-                    <div class="d-flex">
-                        <span id="span_program_name_${program_name}" style="margin-right: 6px;width: 155px;font-size: 13.2px;">${program_name}</span>
-                        <span class="text-nowrap" id="span_program_duration_${program_name}" style="margin-right: 12px;font-size: 13.2px;">${program_duration} min.</span>
-                        <span class="text-nowrap" id="span_program_area_${program_name}" style="margin-right: 12px;font-size: 13.2px;">${program_area} m2</span>
-                    </div>
-                    <div class="btn-group btn-group-sm d-flex ml-auto" role="group">
-                        <button class="btn btn-outline-success d-inline-flex btn-sm-s" id="btn_program_run_${program_name}" onClick="runProgram('${program_name}')" type="button">Run</button>
-                        <button class="btn btn-outline-info d-inline-flex btn-sm-s" id="btn_program_edit_${program_name}" type="button">Edit</button>
-                        <button class="btn btn-outline-danger d-inline-flex btn-sm-s" id="btn_program_remove_${program_name}" type="button">Remove</button>
-                    </div>
-                </div>`
-                div_program_list.innerHTML = html_program_list;
-
-
-
-            }
-            if (message.program_list.length === 0) {
-                div_program_list.innerHTML = "";
-            }
-        });
-
-        // Publish program to run  /////////////////////////////////////////////////////////////////////////////////////
-        var topic_program_select = new ROSLIB.Topic({
-            ros: ros,
-            name: '/web_plan/program_select',
-            messageType: 'std_msgs/String'
-        });
-        topic_program_select.advertise();
-
-        this.runProgram = function (program_name) {
-            let msg = new ROSLIB.Message({
-                data: program_name,
-            });
-            topic_program_select.publish(msg);
-            console.log(msg);
+    // New program template show in initial state
+    btn_program_new.onclick = function () {
+        div_program_template.setAttribute('style', 'display:block !important');
+        input_program_add_zone.innerHTML = '';
+        for (let i in current_zone_list) {
+            var option = document.createElement("option");
+            option.value = i;
+            option.innerHTML = current_zone_list[i].name;
+            input_program_add_zone.appendChild(option);
         }
+        selected_program_msg = new ROSLIB.Message({
+            area: 0,
+            fri: false,
+            last_duration_minutes: 0,
+            last_result: "",
+            length: 0,
+            map_name: "",
+            mon: false,
+            name: "",
+            sat: false,
+            start_hour: 0,
+            start_minute: 0,
+            sun: false,
+            thu: false,
+            tue: false,
+            wed: false,
+            zone_list: [],
+        });
+        span_program_template_zones.innerHTML = "";
+    }
 
-    };
-    planner_programs();
+    // Add selected zone to program
+    btn_program_add_zone.onclick = function () {
+        console.log("Add zone to program");
+        selected_program_msg.zone_list.push(current_zone_list[input_program_add_zone.value]);
+        zones_el = "";
+        for (let i in selected_program_msg.zone_list) {
+            console.log(selected_program_msg.zone_list[i]);
+            const zone_name = selected_program_msg.zone_list[i].name;
+            zones_el += `
+                <span style="background: var(--bs-gray-dark);padding: 2px;border-radius: 5px;padding-right: 4px;padding-left: 4px;margin-left: 2px;"><span style="margin-right: 3px;"><i class="fa fa-remove text-danger" onclick="removeProgramTemplateZone(&#39;${zone_name}&#39;)"></i></span><span>${zone_name}</span></span>
+            `;
+        }
+        span_program_template_zones.innerHTML = zones_el;
+        console.log(selected_program_msg);
+    }
+
+    // Remove zone from program template
+    this.removeProgramTemplateZone = function (zone_name) {
+        console.log("Remove zone from program template");
+        for (let i in selected_program_msg.zone_list) {
+            if (selected_program_msg.zone_list[i].name === zone_name) {
+                selected_program_msg.zone_list.splice(i, 1);
+            }
+        }
+        zones = "";
+        for (let i in selected_program_msg.zone_list) {
+            console.log(selected_program_msg.zone_list[i]);
+            const zone_name = selected_program_msg.zone_list[i].name;
+            zones += `
+                <span style="background: var(--bs-gray-dark);padding: 2px;border-radius: 5px;padding-right: 4px;padding-left: 4px;margin-left: 2px;"><span style="margin-right: 3px;"><i class="fa fa-remove text-danger" onclick="removeProgramTemplateZone(&#39;${zone_name}&#39;)"></i></span><span>${zone_name}</span></span>
+            `;
+        }
+        span_program_template_zones.innerHTML = zones;
+        console.log(selected_program_msg);
+    }
+
+    // Cancel program template
+    btn_program_template_cancel.onclick = function () {
+        div_program_template.setAttribute('style', 'display:none !important');
+        input_program_template_name.value = "";
+        selected_program_msg = new ROSLIB.Message({});
+        span_program_template_zones.innerHTML = "";
+    }
+
+    // Save new program
+    var topic_new_program = new ROSLIB.Topic({
+        ros: ros,
+        name: '/web_plan/program_new',
+        messageType: 'vitulus_msgs/PlannerProgram'
+    });
+    topic_new_program.advertise();
+    btn_program_template_save.onclick = function () {
+        console.log("Save program");
+        let ready = true;
+        if (input_program_template_name.value === "") {
+            ready = false;
+            div_log.innerHTML = "<span class='text-danger'>Program name is empty!</span>";
+        };
+        if (selected_program_msg.zone_list.length === 0) {
+            ready = false;
+            div_log.innerHTML = "<span class='text-danger'>Program has no zones!</span>";
+        }
+        if (ready) {
+            selected_program_msg.name = input_program_template_name.value + ' (' + active_map_file_name.split("***env*")[0] + ')';
+            selected_program_msg.map_name = active_map_file_name;
+            for (let i in selected_program_msg.zone_list) {
+                selected_program_msg.area += selected_program_msg.zone_list[i].area;
+                selected_program_msg.length += selected_program_msg.zone_list[i].length;
+            }
+            console.log(selected_program_msg);
+            topic_new_program.publish(selected_program_msg);
+            input_program_template_name.value = "";
+            div_program_template.setAttribute('style', 'display:none !important');
+            div_log.innerHTML = "<span class='text-info'>Saving program " + selected_program_msg.name + "...</span>";
+        }
+    }
+
+    // Get program list
+    var programListTopic = new ROSLIB.Topic({
+        ros: ros,
+        name: '/web_plan/program_list',
+        messageType: 'vitulus_msgs/PlannerProgramList'
+    });
+    programListTopic.subscribe(function (message) {
+        var html_program_list = '';
+        for (let program in message.program_list) {
+            let program_name = message.program_list[program].name;
+            let program_duration = message.program_list[program].last_duration_minutes;
+            let program_area = message.program_list[program].area;
+            let program_length = message.program_list[program].length;
+            let program_map = message.program_list[program].map_name.split("***env*")[0];
+            let program_env = message.program_list[program].map_name.split("***env*")[1];
+            let program_zones = "";
+            for (let zone in message.program_list[program].zone_list) {
+                program_zones += '<span>' + message.program_list[program].zone_list[zone].name + '</span>, ';
+            }
+            program_zones = program_zones.slice(0, -2);
+            html_program_list += `
+                <div id="div_program" style="border-bottom: 1px solid #444444;padding-right: 4px;padding-left: 6px;padding-bottom: 2px;padding-top: 2px;">
+                    <div><span class="text-info" style="margin-right: 6px;width: 155px;font-size: 13.2px;overflow: hidden;display: inline-flex;">${program_name}</span><span class="text-nowrap" style="margin-right: 4px;font-size: 13.2px;width: auto;overflow: hidden;max-width: 62px;display: inline-flex;">${program_length} m</span><span class="text-nowrap" style="margin-right: 4px;font-size: 13.2px;overflow: hidden;max-width: 62px;display: inline-flex;">${program_area} m2</span>
+                        <div class="d-xxl-flex align-items-xxl-center float-end" style="display: inline-flex;height: 24px;"><span class="text-nowrap" style="margin-right: 4px;font-size: 13.2px;overflow: hidden;max-width: 98px;display: inline-flex;">${program_map}</span><span class="text-nowrap" style="margin-right: 4px;font-size: 13.2px;overflow: hidden;max-width: 62px;display: inline-flex;">${program_env}</span></div>
+                    </div>
+                    <div style="margin-top: 3px;margin-bottom: 1px;"><span style="font-size: 13px;">Zones: </span><span style="color: var(--bs-gray-600);font-size: 12px;">${program_zones}</span>
+                        <div class="btn-group btn-group-sm float-end" role="group"><button class="btn btn-outline-success d-inline-flex btn-sm-s" type="button" onclick="runProgram(&#39;${program_name}&#39;)">Run</button><button class="btn btn-outline-danger d-inline-flex btn-sm-s" type="button" onclick="removeProgram(&#39;${program_name}&#39;)">Remove</button></div>
+                    </div>
+                </div>
+            `;
+            div_program_list.innerHTML = html_program_list;
+        }
+        if (message.program_list.length === 0) {
+            div_program_list.innerHTML = "";
+        }
+    });
+
+    // Publish selected program to run
+    var topic_program_select = new ROSLIB.Topic({
+        ros: ros,
+        name: '/web_plan/program_select',
+        messageType: 'std_msgs/String'
+    });
+    topic_program_select.advertise();
+
+    this.runProgram = function (program_name) {
+        let msg = new ROSLIB.Message({
+            data: program_name,
+        });
+        topic_program_select.publish(msg);
+        console.log(msg);
+    }
+
+    // Remove program from list by name
+    var topic_remove_program = new ROSLIB.Topic({
+        ros: ros,
+        name: '/web_plan/program_remove',
+        messageType: 'std_msgs/String'
+    });
+    topic_remove_program.advertise();
+
+    this.removeProgram = function (name) {
+        let msg = new ROSLIB.Message({
+            data: name,
+        });
+        topic_remove_program.publish(msg);
+    }
+
 
     // Paths  //////////////////////////////////////////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -898,72 +1022,80 @@ window.onload = function() {
     // Active map ///////////////////////////////////////////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    function active_map() {
-        // Program elements  ///////////////////////////////////////////////////////////////////////////////////////////////
-        var btn_save_planner_data = document.getElementById("btn_save_planner_data");
-        var btn_load_planner_data = document.getElementById("btn_load_planner_data");
-        var btn_reload_map = document.getElementById("btn_reload_map");
-        var active_map_name = document.getElementById("active_map_name");
+    // Program elements
+    var btn_save_planner_data = document.getElementById("btn_save_planner_data");
+    var btn_load_planner_data = document.getElementById("btn_load_planner_data");
+    var btn_reload_map = document.getElementById("btn_reload_map");
+    var active_map_name = document.getElementById("active_map_name");
 
-        // Display map name ///////////////////////////////////////////////////////////////////////////////////////////////////////
-        var active_map_Topic = new ROSLIB.Topic({
-            ros : ros,
-            name : '/navi_manager/active_map',
-            messageType : 'std_msgs/String'
-        });
+    // Display map name
+    var active_map_Topic = new ROSLIB.Topic({
+        ros : ros,
+        name : '/navi_manager/active_map',
+        messageType : 'std_msgs/String'
+    });
 
-
-        active_map_Topic.subscribe(function(message) {
-            console.log("Active map:");
-            active_map_name.textContent = message.data;
-        });
-
-        // Load planner data ///////////////////////////////////////////////////////////////////////////////////////////////////////
-        var load_planner_data_Topic = new ROSLIB.Topic({
-            ros : ros,
-            name : '/web_plan/load_planner_data',
-            messageType : 'std_msgs/Bool'
-        });
-        load_planner_data_Topic.advertise();
-
-        btn_load_planner_data.onclick = function () {
+    active_map_Topic.subscribe(function(message) {
+        active_map_name.textContent = message.data.split("***env*")[0] + ' (' + message.data.split("***env*")[1] + ')';
+        if (message.data !== active_map_file_name){
+            console.log("Map changed");
             let msg = new ROSLIB.Message({
-                data: true,
+                data : true,
             });
-            load_planner_data_Topic.publish(msg)
-        }
+            topic_publish_reload.publish(msg);
+            initiate = true;
+            viewer.scene.scaleX = 1;
+            viewer.scene.scaleY = 1;
 
-        // Save planner data ///////////////////////////////////////////////////////////////////////////////////////////////////////
-        var save_planner_data_Topic = new ROSLIB.Topic({
-            ros : ros,
-            name : '/web_plan/save_planner_data',
-            messageType : 'std_msgs/Bool'
+        }
+        active_map_file_name = message.data;
+    });
+
+    // Load planner data
+    var load_planner_data_Topic = new ROSLIB.Topic({
+        ros : ros,
+        name : '/web_plan/load_planner_data',
+        messageType : 'std_msgs/Bool'
+    });
+    load_planner_data_Topic.advertise();
+
+    btn_load_planner_data.onclick = function () {
+        let msg = new ROSLIB.Message({
+            data: true,
         });
-        save_planner_data_Topic.advertise();
-
-        btn_save_planner_data.onclick = function () {
-            let msg = new ROSLIB.Message({
-                data: true,
-            });
-            save_planner_data_Topic.publish(msg)
-        }
-
-        // Reload map ///////////////////////////////////////////////////////////////////////////////////////////////////////
-        var reload_map_Topic = new ROSLIB.Topic({
-            ros : ros,
-            name : '/web_plan/reload_map',
-            messageType : 'std_msgs/Bool'
-        });
-        reload_map_Topic.advertise();
-
-        btn_reload_map.onclick = function () {
-            let msg = new ROSLIB.Message({
-                data: true,
-            });
-            reload_map_Topic.publish(msg)
-        }
+        load_planner_data_Topic.publish(msg)
     }
-    active_map();
+
+    // Save planner data
+    var save_planner_data_Topic = new ROSLIB.Topic({
+        ros : ros,
+        name : '/web_plan/save_planner_data',
+        messageType : 'std_msgs/Bool'
+    });
+    save_planner_data_Topic.advertise();
+
+    btn_save_planner_data.onclick = function () {
+        let msg = new ROSLIB.Message({
+            data: true,
+        });
+        save_planner_data_Topic.publish(msg)
+    }
+
+    // Reload map
+    var reload_map_Topic = new ROSLIB.Topic({
+        ros : ros,
+        name : '/web_plan/reload_map',
+        messageType : 'std_msgs/Bool'
+    });
+    reload_map_Topic.advertise();
+
+    btn_reload_map.onclick = function () {
+        let msg = new ROSLIB.Message({
+            data: true,
+        });
+        reload_map_Topic.publish(msg)
+    }
+
 
 
 
@@ -984,7 +1116,7 @@ window.onload = function() {
     var msg = new ROSLIB.Message({
         data : true
     });
-    window.setTimeout(function(){topic_publish_reload.publish(msg);}, 500);
+    window.setTimeout(function(){topic_publish_reload.publish(msg);}, 800);
 
 } /// end of on.load()
 
