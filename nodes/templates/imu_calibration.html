@@ -51,15 +51,12 @@
 <body>
     <div>
         <nav class="navbar navbar-expand-lg" id="div_menu" style="background: #282b30;padding-top: 3px;padding-bottom: 3px;position: absolute;display: block;width: 100vw;">
-            <div class="container-fluid"><a class="navbar-brand d-flex flex-grow-1 align-items-end" href="#" style="display: flex;padding: 2px;"><img src="assets/img/vitulusShape.svg" width="114" height="27"><span style="margin-left: 9px;">IMU calibration</span></a><button data-bs-toggle="collapse" class="navbar-toggler" data-bs-target="#navcol-1" id="btn_navbar_toggler" style="height: 36px;border-width: 0px;"><span class="visually-hidden">Toggle navigation</span><span class="navbar-toggler-icon"></span></button>
-                <div class="collapse navbar-collapse" id="navcol-1">
-                    <ul class="navbar-nav" style="color: rgba(40,43,48,0.99);/*z-index: 5000;*/">
-                        <li class="nav-item d-inline-flex align-items-center" style="display: inline-flex;"><a class="nav-link" href="/mob/map_view"><span><i class="fa fa-map" style="margin-right: 8px;font-size: 18px;color: rgb(241,125,34);"></i></span>Map view</a></li>
-                        <li class="nav-item d-inline-flex align-items-center" style="display: inline-flex;"><a class="nav-link" href="/mob/motors"><span><i class="fa fa-gears" style="margin-right: 8px;color: rgb(241,125,34);"></i></span>Motors</a></li>
-                        <li class="nav-item d-inline-flex align-items-center" style="display: inline-flex;"><a class="nav-link" href="/mob/power_module"><i class="fa fa-battery-3" style="margin-right: 8px;color: rgb(241,125,34);"></i>Power module</a></li>
-                        <li class="nav-item d-inline-flex align-items-center" style="display: inline-flex;"><a class="nav-link" href="/mob/imu_calibration"><i class="fa fa-compass" style="margin-right: 8px;font-size: 18px;color: rgb(241,125,34);"></i>Imu calibration</a></li>
-                        <li class="nav-item d-inline-flex align-items-center" style="display: inline-flex;"><a class="nav-link" href="/mob/mower"><i class="fa fa-gear" style="margin-right: 11px;font-size: 18px;color: rgb(241,125,34);"></i>Mower</a></li>
-                        <li class="nav-item d-inline-flex align-items-center" style="display: inline-flex;"><a class="nav-link" href="/mob/diagnostics"><i class="fa fa-heartbeat" style="margin-right: 8px;font-size: 15px;color: rgb(241,125,34);"></i>Diagnostics</a></li>
+            <div class="container-fluid"><a class="navbar-brand d-flex flex-grow-1 align-items-end" href="#" style="display: flex;padding: 2px;"><img src="assets/img/vitulusShape.svg" width="114" height="27"><span style="margin-left: 9px;">Imu calibration</span></a><button data-bs-toggle="collapse" class="navbar-toggler" data-bs-target="#navcol-1" id="btn_navbar_toggler" style="height: 36px;border-width: 0px;"><span class="visually-hidden">Toggle navigation</span><span class="navbar-toggler-icon"></span></button>
+                <div class="collapse navbar-collapse d-lg-flex justify-content-lg-end" id="navcol-1">
+                    <ul class="navbar-nav" style="color: rgba(40,43,48,0.99);">
+                        <li class="nav-item d-inline-flex align-items-center" style="display: inline-flex;"><a class="nav-link" href="/"><span><i class="fa fa-map" style="margin-right: 8px;font-size: 18px;color: rgb(241,125,34);"></i></span>Map view</a></li>
+                        <li class="nav-item d-inline-flex align-items-center" style="display: inline-flex;"><a class="nav-link" href="/map_edit"><span><i class="fa fa-random" style="margin-right: 8px;font-size: 18px;color: rgb(241,125,34);"></i></span>Planner</a></li>
+                        <li class="nav-item d-inline-flex align-items-center" style="display: inline-flex;"><a class="nav-link" href="/imu_calibration"><i class="fa fa-compass" style="margin-right: 8px;font-size: 18px;color: rgb(241,125,34);"></i>Imu calibration</a></li>
                     </ul>
                 </div>
             </div>
