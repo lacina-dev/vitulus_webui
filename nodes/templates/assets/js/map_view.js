@@ -7,15 +7,17 @@ ROS3D.Viewer.prototype.resize = function(width, height) {
 };
 
 
-////////// Override getColor() of OccupancyGrid for custom coloring of maps depends on type.
-////////// It's controled through the color attr of OccupancyGridClient
+// Override getColor() of OccupancyGrid for custom coloring of maps depends on type.
+// It's controled through the color attr of OccupancyGridClient
 ROS3D.OccupancyGrid.prototype.getColor = function(index, row, col, value) {
     //  Occupancy identifiers in color attribute of OccupancyGridClient
     //  {r:0,g:255,b:255} gridmap,
     //  {r:255,g:0,b:255} loc costmap,
     //  {r:255,g:255,b:0} glob costmap
+
     // If map is not costmap.
     if (this.color.r === 0 && this.color.g === 255 && this.color.b === 255){
+        // console.log(value);
         if (value === 100){   // obstacle
             return [0,0,0,255];
         };
@@ -26,22 +28,25 @@ ROS3D.OccupancyGrid.prototype.getColor = function(index, row, col, value) {
             return [149-value,149-value,149-value,150];
         };
         if (value === -1){  // unknown
-            return [0,0,0,25];
+            return [0,0,0,150];
         };
     };
+
     // If map is local costmap.
     if (this.color.r === 255 && this.color.g === 0 && this.color.b === 255){
+        // this.opacity = 0.4;
+        // console.log(value);
         if (value === 100){   // obstacle
             return [255,0,0,255];
         };
         if (value === 0){    // free space
-            return [0,0,0,0];
+            return [0,0,0,10];
         };
-        if (value <= 99 && value >= 1){  // probably obstacle
-            return [149,149-value,149-value,255];
-        };
+        // if (value <= 99 && value >= 1){  // probably obstacle
+        //     return [149,149-value,149-value,255];
+        // };
         if (value === -1){  // unknown
-            return [0,0,0,0];
+            return [0,0,0,1];
         };
     };
     // If map is global costmap.
@@ -272,7 +277,7 @@ class ItemList {
         });
         // Redraw list if there was any change.
         if (change_list){
-            console.log(this.list);
+            // console.log(this.list);
             if (this.type === 'path'){
                 this.map_menu.div_menu_path_items_row.innerHTML = this.get_html()
             }
@@ -362,7 +367,7 @@ class MapList {
         });
         // Redraw map_list if there was any change.
         if (change_list){
-            console.log(this.map_list);
+            // console.log(this.map_list);
             this.map_menu.div_menu_map_items_row.innerHTML = this.get_html()
         }
     }
@@ -528,43 +533,12 @@ class TfClient {
 
 class Maps{
     constructor(ros, tf_client, viewer) {
-        this.planner_map_offset =new ROSLIB.Pose({ position : new ROSLIB.Vector3({ x : 0, y : 0, z : -0.01 }),
+        this.map_offset =new ROSLIB.Pose({ position : new ROSLIB.Vector3({ x : 0, y : 0, z : -0.01 }),
                     orientation : new ROSLIB.Quaternion({ x : 0.0, y : 0.0, z : 0.0, w : 1.0 }) });
-        this.planner_map = new ROS3D.OccupancyGridClient({
-            ros : ros,
-            tfClient: tf_client,
-            rootObject : viewer.scene,
-            continuous: true,
-            topic: '/web_plan/map_edited',
-            color: {r:0,g:255,b:255},  // {r:0,g:255,b:255} gridmap, {r:255,g:0,b:255} loc costmap, {r:255,g:255,b:0} glob costmap
-            opacity: 0.9,
-            offsetPose: this.planner_map_offset,
-        });
-        this.rtabmap_offset =new ROSLIB.Pose({ position : new ROSLIB.Vector3({ x : 0, y : 0, z : -0.01 }),
+        this.map = null;
+        this.local_costmap_offset = new ROSLIB.Pose({ position : new ROSLIB.Vector3({ x : 0, y : 0, z : -0.03 }),
                     orientation : new ROSLIB.Quaternion({ x : 0.0, y : 0.0, z : 0.0, w : 1.0 }) });
-        this.rtabmap_grid_map = new ROS3D.OccupancyGridClient({
-            ros : ros,
-            tfClient: tf_client,
-            rootObject : viewer.scene,
-            continuous: true,
-            topic: '/rtabmap/grid_map',
-            color: {r:0,g:255,b:255},  // {r:0,g:255,b:255} gridmap, {r:255,g:0,b:255} loc costmap, {r:255,g:255,b:0} glob costmap
-            opacity: 0.9,
-            offsetPose: this.rtabmap_offset,
-        });
-        this.local_costmap_offset = new ROSLIB.Pose({ position : new ROSLIB.Vector3({ x : 0, y : 0, z : 0.05 }),
-                    orientation : new ROSLIB.Quaternion({ x : 0.0, y : 0.0, z : 0.0, w : 1.0 }) });
-        this.local_costmap = new ROS3D.OccupancyGridClient({
-            ros : ros,
-            tfClient: tf_client,
-            rootObject : viewer.scene,
-            continuous: true,
-            compression: 'cbor',
-            topic: '/move_base_flex/local_costmap/costmap',
-            color: {r:255,g:0,b:255},  // {r:0,g:255,b:255} gridmap, {r:255,g:0,b:255} loc costmap, {r:255,g:255,b:0} glob costmap
-            opacity: 0.4,
-            offsetPose: this.local_costmap_offset,
-        });
+        this.local_costmap = null;
     }
 }
 
@@ -711,8 +685,8 @@ class PathsPointsVisualization {
           ros: ros,
           rootObject: viewer.scene,
           tfClient: tf_client,
-          topic: "/zone_path_lines",
-       });
+          topic: "/web_plan/program_marker",
+        });
         this.mapPath = new ROS3D.Path({
             ros : ros,
             tfClient: tf_client,
@@ -1637,8 +1611,6 @@ class MapMenu {
 
         this.btn_programs = document.getElementById("btn_programs");
         this.div_menu_map_program = document.getElementById("div_menu_map_program");
-        // this.div_menu_program_detail_btn_row = document.getElementById("div_menu_program_detail_btn_row");
-        // this.div_menu_program_detail_btn_row.style.display = 'none';
         this.div_menu_program_detail_row = document.getElementById("div_menu_program_detail_row");
         this.div_menu_program_detail_row.style.display = 'none';
         this.div_menu_program_items_row = document.getElementById("div_menu_program_items_row");
@@ -1652,6 +1624,8 @@ class MapMenu {
         this.span_menu_program_map = document.getElementById("span_menu_program_map");
         this.span_menu_program_env = document.getElementById("span_menu_program_env");
         this.row_menu_program_detail_zones = document.getElementById("row_menu_program_detail_zones");
+        this.btn_menu_program_stop = document.getElementById("btn_menu_program_stop");
+        this.span_menu_program_status = document.getElementById("span_menu_program_status");
 
         this.btn_joy = document.getElementById("btn_joy");
         this.joy_view = document.getElementById("joy_view");
@@ -1747,7 +1721,19 @@ class MapMenu {
             name : '/navi_manager/execute_path',
             messageType : 'std_msgs/String'
         });
-
+        this.show_map_Topic = new ROSLIB.Topic({
+            ros : ros,
+            name : '/navi_manager/show_map',
+            messageType : 'std_msgs/String'
+        });
+        this.map_source_Topic = new ROSLIB.Topic({
+            ros : ros,
+            name : '/navi_manager/map_source',
+            messageType : 'std_msgs/String'
+        });
+        this.map_source_Topic.subscribe((message) => {
+            this.map_btns_state(message);
+        });
 
         this.init();
     }
@@ -1767,11 +1753,23 @@ class MapMenu {
         this.publish_path_Topic.advertise();
         this.remove_path_Topic.advertise();
         this.execute_path_Topic.advertise();
+        this.show_map_Topic.advertise();
         if (this.status_bar.is_indoor === true){
             this.map_to_show = 'rtabmap';
         }
         else {
             this.map_to_show = 'planner';
+        }
+    }
+
+    map_btns_state(msg){
+        if (msg.data === 'planner'){
+            this.btn_menu_map_planner_show.style.color = "#446de5";
+            this.btn_menu_map_rtabmap_show.style.color = "#ffffff";
+        }
+        if (msg.data === 'rtabmap'){
+            this.btn_menu_map_planner_show.style.color = "#ffffff";
+            this.btn_menu_map_rtabmap_show.style.color = "#446de5";
         }
     }
 
@@ -1792,28 +1790,14 @@ class MapMenu {
     }
 
     show_rtabmap_map() {
-        if (this.maps.planner_map.currentGrid !== null){
-            this.maps.planner_map.currentGrid.visible = false;
-        }
-        if (this.maps.rtabmap_grid_map.currentGrid !== null){
-            this.maps.rtabmap_grid_map.currentGrid.visible = true;
-        }
-        this.btn_menu_map_rtabmap_show.style.color = "#446de5";
-        this.btn_menu_map_planner_show.style.color = "#ffffff";
+        this.show_map_Topic.publish(new ROSLIB.Message({data: 'rtabmap'}));
     }
     show_planner_map() {
-        if (this.maps.planner_map.currentGrid !== null){
-            this.maps.planner_map.currentGrid.visible = true;
-        }
-        if (this.maps.rtabmap_grid_map.currentGrid !== null){
-            this.maps.rtabmap_grid_map.currentGrid.visible = false;
-        }
-        this.btn_menu_map_rtabmap_show.style.color = "#ffffff";
-        this.btn_menu_map_planner_show.style.color = "#446de5";
+        this.show_map_Topic.publish(new ROSLIB.Message({data: 'planner'}));
     }
 
     path_clicked_exec(name){
-        console.log("execute_path: " + name);
+        // console.log("execute_path: " + name);
         this.execute_path_Topic.publish(new ROSLIB.Message({
             data: name,
         }));
@@ -1824,14 +1808,14 @@ class MapMenu {
         $('#modal_remove_path').modal('show');
     }
     remove_path(name){
-        console.log("remove_path: " + name);
+        // console.log("remove_path: " + name);
         this.remove_path_Topic.publish(new ROSLIB.Message({
             data: name,
         }));
         $('#modal_remove_path').modal('hide');
     }
     path_clicked_show(name){
-        console.log("publish_path: " + name);
+        // console.log("publish_path: " + name);
         this.publish_path_Topic.publish(new ROSLIB.Message({
             data: name,
         }));
@@ -1863,20 +1847,20 @@ class MapMenu {
         this.input_menu_point_new.value = '';
     }
     remove_point(name){
-        console.log("remove_point: " + name);
+        // console.log("remove_point: " + name);
         this.remove_point_Topic.publish(new ROSLIB.Message({
             data: name,
         }));
         $('#modal_remove_point').modal('hide');
     }
     point_clicked_show(name){
-        console.log("publish_point: " + name);
+        // console.log("publish_point: " + name);
         this.publish_point_Topic.publish(new ROSLIB.Message({
             data: name,
         }));
     }
     point_clicked_goal(name){
-        console.log("send_point_goal: " + name);
+        // console.log("send_point_goal: " + name);
         this.send_point_goal_Topic.publish(new ROSLIB.Message({
             data: name,
         }));
@@ -1889,7 +1873,7 @@ class MapMenu {
     }
 
     remove_map(map_filename){
-        console.log("remove_map: " + map_filename);
+        // console.log("remove_map: " + map_filename);
         this.remove_map_Topic.publish(new ROSLIB.Message({
             data: map_filename,
         }));
@@ -1897,7 +1881,7 @@ class MapMenu {
     }
 
     load_clicked_map(map_name, type){
-        console.log("load_clicked_map: " + map_name);
+        // console.log("load_clicked_map: " + map_name);
         if (type === 'INDOOR') {
             this.load_map_rtabmap_Topic.publish(new ROSLIB.Message({
                 data: map_name,
@@ -2332,10 +2316,6 @@ class LayoutManager {
         this.div_log_view.style.marginLeft = '4px';
         this.div_log_view.style.setProperty('width', 'calc(100vw - 8px)');
         this.div_log_view.style.setProperty('width', 'calc(100vw - 8px)');
-        // this.tab_power.style.setProperty('max-height', 'calc(100vh - 145px);');
-        // this.tab_mower.style.setProperty('max-height', 'calc(100vh - 145px);');
-        // this.tab_motors.style.setProperty('max-height', 'calc(100vh - 145px);');
-        // this.tab_diag.style.setProperty('max-height', 'calc(100vh - 145px);');
         this.tab_power.style.maxHeight = height - 145 + 'px';
         this.tab_mower.style.maxHeight = height - 145 + 'px'
         this.tab_motors.style.maxHeight = height - 145 + 'px'
@@ -2373,10 +2353,6 @@ class LayoutManager {
             this.div_log_view.style.marginLeft = '4px';
             this.div_log_view.style.setProperty('width', 'calc(100vw - 8px)');
         }
-        // this.tab_power.style.setProperty('max-height', 'calc(100vh - 100px);');
-        // this.tab_mower.style.setProperty('max-height', 'calc(100vh - 100px);');
-        // this.tab_motors.style.setProperty('max-height', 'calc(100vh - 100px);');
-        // this.tab_diag.style.setProperty('max-height', 'calc(100vh - 100px);');
         this.tab_power.style.maxHeight = height - 100 + 'px';
         this.tab_mower.style.maxHeight = height - 100 + 'px'
         this.tab_motors.style.maxHeight = height - 100 + 'px'
@@ -2782,7 +2758,6 @@ class PowerModule {
     }
 
     status_data(message){
-        // message.battery_capacity = 5;
         this.span_supply_volts.innerHTML = message.input_voltage.toFixed(2);;
         this.span_supply_amps.innerHTML = message.input_current.toFixed(2);
         this.span_batt_volts.innerHTML = message.battery_voltage.toFixed(2);
@@ -2835,7 +2810,6 @@ class PowerModule {
         }
         span_batt_capacity.textContent = message.battery_capacity;
 
-        // this.progress_batt_capacity.textContent = message.battery_capacity + '%';
         this.progress_batt_capacity.style.width = message.battery_capacity + '%';
         this.progress_batt_capacity.ariaValueNow = message.battery_capacity;
         this.progress_batt_capacity.ariaValueMin = 0;
@@ -2915,8 +2889,9 @@ class PowerModule {
 
 
 class Programs {
-    constructor(ros, map_menu) {
+    constructor(ros, map_menu, paths_visualization) {
         this.map_menu = map_menu;
+        this.paths_visualization = paths_visualization;
         this.program_list_Topic = new ROSLIB.Topic({
             ros : ros,
             name : '/web_plan/program_list',
@@ -2927,21 +2902,46 @@ class Programs {
             name : '/web_plan/reload',
             messageType : 'std_msgs/Bool'
         });
+        this.smach_stop_Topic = new ROSLIB.Topic({
+            ros : ros,
+            name : '/mower_smach/stop',
+            messageType : 'std_msgs/Bool'
+        });
+        this.smach_status_Topic = new ROSLIB.Topic({
+            ros : ros,
+            name : '/mower_smach/status',
+            messageType : 'std_msgs/String'
+        });
+        this.program_to_show_marker_Topic = new ROSLIB.Topic({
+            ros : ros,
+            name : '/web_plan/program_to_show_marker',
+            messageType : 'vitulus_msgs/PlannerProgram'
+        });
         this.program_list_Topic.subscribe((message) => {
             this.process_program_list(message);
+        });
+        this.smach_status_Topic.subscribe((message) => {
+            this.map_menu.span_menu_program_status.innerText = message.data;
         });
         this.program_list_msg = new ROSLIB.Message({
             program_list: []
         });
+        // Publish selected program to run
+        this.topic_program_select = new ROSLIB.Topic({
+            ros: ros,
+            name: '/web_plan/program_select',
+            messageType: 'std_msgs/String'
+        });
         this.program_list = [];
-
-
-
+        this.selected_program = null;
         this.init();
     }
 
     init(){
         this.reload_planner_data_Topic.advertise();
+        this.program_to_show_marker_Topic.advertise();
+        this.topic_program_select.advertise();
+        this.smach_stop_Topic.advertise();
         this.reload_planner_data();
     }
     reload_planner_data(){
@@ -2952,7 +2952,7 @@ class Programs {
     }
     process_program_list(message){
         this.program_list_msg = message;
-        console.log(message);
+        // console.log(message);
         this.draw_program_list();
     }
     draw_program_list() {
@@ -2973,6 +2973,7 @@ class Programs {
     show_program(id){
         // console.log(id);
         const program = this.program_list_msg.program_list[id];
+        this.map_menu.btn_menu_program_show.innerText = 'Show';
         this.map_menu.span_menu_program_name.innerText = program.name.split(' (')[0];
         this.map_menu.span_menu_program_length.innerText = program.length;
         this.map_menu.span_menu_program_area.innerText = program.area;
@@ -2986,11 +2987,47 @@ class Programs {
             const zone_item= new ProgramZoneItemTemplate(zone);
             this.map_menu.row_menu_program_detail_zones.innerHTML += zone_item.element;
         });
-
+        this.selected_program = program;
+        //remove all markers
+        Object.keys(this.paths_visualization.markerArrayClient.markers).forEach((key) => {
+            this.paths_visualization.markerArrayClient.removeMarker(key);
+        });
 
         this.map_menu.div_menu_program_detail_row.style.display = "flex";
     }
+    show_program_in_map(){
+        if (this.map_menu.btn_menu_program_show.innerText === 'Show'){
+            Object.keys(this.paths_visualization.markerArrayClient.markers).forEach((key) => {
+                this.paths_visualization.markerArrayClient.removeMarker(key);
+            });
+            this.program_to_show_marker_Topic.publish(this.selected_program);
+            this.map_menu.btn_menu_program_show.innerText = 'Hide';
+        }
+        // OR Hide marker
+        else {
+            this.program_to_show_marker_Topic.publish(new ROSLIB.Message({
+                name: 'none'
+            }));
+            Object.keys(this.paths_visualization.markerArrayClient.markers).forEach((key) => {
+                this.paths_visualization.markerArrayClient.removeMarker(key);
+            });
+            this.map_menu.btn_menu_program_show.innerText = 'Show';
+        }
+    }
+    runProgram(program_name) {
+        const msg = new ROSLIB.Message({
+            data: program_name,
+        });
+        this.topic_program_select.publish(msg);
+        // console.log(msg);
+    }
 
+    stopProgram() {
+        const msg = new ROSLIB.Message({
+            data: true,
+        });
+        this.smach_stop_Topic.publish(msg);
+    }
 }
 
 
@@ -3012,30 +3049,15 @@ window.onload = function () {
     layout_man.set_layout();
 
     viewer.changeViewerSize();
-
     viewer.updateCam();
     viewer.viewer.addObject(new THREE.AmbientLight(0x696969));
 
-
-    // viewer.viewer.cameraControls.rotateDown(Math.PI/1.9);
-    // viewer.viewer.cameraControls.zoomIn(10);
-
-
     tf_client = new TfClient(ros, viewer.viewer);
     tf_client.tfClientMap.subscribe('base_link', function(tf) {
-    // tf_client.tfClientMap.subscribe('d435_depth_optical_frame', function(tf) {
         tf_client.follow_robot_set(viewer.viewer, tf);
     });
 
     laser_scan = new LaserScan(ros, tf_client.tfClientMap, viewer.viewer);
-
-    // maps = new Maps(ros.ros, tf_client.tfClientMap, viewer.viewer);
-    // maps.local_costmap.on('change', function(event) {
-    //     console.log("local_costmap_change");
-    //     // console.log(event);
-    //     // console.log(maps.local_costmap.currentGrid.message.data);
-    //
-    // })
 
     viewer_grid = new ViewerGrid(viewer);
 
@@ -3043,19 +3065,16 @@ window.onload = function () {
     viewer.viewer.cameraControls.addEventListener('touchstart', function(event3d) {
         interactive_markers.new_marker(event3d);
     });
+
     viewer.viewer.cameraControls.addEventListener('mousedown', function(event3d) {
         interactive_markers.new_marker(event3d);
     });
-    // viewer.viewer.cameraControls.addEventListener('mousewheel', function(event3d) {
-    //     tf_client.cam_z = viewer.viewer.camera.position.z;
-    // });
 
     clouds = new Clouds(ros.ros, tf_client.tfClientMap, viewer.viewer);
 
     robot_visualization = new RobotVisualization(ros.ros, tf_client.tfClientMap, viewer.viewer);
 
     rtabmap = new RtabMap(ros.ros);
-
     rtabmap.rtabmap_status_topic.subscribe(function(message) {
          // console.log(message);
         if (message.data){
@@ -3085,6 +3104,7 @@ window.onload = function () {
     /**
      *  Robot control
      */
+
     icon_status = new IconStatus(ros);
     icon_status.icon_status_topic.subscribe(function (message) {
         icon_status.icon_data(message);
@@ -3121,8 +3141,6 @@ window.onload = function () {
         motors_control.motor_state_data(message)
     });
 
-
-
     lidar_control = new LidarControl(ros.ros);
     lidar_control.btn_menu_lidar_on.onclick = function() {
         lidar_control.start_lidar();
@@ -3133,12 +3151,6 @@ window.onload = function () {
     lidar_control.icon_status_topic.subscribe(function (message) {
         lidar_control.status_data(message);
     });
-
-
-
-
-
-
 
     /**
      *  Status bar
@@ -3161,16 +3173,28 @@ window.onload = function () {
         status_bar.set_indoor(message);
     });
 
-
+    /**
+     *  Occupancy maps
+     */
 
     maps = new Maps(ros.ros, tf_client.tfClientMap, viewer.viewer);
 
 
     /**
-     *  Menu control
+     *  Menu
      */
 
     map_menu = new MapMenu(ros.ros, maps, rtabmap, status_bar);
+
+
+     /**
+     *  Programs
+     */
+
+    programs = new Programs(ros.ros, map_menu, paths_visualization);
+    programs.reload_planner_data();
+
+
 
     /**
      *  Submenu marker
@@ -3197,12 +3221,6 @@ window.onload = function () {
     map_menu.btn_settings.onclick = function () {
         map_menu.btn_config_onclick(interactive_markers);
     };
-    // map_menu.btn_menu_motors_on.onclick = function () {
-    //     map_menu.btn_menu_motors_on_onclick(motors_control, true);
-    // };
-    // map_menu.btn_menu_motors_off.onclick = function () {
-    //     map_menu.btn_menu_motors_on_onclick(motors_control, false);
-    // };
     map_menu.btn_menu_lidar_on.onclick = function () {
         map_menu.btn_menu_lidar_on_onclick(lidar_control, true);
     };
@@ -3221,7 +3239,7 @@ window.onload = function () {
         map_menu.save_point();
     };
     map_menu.btn_menu_point_clear.onclick = function () {
-        console.log("btn_menu_point_clear");
+        // console.log("btn_menu_point_clear");
         for (const [key, value] of Object.entries(paths_visualization.mapMarker.markers)) {
           value.visible = false;
         }
@@ -3235,26 +3253,19 @@ window.onload = function () {
         map_menu.btn_programs_onclick(interactive_markers);
     };
 
-    /**
-     *  Programs
-     */
+    map_menu.btn_menu_program_show.onclick = function () {
+        programs.show_program_in_map();
+    };
 
-    programs = new Programs(ros.ros, map_menu);
-    programs.reload_planner_data();
-    // programs.program_list_Topic.subscribe(function (message) {
-    //     console.log("message");
-    //     programs.process_program_list(message);
-    // });
+    map_menu.btn_menu_program_run.onclick = function () {
+        programs.runProgram(programs.selected_program.name);
+    };
 
-    // map_menu.btn_menu_point_new_save.onclick = function () {
-    //     map_menu.save_point();
-    // };
-    // map_menu.btn_menu_point_clear.onclick = function () {
-    //     console.log("btn_menu_point_clear");
-    //     for (const [key, value] of Object.entries(paths_visualization.mapMarker.markers)) {
-    //       value.visible = false;
-    //     }
-    // };
+    map_menu.btn_menu_program_stop.onclick = function () {
+        programs.stopProgram();
+    };
+
+
 
     /**
      *  Paths submenu
@@ -3267,13 +3278,9 @@ window.onload = function () {
         map_menu.save_path();
     };
     map_menu.btn_menu_path_clear.onclick = function () {
-        console.log("btn_menu_path_clear");
+        // console.log("btn_menu_path_clear");
         map_menu.path_clicked_show('');
-        console.log(paths_visualization);
         paths_visualization.mapPath.sn.visible = false;
-        // for (const [key, value] of Object.entries(paths_visualization.mapMarker.markers)) {
-        //   value.visible = false;
-        // }
     };
 
     /**
@@ -3293,11 +3300,10 @@ window.onload = function () {
     }
     map_menu.btn_menu_map_rtabmap_mapping.onclick = function () {
         rtabmap.set_rtabmap_mapping();
-        // map_menu.hide_all_submenu_divs();
+
     }
     map_menu.btn_menu_map_rtabmap_localization.onclick = function () {
         rtabmap.set_rtabmap_localization();
-        // map_menu.hide_all_submenu_divs();
     }
     map_menu.btn_menu_map_new_save.onclick = function () {
         map_menu.save_map();
@@ -3310,29 +3316,6 @@ window.onload = function () {
         map_menu.map_to_show = 'planner';
         map_menu.show_planner_map();
     }
-    map_menu.maps.rtabmap_grid_map.on('change', function() {
-        // console.log("rtabmap_grid_map_change");
-        // console.log(map_menu.map_to_show);
-        if (map_menu.map_to_show === 'rtabmap'){
-            map_menu.show_rtabmap_map();
-        }
-        if (map_menu.map_to_show === 'planner'){
-            map_menu.show_planner_map();
-        }
-    });
-    map_menu.maps.planner_map.on('change', function() {
-        // console.log("planner_map_change");
-        // console.log(map_menu.map_to_show);
-        if (map_menu.map_to_show === 'rtabmap'){
-            map_menu.show_rtabmap_map();
-        }
-        if (map_menu.map_to_show === 'planner'){
-            map_menu.show_planner_map();
-        }
-    });
-    // map_menu.map_list_Topic.subscribe(function (message) {
-    //     map_menu.process_map_list(message);
-    // });
 
 
      /**
@@ -3419,7 +3402,7 @@ window.onload = function () {
     motors_control.btn_menu_speed_moderate.style.color = "#ffffff";
     motors_control.btn_menu_speed_fast.style.color = "#ffffff";
 
-    // predelat content oncliku na funkce v tride
+    // ToDo: refactor this
     motors_control.btn_menu_speed_fast.onclick = function () {
         joy_teleop.speed_lin = joy_teleop.speed_lin_fast;
         joy_teleop.speed_ang = joy_teleop.speed_ang_fast;
@@ -3457,6 +3440,9 @@ window.onload = function () {
     });
     resize();
 
+    /**
+     *  Log
+     */
 
     ros_log = new RosLog(ros);
     ros_log.log_topic.subscribe(function (message) {
@@ -3475,23 +3461,25 @@ window.onload = function () {
         }
     };
 
-
-
-
-
-
-
+    /**
+     *  Maps, paths, points
+     */
     map_list = new MapList(ros.ros, map_menu);
     point_list = new ItemList(ros.ros, map_menu, 'point');
     path_list = new ItemList(ros.ros, map_menu, 'path');
 
+    /**
+     *  Diagnostics
+     */
 
     diag = new Diag(ros);
     diag.diag_topic.subscribe(function (message) {
         diag.diag_data(message, diag.diag_arr);
     });
 
-    //// Mower
+    /**
+     *  Mower
+     */
 
     mower = new Mower(ros);
     mower.mower_status_topic.subscribe(function (message) {
@@ -3557,7 +3545,9 @@ window.onload = function () {
     };
 
 
-    ///// Power module
+    /**
+     *  Power module
+     */
 
     power_module = new PowerModule(ros);
     power_module.power_status_topic.subscribe(function(message) {
@@ -3600,7 +3590,9 @@ window.onload = function () {
     power_module.btn_mower_off_pm.onclick = function() {power_module.pub_set_bat_out_switch(value = false)};
 
 
-
+    /**
+     *  orientation control
+     */
 
 
     window.matchMedia("(orientation: portrait)").addEventListener("change", e => {
@@ -3608,5 +3600,38 @@ window.onload = function () {
         layout_man.is_portrait = portrait;
         layout_man.set_layout();
     });
+
+    function post_load() {
+
+        maps.local_costmap = new ROS3D.OccupancyGridClient({
+            ros : ros.ros,
+            tfClient: tf_client.tfClientMap,
+            rootObject : viewer.viewer.scene,
+            continuous: true,
+            compression: 'cbor',
+            // topic: 'navi_manager/local_costmap',
+            topic: '/move_base_flex/local_costmap/costmap',
+            color: {r:255,g:0,b:255},  // {r:0,g:255,b:255} gridmap, {r:255,g:0,b:255} loc costmap, {r:255,g:255,b:0} glob costmap
+            opacity: 0.99,
+            offsetPose: maps.local_costmap_offset,
+        });
+        maps.map = new ROS3D.OccupancyGridClient({
+            ros : ros.ros,
+            tfClient: tf_client.tfClientMap,
+            rootObject : viewer.viewer.scene,
+            continuous: true,
+            topic: '/navi_manager/map',
+            color: {r:0,g:255,b:255},  // {r:0,g:255,b:255} gridmap, {r:255,g:0,b:255} loc costmap, {r:255,g:255,b:0} glob costmap
+            opacity: 0.7,
+            offsetPose: maps.map_offset,
+        });
+
+        // Reload planner
+        programs.reload_planner_data();
+
+    }
+    // programs.reload_planner_data();
+
+    window.setTimeout(function(){post_load();}, 1000);
 
 }

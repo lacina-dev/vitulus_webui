@@ -36,10 +36,7 @@ if __name__ == '__main__':
     signal.signal(signal.SIGINT, signal_handler)
 
     try:
-    # if True:
-
         rospy.init_node('webnode', anonymous=True)
-        # app = Flask(__name__, static_url_path='/assets')
         app = Flask(__name__,
                     static_url_path='/assets',
                     static_folder='/home/vitulus/catkin_ws/src/vitulus/vitulus_webui/nodes/templates/assets',
@@ -68,6 +65,7 @@ if __name__ == '__main__':
         rospy.spin()
 
     except rospy.ROSInterruptException:
+        rospy.logerr("Webnode doesn't start!!!!!")
         print("Webnode doesn't start!!!!!")
 
 

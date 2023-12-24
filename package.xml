@@ -4,10 +4,9 @@
   <version>0.0.1</version>
   <description>WebUI server for Vitulus.</description>
 
-  <maintainer email="robert.lacina@gmail.com">Robert Lacina</maintainer>
+  <maintainer email="robert@lacina.dev">Robert Lacina</maintainer>
   <license>MIT</license>
-  <author email="robert.lacina@gmail.com">Robert Lacina</author>
-
+  <author email="robert@lacina.dev">Robert Lacina</author>
 
   <buildtool_depend>catkin</buildtool_depend>
   <depend>rospy</depend>

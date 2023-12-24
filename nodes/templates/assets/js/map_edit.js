@@ -7,16 +7,9 @@ window.onload = function() {
 
     let active_map_file_name = "";
 
-    var listenerMapMeta = new ROSLIB.Topic({
-        ros : ros,
-        name : '/web_plan/map_metadata',
-        messageType : 'nav_msgs/MapMetaData'
-    });
 
-    listenerMapMeta.subscribe(function(message) {
-        console.log(message);
-    });
-
+    // 2D view  ////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     var viewer;
     var gridClient;
@@ -30,11 +23,10 @@ window.onload = function() {
     div_map_width = div_map.offsetWidth;
     div_map_height = div_map.offsetHeight;
     var initiate = true;
-    console.log(div_map_width);
-    console.log(div_map_height);
+    // console.log(div_map_width);
+    // console.log(div_map_height);
 
-
-    // Create the main viewer.  ////////////////////////////////////////////////////////////////////////////////////////
+    // Create the main viewer.
     viewer = new ROS2D.Viewer({
       divID : 'map',
       width : div_map_width,
@@ -51,9 +43,7 @@ window.onload = function() {
         rootObject : viewer.scene
     });
 
-
-    // Grid client.  ////////////////////////////////////////////////////////////////////////////////
-    // div_map_height = div_map.innerHeight;//////////
+    // Grid client.
     gridClient = new ROS2D.OccupancyGridClient({
       ros : ros,
       topic: '/web_plan/map_show',
@@ -71,7 +61,7 @@ window.onload = function() {
     gridClient.rootObject.addChild(coveragePath);
 
 
-    // Grid client on change  //////////////////////////////////////////////////////////////////////////////////////////
+    // Grid client on change
     gridClient.on('change', function() {
         if (initiate){
             resize();
@@ -80,7 +70,7 @@ window.onload = function() {
     });
 
     function resize() {
-        console.log("RESIZE");
+        // console.log("RESIZE");
         div_map_width = div_map.offsetWidth;
         div_map_height = div_map.offsetHeight;
         viewer.width = div_map_width;
@@ -102,7 +92,7 @@ window.onload = function() {
     });
 
 
-    // Polygon setup
+    // Polygons ////////////////////////////////////////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     var polygon_enabled = false
@@ -157,12 +147,10 @@ window.onload = function() {
 
         viewer.scene.addEventListener('stagemousedown', function(event) {
             if (event.nativeEvent.altKey === true) {
-                console.log("alt pressed")
                 zoomKey = true;
                 zoomView.startZoom(event.stageX, event.stageY);
             }
             else if (event.nativeEvent.ctrlKey === true) {
-                console.log("ctrl pressed")
                 panKey = true;
                 panView.startPan(event.stageX, event.stageY);
             }
@@ -188,8 +176,8 @@ window.onload = function() {
 					}
 					else if (panKey === true) {
 						panView.pan(event.stageX, event.stageY);
-                        console.log("viewer.scene.children[0].x: " + viewer.scene.children[0].x + " viewer.scene.children[0].y: " + viewer.scene.children[0].y);
-                        console.log("wiever.scene.x: " + viewer.scene.x + " viewer.scene.y: " + viewer.scene.y);
+                        // console.log("viewer.scene.children[0].x: " + viewer.scene.children[0].x + " viewer.scene.children[0].y: " + viewer.scene.children[0].y);
+                        // console.log("wiever.scene.x: " + viewer.scene.x + " viewer.scene.y: " + viewer.scene.y);
 					}
 				}
           }
@@ -197,7 +185,7 @@ window.onload = function() {
 
         viewer.scene.addEventListener('stagemouseup', function(event) {
           // Add point when not clicked on the polygon
-            console.log("zoomKey: " + zoomKey + " panKey: " + panKey + " mouseDown: " + mouseDown + " clickedPolygon: " + clickedPolygon + " selectedPointIndex: " + selectedPointIndex + " mouseInBounds: " + viewer.scene.mouseInBounds);
+          //   console.log("zoomKey: " + zoomKey + " panKey: " + panKey + " mouseDown: " + mouseDown + " clickedPolygon: " + clickedPolygon + " selectedPointIndex: " + selectedPointIndex + " mouseInBounds: " + viewer.scene.mouseInBounds);
           if (selectedPointIndex !== null) {
             selectedPointIndex = null;
             if (mouseDown === true) {
@@ -213,7 +201,7 @@ window.onload = function() {
           else if (viewer.scene.mouseInBounds === true && clickedPolygon === false && zoomKey === false && panKey === false) {
             var pos = viewer.scene.globalToRos(event.stageX, event.stageY);
             polygon.addPoint(pos);
-            console.log("point added");
+            // console.log("point added");
           } else {
               if (mouseDown === true) {
 					if (zoomKey === true) {
@@ -243,7 +231,7 @@ window.onload = function() {
         messageType: 'std_msgs/String'
     });
     logTopic.subscribe(function (message) {
-        console.log("MapEdit log:" + message.data);
+        // console.log("MapEdit log:" + message.data);
         div_log.textContent = message.data;
     });
 
@@ -285,7 +273,7 @@ window.onload = function() {
                 margin: parseFloat(input_obstacle_margin.value),
                 shape: input_fill_shape.value,
             });
-            console.log(msg)
+            // console.log(msg)
             topic_assemble_map.publish(msg);
         };
     };
@@ -310,6 +298,7 @@ window.onload = function() {
             });
             topic_show_fill_map.publish(msg);
         }
+
         // show free poly
         btn_show_free_poly = document.getElementById("btn_show_free_poly");
         btn_show_free_poly.onclick = function () {
@@ -318,6 +307,7 @@ window.onload = function() {
             });
             topic_show_fill_map.publish(msg);
         }
+
         // show obstacle poly
         btn_show_obstacles_poly = document.getElementById("btn_show_obstacles_poly");
         btn_show_obstacles_poly.onclick = function () {
@@ -326,14 +316,6 @@ window.onload = function() {
             });
             topic_show_fill_map.publish(msg);
         }
-        // show obstacle margin
-        // btn_show_obstacle_margin = document.getElementById("btn_show_obstacle_margin");
-        // btn_show_obstacle_margin.onclick = function () {
-        //     var msg = new ROSLIB.Message({
-        //         data: "obstacle_margin",
-        //     });
-        //     topic_show_fill_map.publish(msg);
-        // }
 
         // show assembled_lite
         btn_show_assembled_lite = document.getElementById("btn_show_assembled_lite");
@@ -343,14 +325,6 @@ window.onload = function() {
             });
             topic_show_fill_map.publish(msg);
         }
-        // // show coverage path
-        // btn_show_coverage_path = document.getElementById("btn_show_coverage_path");
-        // btn_show_coverage_path.onclick = function() {
-        //     var msg = new ROSLIB.Message({
-        //         data : "coverage_path",
-        //     });
-        //     topic_show_fill_map.publish(msg);
-        // }
 
         // show original
         btn_show_original = document.getElementById("btn_show_original");
@@ -404,187 +378,160 @@ window.onload = function() {
     // Polygons  ///////////////////////////////////////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     function map_polygons() {
-    // // Publish current polygon  ////////////////////////////////////////////////////////////////////////////////////////
-    // var topic_publish_polygon = new ROSLIB.Topic({
-    //     ros : ros,
-    //     name : '/publish_polygon',
-    //     messageType : 'geometry_msgs/PolygonStamped'
-    // });
-    // topic_publish_polygon.advertise();
-    // btn_pub_polygon = document.getElementById("btn_pub_polygon");
-    //
-    // btn_pub_polygon.onclick = function() {
-    //     // console.log(polygon.pointContainer.children.length);
-    //     if (polygon.pointContainer.children.length > 0){
-    //         var points = [];
-    //         for (i in polygon.pointContainer.children){
-    //             points.push({x: polygon.pointContainer.children[i].x, y: polygon.pointContainer.children[i].y * -1});
-    //         }
-    //         var msg = new ROSLIB.Message({
-    //             header : {
-    //                 frame_id : "map"
-    //             },
-    //             polygon : {
-    //                 points : points
-    //             }
-    //         });
-    //         topic_publish_polygon.publish(msg);
-    //     }
-    // };
 
-    // Polygon elements
-    var input_poly_template_name = document.getElementById("input_poly_template_name");
-    var input_poly_template_type = document.getElementById("input_poly_template_type");
-    var div_poly_list = document.getElementById("div_poly_list");
-    div_poly_list.innerHTML = '';
-    var btn_new_poly = document.getElementById("btn_new_poly");
-    var btn_poly_template_save = document.getElementById("btn_poly_template_save");
-    var btn_poly_template_cancel = document.getElementById("btn_poly_template_cancel");
-    var div_poly_template = document.getElementById("div_poly_template");
-    var div_poly_template_style_attr = div_poly_template.getAttribute('style');
-    div_poly_template.setAttribute('style', div_poly_template_style_attr + 'display:none !important');
-
-    // New polygon
-    btn_new_poly.onclick = function() {
-        div_poly_template.setAttribute('style', div_poly_template_style_attr + 'display:flex');
-        viewer.scene.addChild(polygon);
-    }
-
-    // Cancel polygon
-    btn_poly_template_cancel.onclick = function() {
+        // Polygon elements
+        var input_poly_template_name = document.getElementById("input_poly_template_name");
+        var input_poly_template_type = document.getElementById("input_poly_template_type");
+        var div_poly_list = document.getElementById("div_poly_list");
+        div_poly_list.innerHTML = '';
+        var btn_new_poly = document.getElementById("btn_new_poly");
+        var btn_poly_template_save = document.getElementById("btn_poly_template_save");
+        var btn_poly_template_cancel = document.getElementById("btn_poly_template_cancel");
+        var div_poly_template = document.getElementById("div_poly_template");
+        var div_poly_template_style_attr = div_poly_template.getAttribute('style');
         div_poly_template.setAttribute('style', div_poly_template_style_attr + 'display:none !important');
-        viewer.scene.removeChild(polygon);
-        polygon.pointContainer.children = [];
-        polygon.lineContainer.children = [];
-        polygon.fillShape.graphics._instructions = [];
-        polygon.fillShape.graphics._oldInstructions = [];
-    }
 
-    // Save polygon
-    var topic_save_poly = new ROSLIB.Topic({
-            ros : ros,
-            name : '/web_plan/save_polygon',
-            messageType : 'vitulus_msgs/MapEditPolygon'
-    });
-    topic_save_poly.advertise();
+        // New polygon
+        btn_new_poly.onclick = function() {
+            div_poly_template.setAttribute('style', div_poly_template_style_attr + 'display:flex');
+            viewer.scene.addChild(polygon);
+        }
 
-    btn_poly_template_save.onclick = function() {
-        console.log(polygon.pointContainer.children.length);
-        if (polygon.pointContainer.children.length > 0){
-            var points = [];
-            for (i in polygon.pointContainer.children){
-                points.push({x: polygon.pointContainer.children[i].x, y: polygon.pointContainer.children[i].y * -1});
-            }
-            console.log(points);
-            var msgPoly = new ROSLIB.Message({
-                header : {
-                    frame_id : "map"
-                },
-                polygon : {
-                    points : points
-                }
-            });
-            console.log(msgPoly);
-            var msg = new ROSLIB.Message({
-                header : {
-                    frame_id : "map"
-                },
-                name: input_poly_template_name.value,
-                area: 0,
-                type: input_poly_template_type.value,
-                polygon : msgPoly
-            });
-            topic_save_poly.publish(msg);
-            console.log(msg);
-
-            // clean up
+        // Cancel polygon
+        btn_poly_template_cancel.onclick = function() {
             div_poly_template.setAttribute('style', div_poly_template_style_attr + 'display:none !important');
             viewer.scene.removeChild(polygon);
             polygon.pointContainer.children = [];
             polygon.lineContainer.children = [];
             polygon.fillShape.graphics._instructions = [];
             polygon.fillShape.graphics._oldInstructions = [];
-        }else{
-            div_log.textContent = "Draw the polygon on the map!";
         }
-    }
 
-    // Remove polygon from list by name
-    var topic_remove_poly = new ROSLIB.Topic({
-        ros : ros,
-        name : '/web_plan/remove_polygon',
-        messageType : 'std_msgs/String'
-    });
-    topic_remove_poly.advertise();
-
-    this.removePoly = function(poly_name){
-        let msg = new ROSLIB.Message({
-            data : poly_name,
+        // Save polygon
+        var topic_save_poly = new ROSLIB.Topic({
+                ros : ros,
+                name : '/web_plan/save_polygon',
+                messageType : 'vitulus_msgs/MapEditPolygon'
         });
-        topic_remove_poly.publish(msg);
-    }
+        topic_save_poly.advertise();
 
-    // Edit polygon from list by name
-    this.editPoly = function(poly_name){
-        for (let i in current_poly_list){
-            if (current_poly_list[i].name === poly_name){
-                let poly = current_poly_list[i];
-                console.log(poly);
-                div_poly_template.setAttribute('style', div_poly_template_style_attr + 'display:flex');
+        btn_poly_template_save.onclick = function() {
+            // console.log(polygon.pointContainer.children.length);
+            if (polygon.pointContainer.children.length > 0){
+                var points = [];
+                for (i in polygon.pointContainer.children){
+                    points.push({x: polygon.pointContainer.children[i].x, y: polygon.pointContainer.children[i].y * -1});
+                }
+                // console.log(points);
+                var msgPoly = new ROSLIB.Message({
+                    header : {
+                        frame_id : "map"
+                    },
+                    polygon : {
+                        points : points
+                    }
+                });
+                // console.log(msgPoly);
+                var msg = new ROSLIB.Message({
+                    header : {
+                        frame_id : "map"
+                    },
+                    name: input_poly_template_name.value,
+                    area: 0,
+                    type: input_poly_template_type.value,
+                    polygon : msgPoly
+                });
+                topic_save_poly.publish(msg);
+                // console.log(msg);
+
+                // clean up
+                div_poly_template.setAttribute('style', div_poly_template_style_attr + 'display:none !important');
                 viewer.scene.removeChild(polygon);
                 polygon.pointContainer.children = [];
                 polygon.lineContainer.children = [];
                 polygon.fillShape.graphics._instructions = [];
                 polygon.fillShape.graphics._oldInstructions = [];
-                viewer.scene.addChild(polygon);
-                for (let point in poly.polygon.polygon.points){
-                    console.log("Point:");
-                    console.log(poly.polygon.polygon.points[point]);
-                    polygon.addPoint(poly.polygon.polygon.points[point]);
-                }
-                input_poly_template_name.value = poly.name;
-                input_poly_template_type.value = poly.type;
+            }else{
+                div_log.textContent = "Draw the polygon on the map!";
             }
         }
-    }
 
-    // load polygon list
-    var polyListTopic = new ROSLIB.Topic({
-        ros : ros,
-        name : '/web_plan/polygon_list',
-        messageType : 'vitulus_msgs/MapEditPolygonList'
-    });
+        // Remove polygon from list by name
+        var topic_remove_poly = new ROSLIB.Topic({
+            ros : ros,
+            name : '/web_plan/remove_polygon',
+            messageType : 'std_msgs/String'
+        });
+        topic_remove_poly.advertise();
 
-    var current_poly_list = [];
-    polyListTopic.subscribe(function(message) {
-        current_poly_list = message.polygon_list;
-        var html_poly_list ='';
-        for (let poly in message.polygon_list){
-            let poly_name = message.polygon_list[poly].name;
-            let poly_type = message.polygon_list[poly].type;
-            html_poly_list += `
-                <div id="div_poly" class="d-flex align-items-center" style="border-bottom: 1px solid #444444;padding-right: 2px;padding-left: 6px;padding-bottom: 2px;padding-top: 2px;">
-                    <div class="d-flex">
-                        <span id="span_poly_name" style="margin-right: 6px;width: 155px;font-size: 13.2px;">
-                            ${poly_name}
-                        </span>
-                        <span id="span_poly_type" class="text-nowrap" style="margin-right: 12px;font-size: 13.2px;">
-                            ${poly_type}
-                        </span>
-                    </div>
-                    <div class="btn-group btn-group-sm d-flex ms-auto" role="group">
-                        <button id="btn_poly_edit" class="btn btn-outline-info d-inline-flex btn-sm-s" type="button" onclick="editPoly(&#39;${poly_name}&#39;)">Edit</button>
-                        <button id="btn_poly_remove" class="btn btn-outline-danger d-inline-flex btn-sm-s" type="button" onclick="removePoly(&#39;${poly_name}&#39;)">Remove</button>
-                    </div>
-                </div>
-`;
-            div_poly_list.innerHTML = html_poly_list;
+        this.removePoly = function(poly_name){
+            let msg = new ROSLIB.Message({
+                data : poly_name,
+            });
+            topic_remove_poly.publish(msg);
         }
-        if (message.polygon_list.length == 0){
-            div_poly_list.innerHTML = "";
+
+        // Edit polygon from list by name
+        this.editPoly = function(poly_name){
+            for (let i in current_poly_list){
+                if (current_poly_list[i].name === poly_name){
+                    let poly = current_poly_list[i];
+                    // console.log(poly);
+                    div_poly_template.setAttribute('style', div_poly_template_style_attr + 'display:flex');
+                    viewer.scene.removeChild(polygon);
+                    polygon.pointContainer.children = [];
+                    polygon.lineContainer.children = [];
+                    polygon.fillShape.graphics._instructions = [];
+                    polygon.fillShape.graphics._oldInstructions = [];
+                    viewer.scene.addChild(polygon);
+                    for (let point in poly.polygon.polygon.points){
+                        // console.log("Point:");
+                        // console.log(poly.polygon.polygon.points[point]);
+                        polygon.addPoint(poly.polygon.polygon.points[point]);
+                    }
+                    input_poly_template_name.value = poly.name;
+                    input_poly_template_type.value = poly.type;
+                }
+            }
         }
-    });
-    }
+
+        // load polygon list
+        var polyListTopic = new ROSLIB.Topic({
+            ros : ros,
+            name : '/web_plan/polygon_list',
+            messageType : 'vitulus_msgs/MapEditPolygonList'
+        });
+
+        var current_poly_list = [];
+        polyListTopic.subscribe(function(message) {
+            current_poly_list = message.polygon_list;
+            var html_poly_list ='';
+            for (let poly in message.polygon_list){
+                let poly_name = message.polygon_list[poly].name;
+                let poly_type = message.polygon_list[poly].type;
+                html_poly_list += `
+                    <div id="div_poly" class="d-flex align-items-center" style="border-bottom: 1px solid #444444;padding-right: 2px;padding-left: 6px;padding-bottom: 2px;padding-top: 2px;">
+                        <div class="d-flex">
+                            <span id="span_poly_name" style="margin-right: 6px;width: 155px;font-size: 13.2px;">
+                                ${poly_name}
+                            </span>
+                            <span id="span_poly_type" class="text-nowrap" style="margin-right: 12px;font-size: 13.2px;">
+                                ${poly_type}
+                            </span>
+                        </div>
+                        <div class="btn-group btn-group-sm d-flex ms-auto" role="group">
+                            <button id="btn_poly_edit" class="btn btn-outline-info d-inline-flex btn-sm-s" type="button" onclick="editPoly(&#39;${poly_name}&#39;)">Edit</button>
+                            <button id="btn_poly_remove" class="btn btn-outline-danger d-inline-flex btn-sm-s" type="button" onclick="removePoly(&#39;${poly_name}&#39;)">Remove</button>
+                        </div>
+                    </div>
+    `;
+                div_poly_list.innerHTML = html_poly_list;
+            }
+            if (message.polygon_list.length == 0){
+                div_poly_list.innerHTML = "";
+            }
+        });
+        }
     map_polygons();
 
 
@@ -603,7 +550,6 @@ window.onload = function() {
     var btn_zone_template_save = document.getElementById("btn_zone_template_save");
     var btn_zone_template_cancel = document.getElementById("btn_zone_template_cancel");
     var div_zone_template = document.getElementById("div_zone_template");
-    // var div_path_list = document.getElementById("div_path_list");
     var header_zone_template_coverage_path = document.getElementById("header_zone_template_coverage_path");
     var header_zone_template_border_path = document.getElementById("header_zone_template_border_path");
     var header_zone_template_path_list = document.getElementById("header_zone_template_path_list");
@@ -613,7 +559,6 @@ window.onload = function() {
     var zone_template_style_attr = div_zone_template.getAttribute('style');
     var header_zone_template_coverage_path_style_attr = header_zone_template_coverage_path.getAttribute('style');
     var header_zone_template_border_path_style_attr = header_zone_template_border_path.getAttribute('style');
-    // var header_zone_template_path_list_style_attr = header_zone_template_path_list.getAttribute('style');
     div_zone_template.setAttribute('style', 'display:none !important');
     div_zone_list.innerHTML = "";
     var current_zone = null;
@@ -632,10 +577,6 @@ window.onload = function() {
         input_zone_template_coverage_path.value = 160;
         input_zone_template_path_distance.value = 0.2;
         input_zone_template_simplify.value = 0.1;
-        // header_zone_template_coverage_path.setAttribute('style', 'display:none !important');
-        // header_zone_template_border_path.setAttribute('style', 'display:none !important');
-        // header_zone_template_path_list.setAttribute('style', 'display:none !important');
-        // div_path_list.innerHTML = "";
         polygon.pointContainer.children = [];
         polygon.lineContainer.children = [];
         polygon.fillShape.graphics._instructions = [];
@@ -675,7 +616,7 @@ window.onload = function() {
 
     // Save zone
     btn_zone_template_save.onclick = function () {
-        console.log(polygon.pointContainer.children.length);
+        // console.log(polygon.pointContainer.children.length);
         if (polygon.pointContainer.children.length > 0) {
             var points = [];
             for (i in polygon.pointContainer.children) {
@@ -684,7 +625,7 @@ window.onload = function() {
                     y: polygon.pointContainer.children[i].y * -1
                 });
             }
-            console.log(points);
+            // console.log(points);
             var msgPoly = new ROSLIB.Message({
                 header: {
                     frame_id: "map"
@@ -693,7 +634,7 @@ window.onload = function() {
                     points: points
                 }
             });
-            console.log(msgPoly);
+            // console.log(msgPoly);
             var msg = new ROSLIB.Message({
                 header: {
                     frame_id: "map"
@@ -711,7 +652,7 @@ window.onload = function() {
                 paths: []
             });
             topic_save_zone.publish(msg);
-            console.log(msg);
+            // console.log(msg);
 
             // clean up
             div_zone_template.setAttribute('style', 'display:none !important');
@@ -763,7 +704,7 @@ window.onload = function() {
         for (let i in current_zone_list) {
             if (current_zone_list[i].name === zone_name) {
                 let zone = current_zone_list[i];
-                console.log(zone);
+                // console.log(zone);
                 div_zone_template.setAttribute('style', zone_template_style_attr);
                 viewer.scene.removeChild(polygon);
                 polygon.pointContainer.children = [];
@@ -772,8 +713,8 @@ window.onload = function() {
                 polygon.fillShape.graphics._oldInstructions = [];
                 viewer.scene.addChild(polygon);
                 for (let point in zone.polygon.polygon.points) {
-                    console.log("Point:");
-                    console.log(zone.polygon.polygon.points[point]);
+                    // console.log("Point:");
+                    // console.log(zone.polygon.polygon.points[point]);
                     polygon.addPoint(zone.polygon.polygon.points[point]);
                 }
                 input_zone_template_name.value = zone.name;
@@ -864,14 +805,14 @@ window.onload = function() {
         selected_program_msg.zone_list.push(current_zone_list[input_program_add_zone.value]);
         zones_el = "";
         for (let i in selected_program_msg.zone_list) {
-            console.log(selected_program_msg.zone_list[i]);
+            // console.log(selected_program_msg.zone_list[i]);
             const zone_name = selected_program_msg.zone_list[i].name;
             zones_el += `
                 <span style="background: var(--bs-gray-dark);padding: 2px;border-radius: 5px;padding-right: 4px;padding-left: 4px;margin-left: 2px;"><span style="margin-right: 3px;"><i class="fa fa-remove text-danger" onclick="removeProgramTemplateZone(&#39;${zone_name}&#39;)"></i></span><span>${zone_name}</span></span>
             `;
         }
         span_program_template_zones.innerHTML = zones_el;
-        console.log(selected_program_msg);
+        // console.log(selected_program_msg);
     }
 
     // Remove zone from program template
@@ -884,14 +825,14 @@ window.onload = function() {
         }
         zones = "";
         for (let i in selected_program_msg.zone_list) {
-            console.log(selected_program_msg.zone_list[i]);
+            // console.log(selected_program_msg.zone_list[i]);
             const zone_name = selected_program_msg.zone_list[i].name;
             zones += `
                 <span style="background: var(--bs-gray-dark);padding: 2px;border-radius: 5px;padding-right: 4px;padding-left: 4px;margin-left: 2px;"><span style="margin-right: 3px;"><i class="fa fa-remove text-danger" onclick="removeProgramTemplateZone(&#39;${zone_name}&#39;)"></i></span><span>${zone_name}</span></span>
             `;
         }
         span_program_template_zones.innerHTML = zones;
-        console.log(selected_program_msg);
+        // console.log(selected_program_msg);
     }
 
     // Cancel program template
@@ -927,7 +868,7 @@ window.onload = function() {
                 selected_program_msg.area += selected_program_msg.zone_list[i].area;
                 selected_program_msg.length += selected_program_msg.zone_list[i].length;
             }
-            console.log(selected_program_msg);
+            // console.log(selected_program_msg);
             topic_new_program.publish(selected_program_msg);
             input_program_template_name.value = "";
             div_program_template.setAttribute('style', 'display:none !important');
@@ -985,7 +926,7 @@ window.onload = function() {
             data: program_name,
         });
         topic_program_select.publish(msg);
-        console.log(msg);
+        // console.log(msg);
     }
 
     // Remove program from list by name
@@ -1014,7 +955,7 @@ window.onload = function() {
 
 
     pathCoverageTopic.subscribe(function(message) {
-        console.log("Path:");
+        // console.log("Path:");
         coveragePath.setPath(message);
     });
 

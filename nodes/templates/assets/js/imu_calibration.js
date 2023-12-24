@@ -1,4 +1,4 @@
-// Desc: MobIMU for Vitulus WebUI
+// Desc: IMU calibration for Vitulus WebUI
 
 class ROS {
     constructor() {
@@ -279,7 +279,6 @@ window.onload = function () {
     ros = new ROS();
 
     imu_diag = new ImuDiag(ros);
-
     viewer = new Viewer3D(ros);
     viewer.changeViewerSize();
     const resizeObserver =  new ResizeObserver((entries) => {
@@ -292,19 +291,14 @@ window.onload = function () {
     resizeObserver.observe(document.getElementById("3d_view"));
     viewer.updateCam();
     viewer.viewer.addObject(new THREE.AmbientLight(0x696969));
-
     viewer_grid = new ViewerGrid(viewer);
-
     imu_markers = new Imu_Markers(ros);
-
     imu_yaws = new ImuYaws(ros);
-
     imu_buttons = new ImuButtons(ros);
     btn_run_calibration.onclick = function() {imu_buttons.pub_run_calibration()};
     btn_save_dcd.onclick = function() {imu_buttons.pub_save_calibration()};
     btn_remove_dcd.onclick = function() {imu_buttons.pub_reset_dcd()};
     btn_reset_imu.onclick = function() {imu_buttons.pub_restart_imu()};
-
     joy_teleop = new JoyTeleop(ros);
 
     joy_teleop.manager.on("move", function(evt, nipple) {
