@@ -202,7 +202,8 @@ var ROS3D = (function (exports, ROSLIB) {
 
 	} );
 
-	var REVISION = '89';
+	// var REVISION = '89';
+	var REVISION = '160';
 	var MOUSE = { LEFT: 0, MIDDLE: 1, RIGHT: 2 };
 	var CullFaceNone = 0;
 	var CullFaceBack = 1;
@@ -58408,7 +58409,8 @@ var ROS3D = (function (exports, ROSLIB) {
 	  makeEverythingInvisible(scene) {
 	    scene.traverse(function(currentObject) {
 	      if ( currentObject instanceof THREE.Mesh || currentObject instanceof THREE.Line
-	           || currentObject instanceof THREE.Sprite ) {
+	           // || currentObject instanceof THREE.Sprite ) {
+              || currentObject instanceof THREE.Sprite || currentObject instanceof THREE.Points ) {
 	        currentObject.previousVisibility = currentObject.visible;
 	        currentObject.visible = false;
 	      }
@@ -58425,7 +58427,8 @@ var ROS3D = (function (exports, ROSLIB) {
 	  makeHighlightedVisible(scene) {
 	    var makeVisible = function(currentObject) {
 	        if ( currentObject instanceof THREE.Mesh || currentObject instanceof THREE.Line
-	             || currentObject instanceof THREE.Sprite ) {
+	             // || currentObject instanceof THREE.Sprite ) {
+                || currentObject instanceof THREE.Sprite || currentObject instanceof THREE.Points ) {
 	          currentObject.visible = true;
 	        }
 	    };
