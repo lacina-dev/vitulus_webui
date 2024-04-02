@@ -1093,6 +1093,7 @@ class IconStatus {
 }
 
 
+
 class JoyTeleop {
     constructor(ros) {
         this.twist = new ROSLIB.Message({
@@ -2149,7 +2150,7 @@ class RosLog{
 
 
 class MoveBaseControl {
-    constructor(ros) {
+    constructor(ros, keyboard_teleop) {
         this.div_status_speed = document.getElementById("div_status_speed");
         this.span_status_speed = document.getElementById("span_status_speed");
         this.cancelGoalTopic = new ROSLIB.Topic({
@@ -2157,11 +2158,31 @@ class MoveBaseControl {
             name: '/move_base_flex/exe_path/cancel',
             messageType: 'actionlib_msgs/GoalID'
         });
-            this.speedTopic = new ROSLIB.Topic({
+        this.speedTopic = new ROSLIB.Topic({
             ros : ros,
             name : '/navi_manager/speed',
             messageType : 'std_msgs/String'
         });
+        this.speed_lin_fast = 0.75;
+        this.speed_ang_fast = 1.5;
+        this.speed_lin_moderate = 0.5;
+        this.speed_ang_moderate = 1.2;
+        this.speed_lin_slow = 0.25;
+        this.speed_ang_slow = 0.75;
+        this.speed_lin_current = this.speed_lin_moderate;
+        this.speed_ang_current = this.speed_ang_moderate;
+        // Keyboard teleop
+        this.keyboard_teleop = new KEYBOARDTELEOP.Teleop({
+            ros: ros,
+            topic: "/cmd_vel",
+            throttle_lin: this.speed_lin_current,
+            throttle_ang: this.speed_ang_current
+        });
+        this.keyboard_teleop.scale = 1.0;
+        this.keyboard_teleop.working = false;
+        this.checkbox_keyboard = document.getElementById('checkbox_keyboard_teleop');
+        this.checkbox_keyboard.checked = false;
+
         this.init();
     }
 
@@ -2178,15 +2199,23 @@ class MoveBaseControl {
         if (speed === 'slow') {
             this.speedTopic.publish({data: 'SLOW'});
             this.span_status_speed.innerText = 'SLOW';
+            this.speed_lin_current = this.speed_lin_slow;
+            this.speed_ang_current = this.speed_ang_slow;
         }
         if (speed === 'moderate') {
             this.speedTopic.publish({data: 'MEDIUM'});
             this.span_status_speed.innerText = 'MODERATE';
+            this.speed_lin_current = this.speed_lin_moderate;
+            this.speed_ang_current = this.speed_ang_moderate;
         }
         if (speed === 'fast') {
             this.speedTopic.publish({data: 'FAST'});
             this.span_status_speed.innerText = 'FAST';
+            this.speed_lin_current = this.speed_lin_fast;
+            this.speed_ang_current = this.speed_ang_fast;
         }
+        this.keyboard_teleop.throttle_lin = this.speed_lin_current;
+        this.keyboard_teleop.throttle_ang = this.speed_ang_current;
     }
 }
 
@@ -3355,6 +3384,7 @@ window.onload = function () {
     };
 
 
+
      /**
      *  Move base control
      */
@@ -3365,6 +3395,10 @@ window.onload = function () {
         motors_control.motors_off();
         update_status_bar_info("Emergency stop");
     }
+
+    move_base_control.checkbox_keyboard.onclick = function() {
+        move_base_control.keyboard_teleop.working = !!this.checked;
+    };
 
 
     /**
@@ -3588,6 +3622,7 @@ window.onload = function () {
     power_module.btn_motor_off_pm.onclick = function() {power_module.pub_set_motor_switch(value = false)};
     power_module.btn_mower_on_pm.onclick = function() {power_module.pub_set_bat_out_switch(value = true)};
     power_module.btn_mower_off_pm.onclick = function() {power_module.pub_set_bat_out_switch(value = false)};
+
 
 
     /**

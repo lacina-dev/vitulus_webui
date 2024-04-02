@@ -28,7 +28,8 @@ KEYBOARDTELEOP.Teleop = function(options) {
   var ros = options.ros;
   var topic = options.topic || '/cmd_vel';
   // permanent throttle
-  var throttle = options.throttle || 1.0;
+  this.throttle_lin = options.throttle_lin || 1.0;
+  this.throttle_ang = options.throttle_ang || 1.0;
 
   // used to externally throttle the speed (e.g., from a slider)
   this.scale = 1.0;
@@ -68,20 +69,20 @@ KEYBOARDTELEOP.Teleop = function(options) {
     // check which key was pressed
     switch (keyCode) {
       case 65: // turn left
-        if (keyDown === true) { speed_left = throttle * that.scale;}else{speed_left = 0;};
-        z = 2 * speed_left; // 1
+        if (keyDown === true) { speed_left = that.throttle_ang * that.scale;}else{speed_left = 0;};
+        z = speed_left;
         break;
       case 87:  // up
-        if (keyDown === true) { speed_up = throttle * that.scale;}else{speed_up = 0;};
-        x = 1 * speed_up; // 0.5
+        if (keyDown === true) { speed_up = that.throttle_lin * that.scale;}else{speed_up = 0;};
+        x = speed_up;
         break;
       case 68:  // turn right
-        if (keyDown === true) { speed_right = throttle * that.scale;}else{speed_right = 0;};
-        z = -2 * speed_right; // -1
+        if (keyDown === true) { speed_right = that.throttle_ang * that.scale;}else{speed_right = 0;};
+        z = -1 * speed_right;
         break;
       case 83:  // down
-        if (keyDown === true) { speed_down = throttle * that.scale;}else{speed_down = 0;};
-        x = -1 * speed_down; // -0.5
+        if (keyDown === true) { speed_down = that.throttle_lin * that.scale;}else{speed_down = 0;};
+        x = -1 * speed_down;
         break;
 
       default:
