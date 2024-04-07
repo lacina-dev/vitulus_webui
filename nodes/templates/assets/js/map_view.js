@@ -622,11 +622,11 @@ class Clouds {
             tfClient: tf_client,
             rootObject : viewer.scene,
             topic: '/ground_cloud',
-            max_pts: 100000,
-            max_age: 60,
-            opacity: 1.0,
-            alpha: 1.0,
-            pointRatio: 1.0,
+            max_pts: 10000,
+            // max_age: 0,
+            // opacity: 1.0,
+            // alpha: 1.0,
+            pointRatio: 2.0,
             material: { size: 2.0, color: 0x71ff02 }
         });
         this.obstacle_cloud = new ROS3D.PointCloud2({
@@ -634,10 +634,10 @@ class Clouds {
             tfClient: tf_client,
             rootObject : viewer.scene,
             topic: '/obstacles_cloud',
-            max_pts: 100000,
-            max_age: 60,
-            opacity: 1.0,
-            alpha: 1.0,
+            max_pts: 10000,
+            // max_age: 60,
+            // opacity: 1.0,
+            // alpha: 1.0,
             pointRatio: 1.0,
             material: { size: 2.0, color: 0xfb0202 }
         });
@@ -664,14 +664,14 @@ class PathsPointsVisualization {
             ros : ros,
             tfClient: tf_client,
             rootObject : viewer.scene,
-            topic: '/move_base_flex/TebLocalPlannerROS/local_plan',
+            topic: '/move_base_flex/TebLocalPlannerROS/local_plan_slow',
             color: 0xff00ff,
         });
         this.globalPlan = new ROS3D.Path({
             ros : ros,
             tfClient: tf_client,
             rootObject : viewer.scene,
-            topic: '/move_base_flex/TebLocalPlannerROS/global_plan',
+            topic: '/move_base_flex/TebLocalPlannerROS/global_plan_slow',
             color: 0xffffff,
         });
         this.mapMarker = new ROS3D.MarkerClient({
@@ -1179,14 +1179,16 @@ class JoyTeleop {
 class CameraView {
 
     constructor(ros) {
-        this.width = 640;
-        this.height = 480;
+        this.width = 160;
+        this.height = 120;
         this.camViewer = new MJPEGCANVAS.Viewer({
           divID : 'div_camera_view',
           host : location.hostname,
           port: 8080,
-          quality: 15,
-          refreshRate: 15,
+          type: 'mjpeg',
+          // type: 'ros_compressed',
+          quality: 20,
+          refreshRate: 6,
           width : this.width,
           height : this.height,
           topic : '/d435/color/image_raw',
@@ -1935,8 +1937,8 @@ class MapMenu {
         if (this.div_camera_view.style.display === "none"){
             this.div_camera_view.style.display = "block";
             this.btn_camera_show.active = true;
-            camera_view.camViewer.width = 640;
-            camera_view.camViewer.height = 480;
+            camera_view.camViewer.width = 180;
+            camera_view.camViewer.height = 120;
             this.div_camera_view.style.width = '180px';
             this.div_camera_view.style.height = '120px';
 
@@ -3645,7 +3647,7 @@ window.onload = function () {
             continuous: true,
             compression: 'cbor',
             // topic: 'navi_manager/local_costmap',
-            topic: '/move_base_flex/local_costmap/costmap',
+            topic: '/move_base_flex/local_costmap/costmap_slow',
             color: {r:255,g:0,b:255},  // {r:0,g:255,b:255} gridmap, {r:255,g:0,b:255} loc costmap, {r:255,g:255,b:0} glob costmap
             opacity: 0.99,
             offsetPose: maps.local_costmap_offset,
