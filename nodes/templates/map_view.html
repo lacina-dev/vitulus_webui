@@ -365,19 +365,19 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="border-primary" id="div_menu_config" style="width: 100%;padding: 4px;background: linear-gradient(var(--bs-gray-900) 0%, var(--bs-primary)), var(--bs-primary);border-bottom-right-radius: 5px;border-bottom-left-radius: 5px;padding-right: 12px;padding-left: 12px;display: none;padding-bottom: 15px;border: 1px solid var(--bs-secondary);border-top-style: none;z-index: 2;position: relative;">
+                        <div class="border-primary" id="div_menu_config" style="width: 100%;padding: 4px;background: linear-gradient(var(--bs-gray-900) 0%, var(--bs-primary)), var(--bs-primary);border-bottom-right-radius: 5px;border-bottom-left-radius: 5px;padding-right: 12px;padding-left: 12px;display: block;padding-bottom: 15px;border: 1px solid var(--bs-secondary);border-top-style: none;z-index: 2;position: relative;">
                             <div class="row">
                                 <div class="col" style="margin-top: 8px;padding-right: 2px;padding-left: 2px;">
                                     <div>
                                         <ul class="nav nav-tabs d-flex d-xl-flex justify-content-start justify-content-xl-center" role="tablist" style="font-size: 13px;display: inline-flex;background: var(--bs-secondary-text-emphasis);">
-                                            <li class="nav-item" role="presentation"><a class="nav-link active" role="tab" data-bs-toggle="tab" href="#tab_motors" style="padding-top: 5px;padding-bottom: 5px;padding-right: 14px;padding-left: 14px;">Motors</a></li>
-                                            <li class="nav-item" role="presentation"><a class="nav-link" role="tab" data-bs-toggle="tab" href="#tab_lidar" style="padding-top: 5px;padding-bottom: 5px;padding-right: 14px;padding-left: 14px;">Lidar</a></li>
+                                            <li class="nav-item" role="presentation"><a class="nav-link" role="tab" data-bs-toggle="tab" href="#tab_motors" style="padding-top: 5px;padding-bottom: 5px;padding-right: 14px;padding-left: 14px;">Motors</a></li>
+                                            <li class="nav-item" role="presentation"><a class="nav-link active" role="tab" data-bs-toggle="tab" href="#tab_lidar" style="padding-top: 5px;padding-bottom: 5px;padding-right: 14px;padding-left: 14px;">Navi</a></li>
                                             <li class="nav-item" role="presentation"><a class="nav-link" role="tab" data-bs-toggle="tab" href="#tab_power" style="padding-top: 5px;padding-bottom: 5px;padding-right: 14px;padding-left: 14px;">Power</a></li>
                                             <li class="nav-item" role="presentation"><a class="nav-link" role="tab" data-bs-toggle="tab" href="#tab_mower" style="padding-top: 5px;padding-bottom: 5px;padding-right: 14px;padding-left: 14px;">Mower</a></li>
                                             <li class="nav-item" role="presentation"><a class="nav-link" role="tab" data-bs-toggle="tab" href="#tab_diag" style="padding-top: 5px;padding-bottom: 5px;padding-right: 14px;padding-left: 14px;">Diag</a></li>
                                         </ul>
                                         <div class="tab-content" style="display: block;position: relative;">
-                                            <div class="tab-pane fade show active" role="tabpanel" id="tab_motors" style="padding-left: 8px;padding-right: 8px;max-height: calc(100vh - 145px);overflow: auto;">
+                                            <div class="tab-pane fade" role="tabpanel" id="tab_motors" style="padding-left: 8px;padding-right: 8px;max-height: calc(100vh - 145px);overflow: auto;">
                                                 <div class="d-xl-flex justify-content-xl-center">
                                                     <div class="row g-0 d-xl-flex justify-content-xl-end" style="margin: 0px;">
                                                         <div class="col-auto col-xl-6" style="height: auto;margin-top: 8px;margin-left: 4px;"><span id="span_motors" style="display: block;font-size: 12px;margin-bottom: 4px;">Motors</span>
@@ -439,10 +439,21 @@
                                                     </div>
                                                 </div>
                                             </div>
-                                            <div class="tab-pane fade" role="tabpanel" id="tab_lidar" style="padding-left: 8px;padding-right: 8px;">
+                                            <div class="tab-pane fade show active" role="tabpanel" id="tab_lidar" style="padding-left: 8px;padding-right: 8px;">
                                                 <div class="row d-xl-flex justify-content-xl-center">
                                                     <div class="col-auto" style="height: auto;margin-top: 8px;"><span style="display: block;font-size: 12px;margin-bottom: 4px;">Lidar</span>
                                                         <div class="btn-group btn-group-sm" role="group" id="btngroup_lidar_on_off" style="border: 2px solid var(--bs-danger);border-radius: 4px;"><button class="btn btn-primary fw-bold" id="btn_menu_lidar_on" type="button">ON&nbsp;<i class="la la-check" style="font-weight: bold;color: var(--bs-success);"></i></button><button class="btn btn-primary fw-bold" id="btn_menu_lidar_off" type="button">OFF&nbsp;<i class="la la-close" style="font-weight: bold;color: var(--bs-danger);"></i></button></div>
+                                                    </div>
+                                                    <div class="col-auto" style="height: auto;margin-top: 8px;"><span style="display: block;font-size: 12px;margin-bottom: 4px;">RtabMap sensor source</span>
+                                                        <div class="btn-group btn-group-sm" role="group" id="btngroup_lidar_on_off-1" style="border-radius: 4px;border: 2px solid var(--bs-info) ;"><button class="btn btn-primary fw-bold" id="btn_menu_rtabmap_camera" type="button">Camera&nbsp;</button><button class="btn btn-primary fw-bold" id="btn_menu_rtabmap_lidar" type="button">Lidar&nbsp;</button><button class="btn btn-primary fw-bold" id="btn_menu_rtabmap_both" type="button">Both&nbsp;</button></div>
+                                                    </div>
+                                                    <div class="col-auto" style="height: auto;margin-top: 8px;"><span style="display: block;font-size: 12px;margin-bottom: 4px;">RtabMap sensor distance</span>
+                                                        <div class="d-flex"><input class="form-range" type="range" id="input_range_rtabmap_distance" style="margin-top: 3px;" min="0.1" max="8.0" step="0.1" value="2.7"><span class="d-xl-flex align-items-xl-end" id="span_rtabmap_distance" style="margin-left: 4px;font-size: 14px;">0.0</span><span class="d-xl-flex align-items-xl-end" style="margin-left: 2px;font-size: 14px;">m</span></div>
+                                                    </div>
+                                                    <div class="col-auto" style="height: auto;margin-top: 8px;"><span style="display: block;font-size: 12px;margin-bottom: 4px;">RtabMap apply</span>
+                                                        <div class="d-flex"><span class="d-xl-flex align-items-xl-center" style="margin-left: 4px;font-size: 14px;">Sensor:&nbsp;</span><span class="d-xl-flex align-items-xl-center" id="span_menu_rtabmap_sensor_apply" style="margin-left: 4px;font-size: 14px;">1&nbsp;</span><span class="d-xl-flex align-items-xl-center" style="margin-left: 4px;font-size: 14px;">Distance:&nbsp;</span><span class="d-xl-flex align-items-xl-center" id="span_menu_rtabmap_distance_apply" style="margin-left: 4px;font-size: 14px;margin-right: 6px;">0.0</span>
+                                                            <div class="btn-group btn-group-sm" role="group" id="btngroup_lidar_on_off-2" style="border-radius: 4px;border: 2px solid var(--bs-success) ;"><button class="btn btn-primary fw-bold" id="btn_menu_rtabmap_apply" type="button">Apply&nbsp;</button></div>
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </div>
