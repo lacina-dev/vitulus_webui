@@ -533,10 +533,10 @@ class TfClient {
 
 class Maps{
     constructor(ros, tf_client, viewer) {
-        this.map_offset =new ROSLIB.Pose({ position : new ROSLIB.Vector3({ x : 0, y : 0, z : -0.01 }),
+        this.map_offset =new ROSLIB.Pose({ position : new ROSLIB.Vector3({ x : 0, y : 0, z : -0.03 }),
                     orientation : new ROSLIB.Quaternion({ x : 0.0, y : 0.0, z : 0.0, w : 1.0 }) });
         this.map = null;
-        this.local_costmap_offset = new ROSLIB.Pose({ position : new ROSLIB.Vector3({ x : 0, y : 0, z : -0.03 }),
+        this.local_costmap_offset = new ROSLIB.Pose({ position : new ROSLIB.Vector3({ x : 0, y : 0, z : -0.01 }),
                     orientation : new ROSLIB.Quaternion({ x : 0.0, y : 0.0, z : 0.0, w : 1.0 }) });
         this.local_costmap = null;
     }
@@ -1110,14 +1110,14 @@ class JoyTeleop {
         this.ang = 0;
         this.publish_joy = false;
         this.joysize = 130;
-        this.speed_lin_fast = 0.75;
-        this.speed_ang_fast = 1.5;
-        this.speed_lin_moderate = 0.5;
-        this.speed_ang_moderate = 1.2;
-        this.speed_lin_low = 0.25;
-        this.speed_ang_low = 0.75;
-        this.speed_lin = this.speed_lin_moderate;
-        this.speed_ang = this.speed_ang_moderate;
+        // this.speed_lin_fast = 0.75;
+        // this.speed_ang_fast = 1.5;
+        // this.speed_lin_moderate = 0.5;
+        // this.speed_ang_moderate = 1.2;
+        // this.speed_lin_low = 0.25;
+        // this.speed_ang_low = 0.75;
+        // this.speed_lin = this.speed_lin_moderate;
+        // this.speed_ang = this.speed_ang_moderate;
         // this.joysize = 172;
         this.joystickContainer = document.getElementById("joy_view");
         this.options = {
@@ -1571,13 +1571,22 @@ class MapMenu {
         this.btn_marker.active = false;
         this.btn_marker_send_goal = document.getElementById("btn_marker_send_goal");
         this.range_marker_orientation = document.getElementById("range_marker_orientation");
+        this.span_menu_rtabmap_sensor_apply = document.getElementById("span_menu_rtabmap_sensor_apply");
+        this.span_menu_rtabmap_distance_apply = document.getElementById("span_menu_rtabmap_distance_apply");
 
         this.div_menu_config = document.getElementById("div_menu_config");
         this.div_menu_config.style.display = "none";
         this.btn_settings = document.getElementById("btn_settings");
         this.btn_settings.active = false;
+
         this.btn_menu_lidar_on = document.getElementById("btn_menu_lidar_on");
         this.btn_menu_lidar_off = document.getElementById("btn_menu_lidar_off");
+        this.btn_menu_rtabmap_camera = document.getElementById("btn_menu_rtabmap_camera");
+        this.btn_menu_rtabmap_lidar = document.getElementById("btn_menu_rtabmap_lidar");
+        this.btn_menu_rtabmap_both = document.getElementById("btn_menu_rtabmap_both");
+        this.input_range_rtabmap_distance = document.getElementById("input_range_rtabmap_distance");
+        this.span_rtabmap_distance = document.getElementById("span_rtabmap_distance");
+        this.btn_menu_rtabmap_apply = document.getElementById("btn_menu_rtabmap_apply");
 
         this.btn_menu_joy_show = document.getElementById("btn_menu_joy_show");
         this.btn_menu_joy_hide = document.getElementById("btn_menu_joy_hide");
@@ -1734,8 +1743,21 @@ class MapMenu {
             name : '/navi_manager/map_source',
             messageType : 'std_msgs/String'
         });
+        this.rtabmap_settings_Topic = new ROSLIB.Topic({
+            ros : ros,
+            name : '/navi_manager/rtabmap_settings',
+            messageType : 'vitulus_msgs/Rtabmap_settings'
+        });
+        this.rtabmap_settings_set_Topic = new ROSLIB.Topic({
+            ros : ros,
+            name : '/navi_manager/rtabmap_settings_set',
+            messageType : 'vitulus_msgs/Rtabmap_settings'
+        });
         this.map_source_Topic.subscribe((message) => {
             this.map_btns_state(message);
+        });
+        this.rtabmap_settings_Topic.subscribe((message) => {
+            this.rtabmap_settings_btns_state(message);
         });
 
         this.init();
@@ -1757,12 +1779,21 @@ class MapMenu {
         this.remove_path_Topic.advertise();
         this.execute_path_Topic.advertise();
         this.show_map_Topic.advertise();
+        this.rtabmap_settings_set_Topic.advertise();
         if (this.status_bar.is_indoor === true){
             this.map_to_show = 'rtabmap';
         }
         else {
             this.map_to_show = 'planner';
         }
+    }
+
+    rtabmap_apply(){
+        const msg = new ROSLIB.Message({
+            grid_sensor: parseInt(this.span_menu_rtabmap_sensor_apply.textContent),
+            grid_sensor_distance: parseFloat(this.span_menu_rtabmap_distance_apply.textContent),
+        });
+        this.rtabmap_settings_set_Topic.publish(msg);
     }
 
     map_btns_state(msg){
@@ -1774,6 +1805,25 @@ class MapMenu {
             this.btn_menu_map_planner_show.style.color = "#ffffff";
             this.btn_menu_map_rtabmap_show.style.color = "#446de5";
         }
+    }
+
+    rtabmap_settings_btns_state(msg){
+        if (msg.grid_sensor === 0) {
+            this.btn_menu_rtabmap_lidar.style.color = "#446de5";
+            this.btn_menu_rtabmap_camera.style.color = "#ffffff";
+            this.btn_menu_rtabmap_both.style.color = "#ffffff";
+        }
+        if (msg.grid_sensor === 1) {
+            this.btn_menu_rtabmap_lidar.style.color = "#ffffff";
+            this.btn_menu_rtabmap_camera.style.color = "#446de5";
+            this.btn_menu_rtabmap_both.style.color = "#ffffff";
+        }
+        if (msg.grid_sensor === 2) {
+            this.btn_menu_rtabmap_lidar.style.color = "#ffffff";
+            this.btn_menu_rtabmap_camera.style.color = "#ffffff";
+            this.btn_menu_rtabmap_both.style.color = "#446de5";
+        }
+        this.span_rtabmap_distance.textContent = Math.round(msg.grid_sensor_distance * 100) / 100;
     }
 
     rtabmap_loc_map_buttons_state(){
@@ -2169,8 +2219,8 @@ class MoveBaseControl {
         this.speed_ang_fast = 1.5;
         this.speed_lin_moderate = 0.5;
         this.speed_ang_moderate = 1.2;
-        this.speed_lin_slow = 0.25;
-        this.speed_ang_slow = 0.75;
+        this.speed_lin_slow = 0.3;
+        this.speed_ang_slow = 0.4;
         this.speed_lin_current = this.speed_lin_moderate;
         this.speed_ang_current = this.speed_ang_moderate;
         // Keyboard teleop
@@ -3258,6 +3308,21 @@ window.onload = function () {
     map_menu.btn_menu_lidar_off.onclick = function () {
         map_menu.btn_menu_lidar_on_onclick(lidar_control, false);
     };
+    map_menu.btn_menu_rtabmap_lidar.onclick = function () {
+        map_menu.span_menu_rtabmap_sensor_apply.innerText = "0";
+    };
+    map_menu.btn_menu_rtabmap_camera.onclick = function () {
+        map_menu.span_menu_rtabmap_sensor_apply.innerText = "1";
+    };
+    map_menu.btn_menu_rtabmap_both.onclick = function () {
+        map_menu.span_menu_rtabmap_sensor_apply.innerText = "2";
+    };
+    map_menu.input_range_rtabmap_distance.oninput = function() {
+        map_menu.span_menu_rtabmap_distance_apply.innerText = map_menu.input_range_rtabmap_distance.value;
+    };
+    map_menu.btn_menu_rtabmap_apply.onclick = function () {
+        map_menu.rtabmap_apply();
+    };
 
     /**
      *  Points submenu
@@ -3431,11 +3496,11 @@ window.onload = function () {
         joy_teleop.set_ang(0);
     });
     setInterval(function() {joy_teleop.joy_pub_speed()}, 50)
-    joy_teleop.speed_lin = joy_teleop.speed_lin_low;
-    joy_teleop.speed_ang = joy_teleop.speed_ang_low;
-    move_base_control.pub_set_speed('slow');
-    motors_control.btn_menu_speed_low.style.color = "#446de5";
-    motors_control.btn_menu_speed_moderate.style.color = "#ffffff";
+    joy_teleop.speed_lin = move_base_control.speed_lin_current;
+    joy_teleop.speed_ang = move_base_control.speed_ang_current;
+    move_base_control.pub_set_speed('moderate');
+    motors_control.btn_menu_speed_low.style.color = "#ffffff";
+    motors_control.btn_menu_speed_moderate.style.color = "#446de5";
     motors_control.btn_menu_speed_fast.style.color = "#ffffff";
 
     // ToDo: refactor this
@@ -3649,7 +3714,7 @@ window.onload = function () {
             // topic: 'navi_manager/local_costmap',
             topic: '/move_base_flex/local_costmap/costmap_slow',
             color: {r:255,g:0,b:255},  // {r:0,g:255,b:255} gridmap, {r:255,g:0,b:255} loc costmap, {r:255,g:255,b:0} glob costmap
-            opacity: 0.99,
+            opacity: 0.3,
             offsetPose: maps.local_costmap_offset,
         });
         maps.map = new ROS3D.OccupancyGridClient({
