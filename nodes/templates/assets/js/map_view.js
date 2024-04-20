@@ -1303,10 +1303,11 @@ class MotorControl {
         this.span_motor_torque = document.getElementById("span_motor_torque");
         this.btn_motors_on = document.getElementById("btn_motors_on");
         this.btn_motors_off = document.getElementById("btn_motors_off");
-        this.btn_menu_speed_low = document.getElementById("btn_menu_speed_low");
-        this.btn_menu_speed_moderate = document.getElementById("btn_menu_speed_moderate");
-        this.btn_menu_speed_fast = document.getElementById("btn_menu_speed_fast");
         this.btngroup_motors_on_off = document.getElementById("btngroup_motors_on_off");
+
+
+        // this.joy_teleop = joy_teleop_arg;
+        // this.move_base_control = move_base_control_arg;
 
         this.motorPowerTopic = new ROSLIB.Topic({
             ros : ros,
@@ -1550,13 +1551,14 @@ class MotorControl {
             motors_control.motors_off();
         }
     }
+
 }
 
 
 class MapMenu {
-    constructor(ros, maps, rtabmap, status_bar) {
+    constructor(ros, maps, status_bar) {
         this.maps = maps;
-        this.rtabmap = rtabmap;
+        // this.rtabmap = rtabmap;
         this.status_bar = status_bar;
         this.map_to_show = 'planner';
         this.row_submenu = document.getElementById("row_submenu");
@@ -1571,7 +1573,6 @@ class MapMenu {
         this.btn_marker.active = false;
         this.btn_marker_send_goal = document.getElementById("btn_marker_send_goal");
         this.range_marker_orientation = document.getElementById("range_marker_orientation");
-        this.span_menu_rtabmap_sensor_apply = document.getElementById("span_menu_rtabmap_sensor_apply");
         this.span_menu_rtabmap_distance_apply = document.getElementById("span_menu_rtabmap_distance_apply");
 
         this.div_menu_config = document.getElementById("div_menu_config");
@@ -1586,7 +1587,8 @@ class MapMenu {
         this.btn_menu_rtabmap_both = document.getElementById("btn_menu_rtabmap_both");
         this.input_range_rtabmap_distance = document.getElementById("input_range_rtabmap_distance");
         this.span_rtabmap_distance = document.getElementById("span_rtabmap_distance");
-        this.btn_menu_rtabmap_apply = document.getElementById("btn_menu_rtabmap_apply");
+        this.rtabmap_sensor = 0;
+
 
         this.btn_menu_joy_show = document.getElementById("btn_menu_joy_show");
         this.btn_menu_joy_hide = document.getElementById("btn_menu_joy_hide");
@@ -1596,8 +1598,7 @@ class MapMenu {
         this.div_menu_map.style.display = "none";
         this.btn_menu_map_new_indoor = document.getElementById("btn_menu_map_new_indoor");
         this.btn_menu_map_new_outdoor = document.getElementById("btn_menu_map_new_outdoor");
-        this.btn_menu_map_rtabmap_mapping = document.getElementById("btn_menu_map_rtabmap_mapping");
-        this.btn_menu_map_rtabmap_localization = document.getElementById("btn_menu_map_rtabmap_localization");
+
         this.btn_menu_map_new_save = document.getElementById("btn_menu_map_new_save");
         this.input_menu_map_new = document.getElementById("input_menu_map_new");
         this.div_menu_map_items_row = document.getElementById("div_menu_map_items_row");
@@ -1790,7 +1791,7 @@ class MapMenu {
 
     rtabmap_apply(){
         const msg = new ROSLIB.Message({
-            grid_sensor: parseInt(this.span_menu_rtabmap_sensor_apply.textContent),
+            grid_sensor: parseInt(this.rtabmap_sensor),
             grid_sensor_distance: parseFloat(this.span_menu_rtabmap_distance_apply.textContent),
         });
         this.rtabmap_settings_set_Topic.publish(msg);
@@ -1826,21 +1827,7 @@ class MapMenu {
         this.span_rtabmap_distance.textContent = Math.round(msg.grid_sensor_distance * 100) / 100;
     }
 
-    rtabmap_loc_map_buttons_state(){
-        // console.log("rtabmap_loc_map_buttons_state");
-        if (this.rtabmap.is_rtabmap === true) {
-            if (this.rtabmap.is_localization === true) {
-                this.btn_menu_map_rtabmap_mapping.style.color = "#ffffff";
-                this.btn_menu_map_rtabmap_localization.style.color = "#446de5";
-            } else {
-                this.btn_menu_map_rtabmap_mapping.style.color = "#446de5";
-                this.btn_menu_map_rtabmap_localization.style.color = "#ffffff";
-            }
-        } else {
-            this.btn_menu_map_rtabmap_mapping.style.color = "#ffffff";
-            this.btn_menu_map_rtabmap_localization.style.color = "#ffffff";
-        }
-    }
+
 
     show_rtabmap_map() {
         this.show_map_Topic.publish(new ROSLIB.Message({data: 'rtabmap'}));
@@ -2202,9 +2189,17 @@ class RosLog{
 
 
 class MoveBaseControl {
-    constructor(ros, keyboard_teleop) {
+    constructor(ros, joy_teleop) {
+        this.joy_teleop = joy_teleop;
         this.div_status_speed = document.getElementById("div_status_speed");
         this.span_status_speed = document.getElementById("span_status_speed");
+        this.btn_menu_speed_low = document.getElementById("btn_menu_speed_low");
+        this.btn_menu_speed_moderate = document.getElementById("btn_menu_speed_moderate");
+        this.btn_menu_speed_fast = document.getElementById("btn_menu_speed_fast");
+
+        this.btn_menu_speed_low_sm = document.getElementById("btn_menu_speed_low_sm");
+        this.btn_menu_speed_moderate_sm = document.getElementById("btn_menu_speed_moderate_sm");
+        this.btn_menu_speed_fast_sm = document.getElementById("btn_menu_speed_fast_sm");
         this.cancelGoalTopic = new ROSLIB.Topic({
             ros: ros,
             name: '/move_base_flex/exe_path/cancel',
@@ -2268,6 +2263,39 @@ class MoveBaseControl {
         }
         this.keyboard_teleop.throttle_lin = this.speed_lin_current;
         this.keyboard_teleop.throttle_ang = this.speed_ang_current;
+    }
+    btn_speed_fast_onclick() {
+        this.joy_teleop.speed_lin = this.speed_lin_fast;
+        this.joy_teleop.speed_ang = this.speed_ang_fast;
+        this.pub_set_speed('fast');
+        this.btn_menu_speed_low.style.color = "#ffffff";
+        this.btn_menu_speed_moderate.style.color = "#ffffff";
+        this.btn_menu_speed_fast.style.color = "#446de5";
+        this.btn_menu_speed_low_sm.style.color = "#ffffff";
+        this.btn_menu_speed_moderate_sm.style.color = "#ffffff";
+        this.btn_menu_speed_fast_sm.style.color = "#446de5";
+    }
+    btn_speed_moderate_onclick() {
+        this.joy_teleop.speed_lin = this.speed_lin_moderate;
+        this.joy_teleop.speed_ang = this.speed_ang_moderate;
+        this.pub_set_speed('moderate');
+        this.btn_menu_speed_low.style.color = "#ffffff";
+        this.btn_menu_speed_moderate.style.color = "#446de5";
+        this.btn_menu_speed_fast.style.color = "#ffffff";
+        this.btn_menu_speed_low_sm.style.color = "#ffffff";
+        this.btn_menu_speed_moderate_sm.style.color = "#446de5";
+        this.btn_menu_speed_fast_sm.style.color = "#ffffff";
+    }
+    btn_speed_slow_onclick() {
+        this.joy_teleop.speed_lin = this.speed_lin_slow;
+        this.joy_teleop.speed_ang = this.speed_ang_slow;
+        this.pub_set_speed('slow');
+        this.btn_menu_speed_low.style.color = "#446de5";
+        this.btn_menu_speed_moderate.style.color = "#ffffff";
+        this.btn_menu_speed_fast.style.color = "#ffffff";
+        this.btn_menu_speed_low_sm.style.color = "#446de5";
+        this.btn_menu_speed_moderate_sm.style.color = "#ffffff";
+        this.btn_menu_speed_fast_sm.style.color = "#ffffff";
     }
 }
 
@@ -2452,6 +2480,8 @@ class RtabMap{
         this.span_rtabmap_proximity = document.getElementById("span_rtabmap_proximity");
         this.span_rtabmap_lc = document.getElementById("span_rtabmap_lc");
         this.span_rtabmap_loc_map = document.getElementById("span_rtabmap_loc_map");
+        this.btn_menu_map_rtabmap_mapping = document.getElementById("btn_menu_map_rtabmap_mapping");
+        this.btn_menu_map_rtabmap_localization = document.getElementById("btn_menu_map_rtabmap_localization");
         this.rtabmap_status_topic = new ROSLIB.Topic({
             ros : ros,
             name : '/navi_manager/is_rtabmap',
@@ -2517,6 +2547,21 @@ class RtabMap{
         });
         this.is_localization = localize;
         this.span_rtabmap_loc_map.innerText = status;
+    }
+    rtabmap_loc_map_buttons_state(){
+        // console.log("rtabmap_loc_map_buttons_state");
+        if (this.is_rtabmap === true) {
+            if (this.is_localization === true) {
+                this.btn_menu_map_rtabmap_mapping.style.color = "#ffffff";
+                this.btn_menu_map_rtabmap_localization.style.color = "#446de5";
+            } else {
+                this.btn_menu_map_rtabmap_mapping.style.color = "#446de5";
+                this.btn_menu_map_rtabmap_localization.style.color = "#ffffff";
+            }
+        } else {
+            this.btn_menu_map_rtabmap_mapping.style.color = "#ffffff";
+            this.btn_menu_map_rtabmap_localization.style.color = "#ffffff";
+        }
     }
 }
 
@@ -3155,25 +3200,6 @@ window.onload = function () {
 
     robot_visualization = new RobotVisualization(ros.ros, tf_client.tfClientMap, viewer.viewer);
 
-    rtabmap = new RtabMap(ros.ros);
-    rtabmap.rtabmap_status_topic.subscribe(function(message) {
-         // console.log(message);
-        if (message.data){
-            rtabmap.div_rtabmap.style.display = "grid";
-            rtabmap.is_rtabmap = true;
-            map_menu.rtabmap_loc_map_buttons_state();
-        }
-        else {
-            rtabmap.div_rtabmap.style.display = "none";
-            rtabmap.is_rtabmap = false;
-            map_menu.rtabmap_loc_map_buttons_state();
-        }
-    });
-    rtabmap.rtabmap_info_Topic.subscribe(function(message) {
-        rtabmap.set_info(message);
-        map_menu.rtabmap_loc_map_buttons_state();
-        // console.log(message);
-    });
 
 
     /**
@@ -3265,7 +3291,39 @@ window.onload = function () {
      *  Menu
      */
 
-    map_menu = new MapMenu(ros.ros, maps, rtabmap, status_bar);
+    map_menu = new MapMenu(ros.ros, maps, status_bar);
+
+    /**
+     *  Rtabmap
+     */
+
+    rtabmap = new RtabMap(ros.ros);
+    rtabmap.rtabmap_status_topic.subscribe(function(message) {
+         // console.log(message);
+        if (message.data){
+            rtabmap.div_rtabmap.style.display = "grid";
+            rtabmap.is_rtabmap = true;
+            rtabmap.rtabmap_loc_map_buttons_state();
+        }
+        else {
+            rtabmap.div_rtabmap.style.display = "none";
+            rtabmap.is_rtabmap = false;
+            rtabmap.rtabmap_loc_map_buttons_state();
+        }
+    });
+    rtabmap.rtabmap_info_Topic.subscribe(function(message) {
+        rtabmap.set_info(message);
+        rtabmap.rtabmap_loc_map_buttons_state();
+        // console.log(message);
+    });
+    rtabmap.btn_menu_map_rtabmap_mapping.onclick = function () {
+        rtabmap.set_rtabmap_mapping();
+
+    }
+    rtabmap.btn_menu_map_rtabmap_localization.onclick = function () {
+        rtabmap.set_rtabmap_localization();
+    }
+
 
 
      /**
@@ -3309,20 +3367,22 @@ window.onload = function () {
         map_menu.btn_menu_lidar_on_onclick(lidar_control, false);
     };
     map_menu.btn_menu_rtabmap_lidar.onclick = function () {
-        map_menu.span_menu_rtabmap_sensor_apply.innerText = "0";
+        map_menu.rtabmap_sensor = "0";
+        map_menu.rtabmap_apply();
     };
     map_menu.btn_menu_rtabmap_camera.onclick = function () {
-        map_menu.span_menu_rtabmap_sensor_apply.innerText = "1";
+        map_menu.rtabmap_sensor = "1";
+        map_menu.rtabmap_apply();
+
     };
     map_menu.btn_menu_rtabmap_both.onclick = function () {
-        map_menu.span_menu_rtabmap_sensor_apply.innerText = "2";
+        map_menu.rtabmap_sensor = "2";
+        map_menu.rtabmap_apply();
     };
     map_menu.input_range_rtabmap_distance.oninput = function() {
         map_menu.span_menu_rtabmap_distance_apply.innerText = map_menu.input_range_rtabmap_distance.value;
     };
-    map_menu.btn_menu_rtabmap_apply.onclick = function () {
-        map_menu.rtabmap_apply();
-    };
+
 
     /**
      *  Points submenu
@@ -3394,13 +3454,7 @@ window.onload = function () {
         map_menu.new_map('outdoor');
         map_menu.hide_all_submenu_divs();
     }
-    map_menu.btn_menu_map_rtabmap_mapping.onclick = function () {
-        rtabmap.set_rtabmap_mapping();
 
-    }
-    map_menu.btn_menu_map_rtabmap_localization.onclick = function () {
-        rtabmap.set_rtabmap_localization();
-    }
     map_menu.btn_menu_map_new_save.onclick = function () {
         map_menu.save_map();
     }
@@ -3452,20 +3506,6 @@ window.onload = function () {
 
 
 
-     /**
-     *  Move base control
-     */
-
-    move_base_control = new MoveBaseControl(ros.ros);
-    map_menu.btn_stop_all.onclick = function () {
-        move_base_control.pub_cancel_goal();
-        motors_control.motors_off();
-        update_status_bar_info("Emergency stop");
-    }
-
-    move_base_control.checkbox_keyboard.onclick = function() {
-        move_base_control.keyboard_teleop.working = !!this.checked;
-    };
 
 
     /**
@@ -3496,37 +3536,51 @@ window.onload = function () {
         joy_teleop.set_ang(0);
     });
     setInterval(function() {joy_teleop.joy_pub_speed()}, 50)
+
+
+    /**
+     *  Move base control
+     */
+
+    move_base_control = new MoveBaseControl(ros.ros, joy_teleop);
+    map_menu.btn_stop_all.onclick = function () {
+        move_base_control.pub_cancel_goal();
+        motors_control.motors_off();
+        update_status_bar_info("Emergency stop");
+    }
+
+    move_base_control.checkbox_keyboard.onclick = function() {
+        move_base_control.keyboard_teleop.working = !!this.checked;
+    };
+
+    move_base_control.pub_set_speed('moderate');
+    move_base_control.btn_menu_speed_low.style.color = "#ffffff";
+    move_base_control.btn_menu_speed_moderate.style.color = "#446de5";
+    move_base_control.btn_menu_speed_fast.style.color = "#ffffff";
+    move_base_control.btn_menu_speed_low_sm.style.color = "#ffffff";
+    move_base_control.btn_menu_speed_moderate_sm.style.color = "#446de5";
+    move_base_control.btn_menu_speed_fast_sm.style.color = "#ffffff";
+
     joy_teleop.speed_lin = move_base_control.speed_lin_current;
     joy_teleop.speed_ang = move_base_control.speed_ang_current;
-    move_base_control.pub_set_speed('moderate');
-    motors_control.btn_menu_speed_low.style.color = "#ffffff";
-    motors_control.btn_menu_speed_moderate.style.color = "#446de5";
-    motors_control.btn_menu_speed_fast.style.color = "#ffffff";
 
-    // ToDo: refactor this
-    motors_control.btn_menu_speed_fast.onclick = function () {
-        joy_teleop.speed_lin = joy_teleop.speed_lin_fast;
-        joy_teleop.speed_ang = joy_teleop.speed_ang_fast;
-        move_base_control.pub_set_speed('fast');
-        motors_control.btn_menu_speed_low.style.color = "#ffffff";
-        motors_control.btn_menu_speed_moderate.style.color = "#ffffff";
-        motors_control.btn_menu_speed_fast.style.color = "#446de5";
+    move_base_control.btn_menu_speed_fast.onclick = function () {
+        move_base_control.btn_speed_fast_onclick();
     };
-    motors_control.btn_menu_speed_moderate.onclick = function () {
-        joy_teleop.speed_lin = joy_teleop.speed_lin_moderate;
-        joy_teleop.speed_ang = joy_teleop.speed_ang_moderate;
-        move_base_control.pub_set_speed('moderate');
-        motors_control.btn_menu_speed_low.style.color = "#ffffff";
-        motors_control.btn_menu_speed_moderate.style.color = "#446de5";
-        motors_control.btn_menu_speed_fast.style.color = "#ffffff";
+    move_base_control.btn_menu_speed_moderate.onclick = function () {
+        move_base_control.btn_speed_moderate_onclick();
     };
-    motors_control.btn_menu_speed_low.onclick = function () {
-        joy_teleop.speed_lin = joy_teleop.speed_lin_low;
-        joy_teleop.speed_ang = joy_teleop.speed_ang_low;
-        move_base_control.pub_set_speed('slow');
-        motors_control.btn_menu_speed_low.style.color = "#446de5";
-        motors_control.btn_menu_speed_moderate.style.color = "#ffffff";
-        motors_control.btn_menu_speed_fast.style.color = "#ffffff";
+    move_base_control.btn_menu_speed_low.onclick = function () {
+        move_base_control.btn_speed_slow_onclick();
+    };
+    move_base_control.btn_menu_speed_fast_sm.onclick = function () {
+        move_base_control.btn_speed_fast_onclick();
+    };
+    move_base_control.btn_menu_speed_moderate_sm.onclick = function () {
+        move_base_control.btn_speed_moderate_onclick();
+    };
+    move_base_control.btn_menu_speed_low_sm.onclick = function () {
+        move_base_control.btn_speed_slow_onclick();
     };
 
 
