@@ -53,11 +53,21 @@ class ImuYaws {
             name: '/imu/yaws',
             messageType: 'std_msgs/Float32MultiArray'
         });
+        this.rtk_yaws_topic = new ROSLIB.Topic({
+            ros: ros.ros,
+            name: '/gnss_heading/yaws',
+            messageType: 'std_msgs/Float32MultiArray'
+        });
 
         this.subscribe = this.imu_yaws_topic.subscribe(function (message) {
             span_imu_deg.innerHTML = "Imu: " + message.data[0].toFixed(2) + "°";
             span_nav_deg.innerHTML = "Nav: " + message.data[1].toFixed(2) + "°";
             span_mag_deg.innerHTML = "Mag: " + message.data[2].toFixed(2) + "°";
+        });
+        this.subscribe = this.rtk_yaws_topic.subscribe(function (message) {
+            span_rtk_deg.innerHTML = "RTK: " + message.data[1].toFixed(2) + "°";
+            span_imu_deg.innerHTML = "IMU: " + message.data[0].toFixed(2) + "°";
+            span_fuse_deg.innerHTML = "Fused: " + message.data[2].toFixed(2) + "°";
         });
     }
 }
@@ -151,6 +161,12 @@ class Imu_Markers {
           tfClient: this.tfClient,
           topic: "/imu/markers",
         });
+        this.markerArrayGnssClient = new ROS3D.MarkerArrayClient({
+          ros: ros.ros,
+          rootObject: viewer.viewer.scene,
+          tfClient: this.tfClient,
+          topic: "/gnss_heading/markers",
+        });
 
     }
 }
@@ -178,9 +194,16 @@ class ImuDiag {
                     }
                 });
                 if (contains_element === false){
-                    if (element.name.includes("BNO085")){
+                    const el_name = element.name + ":";
+                    if (el_name.includes("BNO085")){
                         diag_arr.push(element);
                     }
+                    if (el_name.includes("fix:")){
+                        diag_arr.push(element);
+                    }
+                    // if (element.name.includes("gnss_heading: fix:")){
+                    //     diag_arr.push(element);
+                    // }
                 }
             });
             var diag_html_content = '';
