@@ -1997,14 +1997,14 @@ class MapMenu {
     }
 
     btn_points_onclick(interactive_markers) {
-        if (this.current_submenu !== 'map') {
+        if (this.current_submenu !== 'points') {
             this.hide_all_submenu_divs();
             this.row_submenu.style.display = "none";
             this.row_submenu_visible = false;
             interactive_markers.imClient.rootObject.visible = false;
         }
         if (this.row_submenu_visible === false) {
-            this.current_submenu = 'map';
+            this.current_submenu = 'points';
             this.div_menu_map_point.style.display = "block";
             this.row_submenu.style.display = "block";
             this.row_submenu_visible = true;
@@ -3156,6 +3156,39 @@ class Programs {
     }
 }
 
+class RainAlert {
+    constructor(ros) {
+        this.ico_rain_ok = document.getElementById("ico_rain_ok");
+        this.ico_rain_warn = document.getElementById("ico_rain_warn");
+        this.ico_rain_danger = document.getElementById("ico_rain_danger");
+        this.rain_alert_topic = new ROSLIB.Topic({
+            ros: ros,
+            name: '/weather_alert/rain_alert',
+            messageType: 'weather_alert/RainAlert'
+        });
+    }
+    rain_alert_data(message){
+        if (message.rain_alert){
+            this.ico_rain_ok.style.setProperty('display', 'none');
+            this.ico_rain_warn.style.setProperty('display', 'block');
+            this.ico_rain_danger.style.setProperty('display', 'none');
+            // this.ico_rain.className = 'bi bi-cloud-rain-fill';
+            if (message.rain_now > 0){
+                this.ico_rain_ok.style.setProperty('display', 'none');
+                this.ico_rain_warn.style.setProperty('display', 'none');
+                this.ico_rain_danger.style.setProperty('display', 'block');
+                // this.ico_rain.className = 'bi bi-cloud-rain-heavy-fill';
+            }
+        }
+        else {
+                this.ico_rain_ok.style.setProperty('display', 'block');
+                this.ico_rain_warn.style.setProperty('display', 'none');
+                this.ico_rain_danger.style.setProperty('display', 'none');
+
+        }
+    }
+}
+
 
 window.onload = function () {
     ros = new ROS();
@@ -3744,6 +3777,16 @@ window.onload = function () {
     power_module.btn_mower_on_pm.onclick = function() {power_module.pub_set_bat_out_switch(value = true)};
     power_module.btn_mower_off_pm.onclick = function() {power_module.pub_set_bat_out_switch(value = false)};
 
+
+
+    /**
+     *  Rain alert
+     */
+
+    rain_alert = new RainAlert(ros.ros);
+    rain_alert.rain_alert_topic.subscribe(function (message) {
+        rain_alert.rain_alert_data(message);
+    });
 
 
     /**
