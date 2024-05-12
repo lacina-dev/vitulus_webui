@@ -136,11 +136,11 @@
                     <div class="col" style="padding-right: 0px;padding-left: 0px;">
                         <div class="bg-primary border-primary" id="div_menu_marker" style="width: 100%;padding: 4px;background: linear-gradient(var(--bs-gray-900) 1%, var(--bs-primary)), var(--bs-secondary);border-bottom-right-radius: 5px;border-bottom-left-radius: 5px;border: 1px solid var(--bs-info);border-top-style: none;padding-right: 12px;padding-left: 12px;display: none;padding-bottom: 8px;">
                             <div class="row g-0">
-                                <div class="col-12 col-sm-6 col-md-6 col-lg-6 col-xl-6 col-xxl-6" style="height: auto;margin-top: 8px;"><label class="form-label" style="font-size: 12px;margin-bottom: 4px;display: block;">Marker</label><button class="btn btn-primary btn-sm" id="btn_marker_send_goal" type="button">Send goal</button><button class="btn btn-primary btn-sm disabled" type="button" disabled="">Save point</button><button class="btn btn-primary btn-sm disabled" type="button" disabled="">Add path point</button></div>
+                                <div class="col-12 col-sm-6 col-md-6 col-lg-6 col-xl-6 col-xxl-6" style="height: auto;margin-top: 8px;"><label class="form-label" style="font-size: 12px;margin-bottom: 4px;display: block;">Marker</label><button class="btn btn-primary btn-sm" id="btn_marker_send_goal" type="button">Send goal</button><button class="btn btn-warning btn-sm" id="btn_marker_cancel_navigation" type="button">Cancel navigation</button></div>
                                 <div class="col-12 col-sm-6 col-md-6 col-lg-6 col-xl-6 col-xxl-6" style="display: block;height: auto;margin-top: 8px;"><label class="form-label" style="font-size: 12px;margin-bottom: 4px;display: block;">Marker orientation</label><input class="form-range bg-secondary border rounded-pill border-secondary" type="range" id="range_marker_orientation" min="0" max="6.28" step="0.05" value="0" style="padding: 12px;"></div>
                             </div>
                         </div>
-                        <div class="border-primary" id="div_menu_map" style="width: 100%;padding: 4px;background: linear-gradient(var(--bs-gray-900) 0%, var(--bs-primary)), var(--bs-primary);border-bottom-right-radius: 5px;border-bottom-left-radius: 5px;padding-right: 12px;padding-left: 12px;display: none;padding-bottom: 15px;border: 1px solid var(--bs-secondary);border-top-style: none;">
+                        <div class="border-primary" id="div_menu_map" style="width: 100%;padding: 4px;background: linear-gradient(var(--bs-gray-900) 0%, var(--bs-primary)), var(--bs-primary);border-bottom-right-radius: 5px;border-bottom-left-radius: 5px;padding-right: 12px;padding-left: 12px;display: block;padding-bottom: 15px;border: 1px solid var(--bs-secondary);border-top-style: none;">
                             <div class="row">
                                 <div class="col-auto" style="height: auto;margin-top: 8px;"><span style="display: block;font-size: 12px;margin-bottom: 4px;">New map</span>
                                     <div class="btn-group btn-group-sm" role="group"><button class="btn btn-primary d-flex justify-content-center align-items-center align-items-center align-baseline" id="btn_menu_map_new_indoor" type="button" style="width: 55px;">&nbsp;<i class="material-icons" style="font-size: 18px;">home</i></button><button class="btn btn-primary d-flex justify-content-center align-items-center align-items-center align-middle" id="btn_menu_map_new_outdoor" type="button" style="width: 55px;">&nbsp;<i class="fa fa-tree"></i></button></div>
@@ -156,6 +156,9 @@
                                 </div>
                                 <div class="col-auto" style="height: auto;margin-top: 8px;"><span style="display: block;font-size: 12px;margin-bottom: 4px;">RtabMap</span>
                                     <div class="btn-group btn-group-sm" role="group"><button class="btn btn-primary" id="btn_menu_map_rtabmap_mapping" type="button">Mapping</button><button class="btn btn-primary" id="btn_menu_map_rtabmap_localization" type="button">Localization</button></div>
+                                </div>
+                                <div class="col-auto" style="height: auto;margin-top: 8px;"><span style="display: block;font-size: 12px;margin-bottom: 4px;">Init pose</span>
+                                    <div class="btn-group btn-group-sm" role="group"><button class="btn btn-primary" id="btn_menu_map_pose_dock" type="button">Set to dock</button></div>
                                 </div>
                             </div>
                             <hr>
@@ -201,7 +204,8 @@
                                 <div class="col-auto" style="height: auto;margin-top: 8px;"><span style="display: block;font-size: 12px;margin-bottom: 4px;">Add current position as point</span>
                                     <div class="input-group input-group-sm" style="display: flex;"><span class="input-group-text"><i class="fa fa-map-marker"></i></span><input class="bg-secondary form-control" type="text" id="input_menu_point_new" style="width: 125px;" placeholder="Point name"><button class="btn btn-primary" id="btn_menu_point_new_save" type="button">Add</button></div>
                                 </div>
-                                <div class="col" style="margin-top: 8px;"><span style="display: block;font-size: 12px;margin-bottom: 4px;">Clear points in map</span><button class="btn btn-primary btn-sm" id="btn_menu_point_clear" type="button">Clear</button></div>
+                                <div class="col-auto" style="margin-top: 8px;"><span style="display: block;font-size: 12px;margin-bottom: 4px;">Clear points in map</span><button class="btn btn-primary btn-sm" id="btn_menu_point_clear" type="button">Clear</button></div>
+                                <div class="col" style="margin-top: 8px;"><span style="display: block;font-size: 12px;margin-bottom: 4px;">Cancel navi</span><button class="btn btn-warning btn-sm" id="btn_menu_point_cancel" type="button">Cancel</button></div>
                             </div>
                             <hr>
                             <div class="row" id="div_menu_point_items_row" style="overflow: auto;">
@@ -215,7 +219,8 @@
                                 <div class="col-auto" style="height: auto;margin-top: 8px;"><span style="display: block;font-size: 12px;margin-bottom: 4px;">Add path, current position as start</span>
                                     <div class="input-group input-group-sm" style="display: flex;"><span class="input-group-text"><i class="fa fa-road"></i></span><input class="bg-secondary form-control" type="text" id="input_menu_path_new" style="width: 125px;" placeholder="Path name"><button class="btn btn-primary" id="btn_menu_path_new_save" type="button">Add</button></div>
                                 </div>
-                                <div class="col" style="margin-top: 8px;"><span style="display: block;font-size: 12px;margin-bottom: 4px;">Clear paths in map</span><button class="btn btn-primary btn-sm" id="btn_menu_path_clear" type="button">Clear</button></div>
+                                <div class="col-auto" style="margin-top: 8px;"><span style="display: block;font-size: 12px;margin-bottom: 4px;">Clear paths in map</span><button class="btn btn-primary btn-sm" id="btn_menu_path_clear" type="button">Clear</button></div>
+                                <div class="col" style="margin-top: 8px;"><span style="display: block;font-size: 12px;margin-bottom: 4px;">Cancel navi</span><button class="btn btn-warning btn-sm" id="btn_menu_path_cancel" type="button">Cancel</button></div>
                             </div>
                             <hr>
                             <div class="row" id="div_menu_path_items_row" style="overflow: auto;">
@@ -372,7 +377,7 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="border-primary" id="div_menu_config" style="width: 100%;padding: 4px;background: linear-gradient(var(--bs-gray-900) 0%, var(--bs-primary)), var(--bs-primary);border-bottom-right-radius: 5px;border-bottom-left-radius: 5px;padding-right: 12px;padding-left: 12px;display: block;padding-bottom: 15px;border: 1px solid var(--bs-secondary);border-top-style: none;z-index: 2;position: relative;">
+                        <div class="border-primary" id="div_menu_config" style="width: 100%;padding: 4px;background: linear-gradient(var(--bs-gray-900) 0%, var(--bs-primary)), var(--bs-primary);border-bottom-right-radius: 5px;border-bottom-left-radius: 5px;padding-right: 12px;padding-left: 12px;display: none;padding-bottom: 15px;border: 1px solid var(--bs-secondary);border-top-style: none;z-index: 2;position: relative;">
                             <div class="row">
                                 <div class="col" style="margin-top: 8px;padding-right: 2px;padding-left: 2px;">
                                     <div>
@@ -599,6 +604,10 @@
                         <div id="div_rtabmap" class="status-panels" style="padding: 1px;padding-left: 3px;padding-right: 4px;/*background: var(--bs-gray-900);*//*border-radius: 8px;*//*border: 1px solid var(--bs-primary);*/height: 46px;width: 128px;display: grid;">
                             <div class="align-items-center" style="width: 120px;height: 24px;display: inline-flex;"><span id="span_status_follow-1" class="no-event" style="font-size: 12px;margin-left: 2px;color: var(--bs-info);display: inline-block;">RtabMap&nbsp;</span><span id="span_rtabmap_id" style="margin-left: 2px;height: auto;font-size: 12px;width: 37px;display: inline-block;">00000&nbsp;</span><span id="span_rtabmap_proximity" class="no-event" style="font-size: 12px;margin-left: 4px;width: 15px;height: 9px;background: #fff500;border-radius: 24px;border: 1px solid var(--bs-emphasis-color);">&nbsp;&nbsp;</span><span id="span_rtabmap_lc" class="no-event" style="font-size: 12px;margin-left: 4px;width: 15px;height: 9px;background: #00d716;border-radius: 24px;border: 1px solid var(--bs-emphasis-color);">&nbsp;&nbsp;</span></div>
                             <div style="display: inline-flex;"><span id="span_rtabmap_loc_map" style="font-size: 10px;margin-left: 2px;">&nbsp; &nbsp;</span></div>
+                        </div>
+                        <div id="div_odom" class="status-panels" style="padding: 1px;padding-left: 3px;padding-right: 4px;/*background: var(--bs-gray-900);*//*border-radius: 8px;*//*border: 1px solid var(--bs-primary);*/height: 46px;width: 128px;display: grid;">
+                            <div class="align-items-center" style="width: 120px;height: 24px;display: inline-flex;"><span id="span_status_follow-2" class="no-event" style="font-size: 12px;margin-left: 2px;color: var(--bs-info);display: inline-block;">Odom&nbsp;</span><span id="span_odom_status" style="margin-left: 2px;height: auto;font-size: 12px;width: 42px;display: inline-block;">fusion</span><span id="span_odom_position" class="no-event" style="font-size: 12px;margin-left: 4px;width: 15px;height: 9px;background: var(--bs-info);border-radius: 24px;border: 1px solid var(--bs-emphasis-color);">&nbsp;&nbsp;</span><span id="span_odom_heading" class="no-event" style="font-size: 12px;margin-left: 4px;width: 15px;height: 9px;background: #5bc0de00;border-radius: 24px;border: 1px solid var(--bs-emphasis-color);">&nbsp;&nbsp;</span></div>
+                            <div style="display: inline-flex;"><span id="span_odom_info" style="font-size: 10px;margin-left: 2px;">&nbsp; &nbsp;</span></div>
                         </div>
                     </div>
                     <div class="col-6 d-flex flex-column justify-content-end align-items-end no-event" style="text-align: right;padding-right: 0px;padding-left: 0px;">
