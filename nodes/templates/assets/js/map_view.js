@@ -1573,6 +1573,7 @@ class MapMenu {
         this.btn_marker.active = false;
         this.btn_marker_send_goal = document.getElementById("btn_marker_send_goal");
         this.range_marker_orientation = document.getElementById("range_marker_orientation");
+        this.btn_marker_cancel_navigation = document.getElementById("btn_marker_cancel_navigation");
         this.span_menu_rtabmap_distance_apply = document.getElementById("span_menu_rtabmap_distance_apply");
 
         this.div_menu_config = document.getElementById("div_menu_config");
@@ -1598,6 +1599,7 @@ class MapMenu {
         this.div_menu_map.style.display = "none";
         this.btn_menu_map_new_indoor = document.getElementById("btn_menu_map_new_indoor");
         this.btn_menu_map_new_outdoor = document.getElementById("btn_menu_map_new_outdoor");
+        this.btn_menu_map_pose_dock= document.getElementById("btn_menu_map_pose_dock");
 
         this.btn_menu_map_new_save = document.getElementById("btn_menu_map_new_save");
         this.input_menu_map_new = document.getElementById("input_menu_map_new");
@@ -1613,6 +1615,7 @@ class MapMenu {
         this.btn_menu_point_new_save = document.getElementById("btn_menu_point_new_save");
         this.input_menu_point_new = document.getElementById("input_menu_point_new");
         this.btn_menu_point_clear = document.getElementById("btn_menu_point_clear");
+        this.btn_menu_point_cancel = document.getElementById("btn_menu_point_cancel");
 
         this.btn_paths = document.getElementById("btn_paths");
         this.div_menu_map_path = document.getElementById("div_menu_map_path");
@@ -1621,6 +1624,7 @@ class MapMenu {
         this.btn_menu_path_new_save = document.getElementById("btn_menu_path_new_save");
         this.input_menu_path_new = document.getElementById("input_menu_path_new");
         this.btn_menu_path_clear = document.getElementById("btn_menu_path_clear");
+        this.btn_menu_path_cancel = document.getElementById("btn_menu_path_cancel");
 
         this.btn_programs = document.getElementById("btn_programs");
         this.div_menu_map_program = document.getElementById("div_menu_map_program");
@@ -1656,6 +1660,16 @@ class MapMenu {
 
         this.btn_stop_all = document.getElementById("btn_stop_all");
 
+        this.dock_pose_Topic = new ROSLIB.Topic({
+            ros : ros,
+            name : '/nav_tf/set_dock_pose',
+            messageType : 'std_msgs/Bool'
+        });
+        this.cancel_navi_Topic = new ROSLIB.Topic({
+            ros : ros,
+            name : '/smach_goal/cancel',
+            messageType : 'std_msgs/Bool'
+        });
         this.new_map_Topic = new ROSLIB.Topic({
             ros : ros,
             name : '/navi_manager/new_map',
@@ -1780,6 +1794,8 @@ class MapMenu {
         this.remove_path_Topic.advertise();
         this.execute_path_Topic.advertise();
         this.show_map_Topic.advertise();
+        this.cancel_navi_Topic.advertise();
+        this.dock_pose_Topic.advertise();
         this.rtabmap_settings_set_Topic.advertise();
         if (this.status_bar.is_indoor === true){
             this.map_to_show = 'rtabmap';
@@ -1787,6 +1803,21 @@ class MapMenu {
         else {
             this.map_to_show = 'planner';
         }
+    }
+
+    cancel_goal_publish(){
+        // console.log("cancel_goal_publish");
+        const msg = new ROSLIB.Message({
+            data : true,
+        });
+        this.cancel_navi_Topic.publish(msg);
+    }
+
+    dock_pose_publish(){
+        const msg = new ROSLIB.Message({
+            data : true,
+        });
+        this.dock_pose_Topic.publish(msg);
     }
 
     rtabmap_apply(){
@@ -2137,7 +2168,7 @@ class MapMenu {
     }
     btn_marker_send_goal_onclick(interactive_markers) {
         interactive_markers.send_goal();
-        this.btn_marker_onclick(interactive_markers);
+        // this.btn_marker_onclick(interactive_markers);
     }
 
     btn_menu_lidar_on_onclick(lidar_control, status) {
@@ -2471,6 +2502,62 @@ class LayoutManager {
     };
 }
 
+class Odom{
+    constructor(ros) {
+        this.div_odom = document.getElementById("div_odom");
+        // this.div_odom.style.display = "none";
+        this.span_odom_status = document.getElementById("span_odom_status");
+        this.span_odom_position = document.getElementById("span_odom_position");
+        this.span_odom_heading = document.getElementById("span_odom_heading");
+        this.span_odom_info = document.getElementById("span_odom_info");
+        // this.btn_menu_map_rtabmap_mapping = document.getElementById("btn_menu_map_rtabmap_mapping");
+        // this.btn_menu_map_rtabmap_localization = document.getElementById("btn_menu_map_rtabmap_localization");
+        this.odom_status_topic = new ROSLIB.Topic({
+            ros : ros,
+            name : '/nav_tf/odom_status',
+            messageType : 'vitulus_msgs/Navi_transform'
+        });
+
+        // this.rtabmap_localization_srvs = new ROSLIB.Service({
+        //     ros : ros,
+        //     name : '/rtabmap/set_mode_localization',
+        //     serviceType : 'std_srvs/EmptyRequest'
+        // });
+        // this.request = new ROSLIB.ServiceRequest({});
+
+        this.span_odom_heading.style.background = "#555555";
+        this.span_odom_position.style.background = "#555555";
+        this.span_odom_status.textContent = "";
+    }
+
+    // set_rtabmap_localization(){
+    //     this.rtabmap_localization_srvs.callService(this.request, function(result) {
+    //         // console.log(result);
+    //         console.log('Result for service call on rtabmap localization: ' + result);
+    //     });
+    // }
+
+
+
+    process_msg(message) {
+        if (message.position === 0) {
+            this.span_odom_position.style.background = "#555555";
+        } else {
+            this.span_odom_position.style.background = "#5bc0de";
+        }
+
+        if (message.heading === 0) {
+            this.span_odom_heading.style.background = "#555555";
+        } else {
+            this.span_odom_heading.style.background = "#5bc0de";
+        }
+
+        this.span_odom_status.textContent = message.status;
+        this.span_odom_info.textContent = message.info;
+        // console.log(message.status);
+    }
+
+}
 
 class RtabMap{
     constructor(ros) {
@@ -3357,6 +3444,14 @@ window.onload = function () {
         rtabmap.set_rtabmap_localization();
     }
 
+    /**
+    *  Odom
+    */
+
+    odom = new Odom(ros.ros);
+    odom.odom_status_topic.subscribe(function(message) {
+         odom.process_msg(message);
+    });
 
 
      /**
@@ -3384,6 +3479,14 @@ window.onload = function () {
     };
     map_menu.btn_marker_send_goal.onclick = function () {
         map_menu.btn_marker_send_goal_onclick(interactive_markers);
+    };
+
+    map_menu.btn_marker_cancel_navigation.onclick = function () {
+        map_menu.cancel_goal_publish();
+    };
+
+    map_menu.btn_menu_map_pose_dock.onclick = function () {
+        map_menu.dock_pose_publish();
     };
 
     /**
@@ -3426,6 +3529,9 @@ window.onload = function () {
     };
     map_menu.btn_menu_point_new_save.onclick = function () {
         map_menu.save_point();
+    };
+    map_menu.btn_menu_point_cancel.onclick = function () {
+        map_menu.cancel_goal_publish()
     };
     map_menu.btn_menu_point_clear.onclick = function () {
         // console.log("btn_menu_point_clear");
@@ -3470,6 +3576,9 @@ window.onload = function () {
         // console.log("btn_menu_path_clear");
         map_menu.path_clicked_show('');
         paths_visualization.mapPath.sn.visible = false;
+    };
+    map_menu.btn_menu_path_cancel.onclick = function () {
+        map_menu.cancel_goal_publish()
     };
 
     /**
