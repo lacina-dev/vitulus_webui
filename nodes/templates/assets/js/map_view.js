@@ -801,7 +801,7 @@ class IconStatus {
                 this.ico_mower.src = "/assets/img/robot_icons/Nextion_ico_mower_green.png";
             }
             if (message.mower === "BUSY") {
-                this.ico_mower.src = "/assets/img/robot_icons/Nextion_ico_mower_green.png";
+                this.ico_mower.src = "/assets/img/robot_icons/Nextion_ico_mower_orange.png";
             }
             if (message.mower === "ERROR") {
                 this.ico_mower.src = "/assets/img/robot_icons/Nextion_ico_mower_red.png";
@@ -2695,6 +2695,7 @@ class Diag {
 class Mower {
     constructor(ros) {
         this.span_mower_status = document.getElementById("span_mower_status");
+        this.span_mower_temp = document.getElementById("span_mower_temp");
         this.span_mower_direction = document.getElementById("span_mower_direction");
         this.span_mower_cut_height = document.getElementById("span_mower_cut_height");
         this.span_mower_rpm = document.getElementById("span_mower_rpm");
@@ -2716,6 +2717,7 @@ class Mower {
         this.input_mower_cmd2 = document.getElementById("input_mower_cmd2");
         this.input_mower_cmd3 = document.getElementById("input_mower_cmd3");
         this.input_mower_cmd4 = document.getElementById("input_mower_cmd4");
+        this.paragraph_mower_config = document.getElementById("paragraph_mower_config");
         this.input_mower_cut_height = document.getElementById("input_mower_cut_height");
         this.input_mower_rpm = document.getElementById("input_mower_rpm");
         this.inputgroup_mower_on_off = document.getElementById("inputgroup_mower_on_off");
@@ -2724,6 +2726,11 @@ class Mower {
             ros: ros.ros,
             name: '/mower/status',
             messageType: 'vitulus_msgs/Mower'
+        });
+        this.mower_config_print_topic = new ROSLIB.Topic({
+            ros: ros.ros,
+            name: '/mower/config_print',
+            messageType: 'std_msgs/String'
         });
         this.mower_set_power_topic = new ROSLIB.Topic({
             ros : ros.ros,
@@ -2793,11 +2800,11 @@ class Mower {
             default:
                 this.span_mower_status.textContent = message.status;
         }
-        if (message.status === 'UNK' || message.status === 'OFF' || message.status === 'ERROR') {
+        if (message.status === 'UNK' || message.status === 'OFF' || message.status === 'ERR' || message.status === 'BLOCKED' || message.status === 'TEMP') {
             this.inputgroup_mower_on_off.style.setProperty('border', '2px solid var(--bs-danger)');
         }
         else {
-            if (message.status === 'WAIT' || message.status === 'RUN') {
+            if (message.status === 'READY' || message.status === 'RUN') {
                 this.inputgroup_mower_on_off.style.setProperty('border', '2px solid var(--bs-success)');
             }
             else {
@@ -2808,6 +2815,7 @@ class Mower {
         this.span_mower_direction.textContent = message.moto_dir;
         this.span_mower_cut_height.textContent = message.current_height + "/" + message.max_height + " cm";
         this.span_mower_rpm.textContent = message.moto_rpm + "/" + message.setpoint_rpm + " rpm";
+        this.span_mower_temp.textContent = parseInt(message.temp) + "`C";
     }
 
     pub_mower_set_power(value) {
@@ -3781,6 +3789,11 @@ window.onload = function () {
     mower = new Mower(ros);
     mower.mower_status_topic.subscribe(function (message) {
         mower.mower_status(message);
+    });
+
+
+    mower.mower_config_print_topic.subscribe(function (message) {
+        mower.paragraph_mower_config.innerHTML = message.data;
     });
 
     mower.btn_mower_on.onclick = function() {
