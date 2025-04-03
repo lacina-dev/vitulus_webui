@@ -579,6 +579,7 @@ class InteractiveMarkers{
             messageType : 'std_msgs/String'
         });
 
+
         this.init();
     }
     init(){
@@ -654,6 +655,12 @@ class RobotVisualization {
             topic: '/move_base_flex/local_costmap/footprint',
             color: 0xffffff,
         });
+        this.markerArrayClient = new ROS3D.MarkerArrayClient({
+            ros: ros,
+            rootObject: viewer.scene,
+            tfClient: tf_client,
+            topic: "/dock/visualization",
+          });
     }
 }
 
