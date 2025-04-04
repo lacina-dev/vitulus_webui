@@ -654,12 +654,16 @@ class RobotVisualization {
             rootObject : viewer.scene,
             topic: '/move_base_flex/local_costmap/footprint',
             color: 0xffffff,
+            opacity: 1.0,      
+            thickness: 2.0 
+            
         });
         this.markerArrayClient = new ROS3D.MarkerArrayClient({
             ros: ros,
             rootObject: viewer.scene,
             tfClient: tf_client,
             topic: "/dock/visualization",
+
           });
     }
 }
