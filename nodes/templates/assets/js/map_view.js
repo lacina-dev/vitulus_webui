@@ -478,7 +478,7 @@ class TfClient {
         this.map_reinit = true;
         this.tfClientMap = new ROSLIB.TFClient({
           ros : ros.ros,
-          angularThres : 0.000001,
+          angularThres : 0.00001,
           transThres : 0.00001,
           rate : 20.0,
           fixedFrame : '/map'
@@ -658,13 +658,7 @@ class RobotVisualization {
             thickness: 2.0 
             
         });
-        this.markerArrayClient = new ROS3D.MarkerArrayClient({
-            ros: ros,
-            rootObject: viewer.scene,
-            tfClient: tf_client,
-            topic: "/dock/visualization",
-
-          });
+        
     }
 }
 
@@ -1545,13 +1539,13 @@ class MotorControl {
     motors_on(){
         this.motor_power_msg.data = true;
         this.pm_motor_switch_msg.data = true;
-        this.pmMotorSwitchTopic.publish(this.pm_motor_switch_msg);
+        // this.pmMotorSwitchTopic.publish(this.pm_motor_switch_msg);
         this.motorPowerTopic.publish(this.motor_power_msg);
     }
     motors_off(){
         this.motor_power_msg.data = false;
         this.pm_motor_switch_msg.data = false;
-        this.pmMotorSwitchTopic.publish(this.pm_motor_switch_msg);
+        // this.pmMotorSwitchTopic.publish(this.pm_motor_switch_msg);
         this.motorPowerTopic.publish(this.motor_power_msg);
     }
     btn_motors_on_onclick(motors_control, status) {
@@ -1619,7 +1613,7 @@ class MapMenu {
         this.btn_menu_map_planner_show = document.getElementById("btn_menu_map_planner_show");
         this.btn_menu_map_rtabmap_show = document.getElementById("btn_menu_map_rtabmap_show");
 
-        this.btn_points = document.getElementById("btn_points");
+        // this.btn_points = document.getElementById("btn_points_map");
         this.div_menu_map_point = document.getElementById("div_menu_map_point");
         this.div_menu_point_items_row = document.getElementById("div_menu_point_items_row");
         this.div_menu_point_items_row.innerHTML = '';
@@ -1628,7 +1622,7 @@ class MapMenu {
         this.btn_menu_point_clear = document.getElementById("btn_menu_point_clear");
         this.btn_menu_point_cancel = document.getElementById("btn_menu_point_cancel");
 
-        this.btn_paths = document.getElementById("btn_paths");
+        // this.btn_paths = document.getElementById("btn_paths_map");
         this.div_menu_map_path = document.getElementById("div_menu_map_path");
         this.div_menu_path_items_row = document.getElementById("div_menu_path_items_row");
         this.div_menu_path_items_row.innerHTML = '';
@@ -2038,51 +2032,51 @@ class MapMenu {
         this.row_submenu_visible = false;
     }
 
-    btn_points_onclick(interactive_markers) {
-        if (this.current_submenu !== 'points') {
-            this.hide_all_submenu_divs();
-            this.row_submenu.style.display = "none";
-            this.row_submenu_visible = false;
-            interactive_markers.imClient.rootObject.visible = false;
-        }
-        if (this.row_submenu_visible === false) {
-            this.current_submenu = 'points';
-            this.div_menu_map_point.style.display = "block";
-            this.row_submenu.style.display = "block";
-            this.row_submenu_visible = true;
-            this.btn_points.active = true;
-        }
-        else {
-            this.current_submenu = 'none';
-            this.div_menu_map_point.style.display = "none";
-            this.row_submenu.style.display = "none";
-            this.row_submenu_visible = false;
-            this.btn_points.active = false;
-        }
-    }
+    // btn_points_onclick(interactive_markers) {
+    //     if (this.current_submenu !== 'points') {
+    //         this.hide_all_submenu_divs();
+    //         this.row_submenu.style.display = "none";
+    //         this.row_submenu_visible = false;
+    //         interactive_markers.imClient.rootObject.visible = false;
+    //     }
+    //     if (this.row_submenu_visible === false) {
+    //         this.current_submenu = 'points';
+    //         this.div_menu_map_point.style.display = "block";
+    //         this.row_submenu.style.display = "block";
+    //         this.row_submenu_visible = true;
+    //         this.btn_points.active = true;
+    //     }
+    //     else {
+    //         this.current_submenu = 'none';
+    //         this.div_menu_map_point.style.display = "none";
+    //         this.row_submenu.style.display = "none";
+    //         this.row_submenu_visible = false;
+    //         this.btn_points.active = false;
+    //     }
+    // }
 
-    btn_paths_onclick(interactive_markers) {
-        if (this.current_submenu !== 'path') {
-            this.hide_all_submenu_divs();
-            this.row_submenu.style.display = "none";
-            this.row_submenu_visible = false;
-            interactive_markers.imClient.rootObject.visible = false;
-        }
-        if (this.row_submenu_visible === false) {
-            this.current_submenu = 'path';
-            this.div_menu_map_path.style.display = "block";
-            this.row_submenu.style.display = "block";
-            this.row_submenu_visible = true;
-            this.btn_paths.active = true;
-        }
-        else {
-            this.current_submenu = 'none';
-            this.div_menu_map_path.style.display = "none";
-            this.row_submenu.style.display = "none";
-            this.row_submenu_visible = false;
-            this.btn_paths.active = false;
-        }
-    }
+    // btn_paths_onclick(interactive_markers) {
+    //     if (this.current_submenu !== 'path') {
+    //         this.hide_all_submenu_divs();
+    //         this.row_submenu.style.display = "none";
+    //         this.row_submenu_visible = false;
+    //         interactive_markers.imClient.rootObject.visible = false;
+    //     }
+    //     if (this.row_submenu_visible === false) {
+    //         this.current_submenu = 'path';
+    //         this.div_menu_map_path.style.display = "block";
+    //         this.row_submenu.style.display = "block";
+    //         this.row_submenu_visible = true;
+    //         this.btn_paths.active = true;
+    //     }
+    //     else {
+    //         this.current_submenu = 'none';
+    //         this.div_menu_map_path.style.display = "none";
+    //         this.row_submenu.style.display = "none";
+    //         this.row_submenu_visible = false;
+    //         this.btn_paths.active = false;
+    //     }
+    // }
 
     btn_programs_onclick(interactive_markers) {
         if (this.current_submenu !== 'program') {
@@ -2254,10 +2248,10 @@ class MoveBaseControl {
         });
         this.speed_lin_fast = 0.75;
         this.speed_ang_fast = 1.5;
-        this.speed_lin_moderate = 0.5;
-        this.speed_ang_moderate = 1.2;
-        this.speed_lin_slow = 0.3;
-        this.speed_ang_slow = 0.4;
+        this.speed_lin_moderate = 0.4;
+        this.speed_ang_moderate = 1.3;
+        this.speed_lin_slow = 0.25;
+        this.speed_ang_slow = 0.6;
         this.speed_lin_current = this.speed_lin_moderate;
         this.speed_ang_current = this.speed_ang_moderate;
         // Keyboard teleop
@@ -3262,38 +3256,38 @@ class Programs {
     }
 }
 
-class RainAlert {
-    constructor(ros) {
-        this.ico_rain_ok = document.getElementById("ico_rain_ok");
-        this.ico_rain_warn = document.getElementById("ico_rain_warn");
-        this.ico_rain_danger = document.getElementById("ico_rain_danger");
-        this.rain_alert_topic = new ROSLIB.Topic({
-            ros: ros,
-            name: '/weather_alert/rain_alert',
-            messageType: 'weather_alert/RainAlert'
-        });
-    }
-    rain_alert_data(message){
-        if (message.rain_alert){
-            this.ico_rain_ok.style.setProperty('display', 'none');
-            this.ico_rain_warn.style.setProperty('display', 'block');
-            this.ico_rain_danger.style.setProperty('display', 'none');
-            // this.ico_rain.className = 'bi bi-cloud-rain-fill';
-            if (message.rain_now > 0){
-                this.ico_rain_ok.style.setProperty('display', 'none');
-                this.ico_rain_warn.style.setProperty('display', 'none');
-                this.ico_rain_danger.style.setProperty('display', 'block');
-                // this.ico_rain.className = 'bi bi-cloud-rain-heavy-fill';
-            }
-        }
-        else {
-                this.ico_rain_ok.style.setProperty('display', 'block');
-                this.ico_rain_warn.style.setProperty('display', 'none');
-                this.ico_rain_danger.style.setProperty('display', 'none');
+// class RainAlert {
+//     constructor(ros) {
+//         this.ico_rain_ok = document.getElementById("ico_rain_ok");
+//         this.ico_rain_warn = document.getElementById("ico_rain_warn");
+//         this.ico_rain_danger = document.getElementById("ico_rain_danger");
+//         this.rain_alert_topic = new ROSLIB.Topic({
+//             ros: ros,
+//             name: '/weather_alert/rain_alert',
+//             messageType: 'weather_alert/RainAlert'
+//         });
+//     }
+//     rain_alert_data(message){
+//         if (message.rain_alert){
+//             this.ico_rain_ok.style.setProperty('display', 'none');
+//             this.ico_rain_warn.style.setProperty('display', 'block');
+//             this.ico_rain_danger.style.setProperty('display', 'none');
+//             // this.ico_rain.className = 'bi bi-cloud-rain-fill';
+//             if (message.rain_now > 0){
+//                 this.ico_rain_ok.style.setProperty('display', 'none');
+//                 this.ico_rain_warn.style.setProperty('display', 'none');
+//                 this.ico_rain_danger.style.setProperty('display', 'block');
+//                 // this.ico_rain.className = 'bi bi-cloud-rain-heavy-fill';
+//             }
+//         }
+//         else {
+//                 this.ico_rain_ok.style.setProperty('display', 'block');
+//                 this.ico_rain_warn.style.setProperty('display', 'none');
+//                 this.ico_rain_danger.style.setProperty('display', 'none');
 
-        }
-    }
-}
+//         }
+//     }
+// }
 
 
 window.onload = function () {
@@ -3321,6 +3315,7 @@ window.onload = function () {
     tf_client.tfClientMap.subscribe('base_link', function(tf) {
         tf_client.follow_robot_set(viewer.viewer, tf);
     });
+    // tf_client_dock = new TfClient(ros, viewer.viewer);
 
     laser_scan = new LaserScan(ros, tf_client.tfClientMap, viewer.viewer);
 
@@ -3543,9 +3538,9 @@ window.onload = function () {
      *  Points submenu
      */
 
-    map_menu.btn_points.onclick = function () {
-        map_menu.btn_points_onclick(interactive_markers);
-    };
+    // map_menu.btn_points.onclick = function () {
+    //     map_menu.btn_points_onclick(interactive_markers);
+    // };
     map_menu.btn_menu_point_new_save.onclick = function () {
         map_menu.save_point();
     };
@@ -3585,9 +3580,9 @@ window.onload = function () {
      *  Paths submenu
      */
 
-    map_menu.btn_paths.onclick = function () {
-        map_menu.btn_paths_onclick(interactive_markers);
-    };
+    // map_menu.btn_paths.onclick = function () {
+    //     map_menu.btn_paths_onclick(interactive_markers);
+    // };
     map_menu.btn_menu_path_new_save.onclick = function () {
         map_menu.save_path();
     };
@@ -3609,11 +3604,11 @@ window.onload = function () {
     };
     map_menu.btn_menu_map_new_indoor.onclick = function () {
         map_menu.new_map('indoor');
-        map_menu.hide_all_submenu_divs();
+        // map_menu.hide_all_submenu_divs();
     }
     map_menu.btn_menu_map_new_outdoor.onclick = function () {
         map_menu.new_map('outdoor');
-        map_menu.hide_all_submenu_divs();
+        // map_menu.hide_all_submenu_divs();
     }
 
     map_menu.btn_menu_map_new_save.onclick = function () {
@@ -3920,6 +3915,15 @@ window.onload = function () {
     rain_alert.rain_alert_topic.subscribe(function (message) {
         rain_alert.rain_alert_data(message);
     });
+
+    /**
+     *  Dock
+     */
+
+    dock = new Dock(ros.ros, tf_client.tfClientMap, viewer.viewer);
+    // rain_alert.rain_alert_topic.subscribe(function (message) {
+    //     rain_alert.rain_alert_data(message);
+    // });
 
 
     /**
