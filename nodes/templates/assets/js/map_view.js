@@ -2230,7 +2230,7 @@ class RosLog{
         switch (message.level) {
             case 1: log_item = '<span style="font-size: 10px;display: block;color: #7a8288;">[DEBUG]';
             break;
-            case 2: log_item = '<span style="font-size: 10px;display: block;color: #0268b4;">[INFO]';
+            case 2: log_item = '<span style="font-size: 10px;display: block;color:rgb(2, 153, 253);">[INFO]';
             break;
             case 4: log_item = '<span style="font-size: 10px;display: block;color: #fc7e14;">[WARN]';
             break;
