@@ -1630,6 +1630,8 @@ class MapMenu {
         this.input_menu_path_new = document.getElementById("input_menu_path_new");
         this.btn_menu_path_clear = document.getElementById("btn_menu_path_clear");
         this.btn_menu_path_cancel = document.getElementById("btn_menu_path_cancel");
+        this.btn_menu_path_auto = document.getElementById("btn_menu_path_new_auto");
+        this.btn_menu_path_stop_auto = document.getElementById("btn_menu_path_stop_auto");
 
         this.btn_programs = document.getElementById("btn_programs");
         this.div_menu_map_program = document.getElementById("div_menu_map_program");
@@ -1728,6 +1730,16 @@ class MapMenu {
             name : '/navi_manager/remove_point',
             messageType : 'std_msgs/String'
         });
+        this.new_path_auto_Topic = new ROSLIB.Topic({
+            ros : ros,
+            name : '/navi_manager/start_new_autopath',
+            messageType : 'std_msgs/String'
+        });
+        this.path_stop_auto_Topic = new ROSLIB.Topic({
+            ros : ros,
+            name : '/navi_manager/stop_autopath',
+            messageType : 'std_msgs/Bool'
+        });
         this.new_path_Topic = new ROSLIB.Topic({
             ros : ros,
             name : '/navi_manager/save_path',
@@ -1795,6 +1807,8 @@ class MapMenu {
         this.remove_point_Topic.advertise();
         this.new_path_Topic.advertise();
         this.new_path_point_Topic.advertise();
+        this.new_path_auto_Topic.advertise();
+        this.path_stop_auto_Topic.advertise();
         this.publish_path_Topic.advertise();
         this.remove_path_Topic.advertise();
         this.execute_path_Topic.advertise();
@@ -1907,6 +1921,20 @@ class MapMenu {
             data : this.input_menu_path_new.value,
         });
         this.new_path_Topic.publish(msg);
+        this.input_menu_path_new.value = '';
+    }
+    new_auto_path(){
+        const msg = new ROSLIB.Message({
+            data : this.input_menu_path_new.value,
+        });
+        this.new_path_auto_Topic.publish(msg);
+        this.input_menu_path_new.value = '';
+    }
+    stop_auto_path(){
+        const msg = new ROSLIB.Message({
+            data : true,
+        });
+        this.path_stop_auto_Topic.publish(msg);
         this.input_menu_path_new.value = '';
     }
 
@@ -3585,6 +3613,12 @@ window.onload = function () {
     // };
     map_menu.btn_menu_path_new_save.onclick = function () {
         map_menu.save_path();
+    };
+    map_menu.btn_menu_path_auto.onclick = function () {
+        map_menu.new_auto_path();
+    };
+    map_menu.btn_menu_path_stop_auto.onclick = function () {
+        map_menu.stop_auto_path();
     };
     map_menu.btn_menu_path_clear.onclick = function () {
         // console.log("btn_menu_path_clear");

@@ -24,7 +24,7 @@
     <link rel="stylesheet" href="assets/fonts/material-icons.min.css">
     <link rel="stylesheet" href="assets/fonts/simple-line-icons.min.css">
     <link rel="stylesheet" href="assets/fonts/typicons.min.css">
-    <link rel="stylesheet" href="assets/css/bs-theme-overrides.css">
+    <link rel="stylesheet" href="assets/css/bss-overrides.css">
     <link rel="stylesheet" href="assets/css/Dark-NavBar-1.css">
     <link rel="stylesheet" href="assets/css/Dark-NavBar-2.css">
     <link rel="stylesheet" href="assets/css/Dark-NavBar.css">
@@ -142,17 +142,17 @@
                                 <div class="col-12 col-sm-6 col-md-6 col-lg-6 col-xl-6 col-xxl-6" style="display: block;height: auto;margin-top: 8px;"><label class="form-label" style="font-size: 12px;margin-bottom: 4px;display: block;">Marker orientation</label><input class="form-range bg-secondary border rounded-pill border-secondary" type="range" id="range_marker_orientation" min="0" max="6.28" step="0.05" value="0" style="padding: 12px;"></div>
                             </div>
                         </div>
-                        <div class="border-primary" id="div_menu_map" style="width: 100%;padding: 4px;background: linear-gradient(var(--bs-gray-900) 0%, var(--bs-primary)), var(--bs-primary);border-bottom-right-radius: 5px;border-bottom-left-radius: 5px;padding-right: 12px;padding-left: 12px;padding-bottom: 15px;border: 1px solid var(--bs-secondary);border-top-style: none;display: none;">
+                        <div class="border-primary" id="div_menu_map" style="width: 100%;padding: 4px;background: linear-gradient(var(--bs-gray-900) 0%, var(--bs-primary)), var(--bs-primary);border-bottom-right-radius: 5px;border-bottom-left-radius: 5px;padding-right: 12px;padding-left: 12px;padding-bottom: 15px;border: 1px solid var(--bs-secondary);border-top-style: none;display: block;">
                             <div>
                                 <ul class="nav nav-tabs d-flex d-xl-flex justify-content-start justify-content-xl-center" role="tablist" style="font-size: 13px;display: inline-flex;background: var(--bs-secondary-text-emphasis);">
-                                    <li class="nav-item" role="presentation"><a class="nav-link active" role="tab" data-bs-toggle="tab" href="#tab-map" style="padding-top: 5px;padding-bottom: 5px;padding-right: 14px;padding-left: 14px;">Map</a></li>
-                                    <li class="nav-item" role="presentation"><a class="nav-link" role="tab" data-bs-toggle="tab" href="#tab-path" style="padding-top: 5px;padding-bottom: 5px;padding-right: 14px;padding-left: 14px;">Path</a></li>
+                                    <li class="nav-item" role="presentation"><a class="nav-link" role="tab" data-bs-toggle="tab" href="#tab-map" style="padding-top: 5px;padding-bottom: 5px;padding-right: 14px;padding-left: 14px;">Map</a></li>
+                                    <li class="nav-item" role="presentation"><a class="nav-link active" role="tab" data-bs-toggle="tab" href="#tab-path" style="padding-top: 5px;padding-bottom: 5px;padding-right: 14px;padding-left: 14px;">Path</a></li>
                                     <li class="nav-item" role="presentation"><a class="nav-link" role="tab" data-bs-toggle="tab" href="#tab-point" style="padding-top: 5px;padding-bottom: 5px;padding-right: 14px;padding-left: 14px;">Point</a></li>
                                     <li class="nav-item" role="presentation"><a class="nav-link" role="tab" data-bs-toggle="tab" href="#tab-dock" style="padding-top: 5px;padding-bottom: 5px;padding-right: 14px;padding-left: 14px;">Dock</a></li>
                                     <li class="nav-item" role="presentation"><a class="nav-link" role="tab" data-bs-toggle="tab" href="#tab-rain" style="padding-top: 5px;padding-bottom: 5px;padding-right: 14px;padding-left: 14px;">Rain</a></li>
                                 </ul>
                                 <div class="tab-content" style="overflow: clip;">
-                                    <div class="tab-pane active" role="tabpanel" id="tab-map" style="padding-left: 8px;padding-right: 8px;max-height: calc(100vh - 145px);overflow: auto;">
+                                    <div class="tab-pane" role="tabpanel" id="tab-map" style="padding-left: 8px;padding-right: 8px;max-height: calc(100vh - 145px);overflow: auto;">
                                         <div class="row g-0">
                                             <div class="col-auto" style="height: auto;margin-top: 8px;"><span style="display: block;font-size: 12px;margin-bottom: 4px;">New map</span>
                                                 <div class="btn-group btn-group-sm" role="group"><button class="btn btn-primary d-flex justify-content-center align-items-center align-items-center align-baseline" id="btn_menu_map_new_indoor" type="button" style="width: 55px;">&nbsp;<i class="material-icons" style="font-size: 18px;">home</i></button><button class="btn btn-primary d-flex justify-content-center align-items-center align-items-center align-middle" id="btn_menu_map_new_outdoor" type="button" style="width: 55px;">&nbsp;<i class="fa fa-tree"></i></button></div>
@@ -211,13 +211,14 @@
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="tab-pane" role="tabpanel" id="tab-path" style="padding-left: 8px;padding-right: 8px;max-height: calc(100vh - 145px);overflow: auto;">
+                                    <div class="tab-pane active" role="tabpanel" id="tab-path" style="padding-left: 8px;padding-right: 8px;max-height: calc(100vh - 145px);overflow: auto;">
                                         <div class="row g-0">
-                                            <div class="col-auto" style="height: auto;margin-top: 8px;"><span style="display: block;font-size: 12px;margin-bottom: 4px;">Add path, current position as start</span>
-                                                <div class="input-group input-group-sm" style="display: flex;"><span class="input-group-text"><i class="fa fa-road"></i></span><input class="bg-secondary form-control" type="text" id="input_menu_path_new" style="width: 125px;" placeholder="Path name"><button class="btn btn-primary" id="btn_menu_path_new_save" type="button">Add</button></div>
+                                            <div class="col-auto" style="height: auto;margin-top: 8px;padding: 3px;"><span style="display: block;font-size: 12px;margin-bottom: 4px;">Add path, current position as start</span>
+                                                <div class="input-group input-group-sm" style="display: flex;"><span class="input-group-text"><i class="fa fa-road"></i></span><input class="bg-secondary form-control" type="text" id="input_menu_path_new" style="width: 125px;" placeholder="Path name"><button class="btn btn-primary" id="btn_menu_path_new_save" type="button">New</button><button class="btn btn-primary" id="btn_menu_path_new_auto" type="button">&nbsp;New auto</button></div>
                                             </div>
-                                            <div class="col-auto" style="margin-top: 8px;"><span style="display: block;font-size: 12px;margin-bottom: 4px;">Clear paths in map</span><button class="btn btn-primary btn-sm" id="btn_menu_path_clear" type="button">Clear</button></div>
-                                            <div class="col" style="margin-top: 8px;"><span style="display: block;font-size: 12px;margin-bottom: 4px;">Cancel navi</span><button class="btn btn-warning btn-sm" id="btn_menu_path_cancel" type="button">Cancel</button></div>
+                                            <div class="col-auto" style="margin-top: 8px;padding: 3px;"><span style="display: block;font-size: 12px;margin-bottom: 4px;">Autopath stop</span><button class="btn btn-warning btn-sm" id="btn_menu_path_stop_auto" type="button">Stop auto</button></div>
+                                            <div class="col-auto" style="margin-top: 8px;padding: 3px;"><span style="display: block;font-size: 12px;margin-bottom: 4px;">Clear paths in map</span><button class="btn btn-primary btn-sm" id="btn_menu_path_clear" type="button">Clear</button></div>
+                                            <div class="col" style="margin-top: 8px;padding: 3px;"><span style="display: block;font-size: 12px;margin-bottom: 4px;">Cancel navi</span><button class="btn btn-warning btn-sm" id="btn_menu_path_cancel" type="button">Cancel</button></div>
                                         </div>
                                         <hr>
                                         <div class="row g-0" id="div_menu_path_items_row" style="overflow: auto;">

@@ -1,4 +1,3 @@
-
 window.onload = function() {
 
     console.log("START");
@@ -1059,6 +1058,37 @@ window.onload = function() {
     });
     window.setTimeout(function(){topic_publish_reload.publish(msg);}, 800);
 
+
+    // Subscribe to /navi_manager/map_path and display the path in the view
+    var mapPathTopic = new ROSLIB.Topic({
+        ros: ros,
+        name: '/navi_manager/map_path',
+        messageType: 'nav_msgs/Path',
+        
+    });
+
+    mapPathTopic.subscribe(function(message) {
+        if (message.poses && message.poses.length > 0) {
+            console.log("Path received");
+            coveragePath.setPath(message);
+        } else {
+            console.log("No path available");
+        }
+    });
+
+    // Set path strokeSize to 0.45 on btn_path_footprint click
+    var btnPathFootprint = document.getElementById("btn_path_footprint");
+    btnPathFootprint.onclick = function() {
+        console.log("Setting path strokeSize to 0.55");
+        coveragePath.strokeSize = 0.45;
+    };
+
+    // Set path strokeSize to 0.03 on btn_path_thin click
+    var btnPathThin = document.getElementById("btn_path_thin");
+    btnPathThin.onclick = function() {
+        console.log("Setting path strokeSize to 0.03");
+        coveragePath.strokeSize = 0.03;
+    };
 } /// end of on.load()
 
 
