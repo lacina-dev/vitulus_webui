@@ -50,19 +50,31 @@ class RainAlert {
     updateImages() {
         // Add timestamp to prevent caching
         const timestamp = new Date().getTime();
-        
-        // Create map image
-        const mapImg = new Image();
-        mapImg.src = `http://${this.hostname}:8080/snapshot?topic=/weather_alert/map_img&t=${timestamp}`;
-        mapImg.style.maxWidth = '100%';
-        mapImg.style.height = 'auto';
-        mapImg.style.display = 'block';
+
+        const buildImg = (topic, container_w) => {
+            const img = new Image();
+            img.src = `http://${this.hostname}:8080/snapshot?topic=${topic}&t=${timestamp}`;
+            img.style.maxWidth = '100%';
+            img.style.height = 'auto';
+            img.style.display = 'block';
+            img.style.cursor = 'zoom-in';
+            img.title = 'Click to enlarge';
+            img.addEventListener('click', () => this.openImageModal(topic));
+            return img;
+        };
+
+        // Both map and forecast frames are 512×512 (the forecast is now a
+        // 2×2 grid of nowcast frames sized to match NOW), so render them
+        // at the same on-page width.
+        const PANEL_WIDTH = '420px';
+
+        // Map (NOW) image
+        const mapImg = buildImg('/weather_alert/map_img', PANEL_WIDTH);
         mapImg.onload = () => {
             this.rain_map_div.innerHTML = '';
-            // Create container div to control size
             const container = document.createElement('div');
-            container.style.width = '400px';
-            container.style.height = 'auto';
+            container.style.width = PANEL_WIDTH;
+            container.style.maxWidth = '100%';
             container.style.margin = '0 auto';
             container.appendChild(mapImg);
             this.rain_map_div.appendChild(container);
@@ -70,19 +82,13 @@ class RainAlert {
         mapImg.onerror = () => {
             this.rain_map_div.innerHTML = '<div style="text-align: center; padding: 20px;"><i class="bi bi-cloud-slash" style="font-size: 2rem;"></i><p>Map image unavailable</p></div>';
         };
-        
-        // Create forecast image
-        const forecastImg = new Image();
-        forecastImg.src = `http://${this.hostname}:8080/snapshot?topic=/weather_alert/forecast_img&t=${timestamp}`;
-        forecastImg.style.maxWidth = '100%';
-        forecastImg.style.height = 'auto';
-        forecastImg.style.display = 'block';
+
+        // Forecast image (2×2 grid, same pixel size as map)
+        const forecastImg = buildImg('/weather_alert/forecast_img', PANEL_WIDTH);
         forecastImg.onload = () => {
             this.rain_forecast_div.innerHTML = '';
-            // Create container div to control size
             const container = document.createElement('div');
-            container.style.width = '600px';
-            container.style.height = 'auto';
+            container.style.width = PANEL_WIDTH;
             container.style.maxWidth = '100%';
             container.style.margin = '0 auto';
             container.appendChild(forecastImg);
@@ -91,6 +97,36 @@ class RainAlert {
         forecastImg.onerror = () => {
             this.rain_forecast_div.innerHTML = '<div style="text-align: center; padding: 20px;"><i class="bi bi-cloud-slash" style="font-size: 2rem;"></i><p>Forecast image unavailable</p></div>';
         };
+    }
+
+    openImageModal(topic) {
+        // Lazily create a single full-screen modal that we reuse for both
+        // the map and the forecast image.
+        let modal = document.getElementById('rain-img-modal');
+        if (!modal) {
+            modal = document.createElement('div');
+            modal.id = 'rain-img-modal';
+            Object.assign(modal.style, {
+                position: 'fixed', top: '0', left: '0',
+                width: '100vw', height: '100vh',
+                background: 'rgba(0,0,0,0.85)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                zIndex: '10000', cursor: 'zoom-out',
+            });
+            modal.addEventListener('click', () => { modal.style.display = 'none'; });
+            document.body.appendChild(modal);
+        }
+        modal.innerHTML = '';
+        const ts = new Date().getTime();
+        const big = new Image();
+        big.src = `http://${this.hostname}:8080/snapshot?topic=${topic}&t=${ts}`;
+        Object.assign(big.style, {
+            maxWidth: '95vw', maxHeight: '95vh',
+            objectFit: 'contain', boxShadow: '0 0 20px #000',
+            imageRendering: 'pixelated',
+        });
+        modal.appendChild(big);
+        modal.style.display = 'flex';
     }
     
     updateReportDiv(message) {

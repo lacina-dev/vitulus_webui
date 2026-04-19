@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 
+import os
 import rospy
-from flask import Flask, render_template, send_from_directory
+import yaml
+from flask import Flask, render_template, send_from_directory, jsonify, request, send_file, abort
 import threading
 import sys
 import signal
@@ -10,12 +12,49 @@ from werkzeug.serving import make_server
 port = 7777
 host = "0.0.0.0"
 
+# Default falls back to the rosbag config default; overridden by YAML at runtime.
+ROSBAG_BASE_DIR = "/home/vitulus/rosbags"
+ROSBAG_CONFIG_PATHS = [
+    "/home/vitulus/catkin_ws/src/vitulus/vitulus_rosbag/config/recorders.yaml",
+    "/home/vitulus/catkin_ws/install/share/vitulus_rosbag/config/recorders.yaml",
+]
+
+
+def _load_rosbag_base_dir():
+    for path in ROSBAG_CONFIG_PATHS:
+        try:
+            with open(path, 'r') as fh:
+                cfg = yaml.safe_load(fh) or {}
+            base = cfg.get('rosbag_base_dir')
+            if base:
+                return os.path.abspath(os.path.expanduser(base))
+        except Exception:
+            continue
+    return os.path.abspath(os.path.expanduser(ROSBAG_BASE_DIR))
+
+
+def _safe_resolve(rel_path: str, base: str) -> str:
+    """Resolve ``rel_path`` against ``base`` and ensure it stays inside ``base``.
+
+    Returns the absolute path or raises ValueError if the target escapes the
+    base directory (protects against traversal/symlink attacks).
+    """
+    if not rel_path:
+        raise ValueError("empty path")
+    # Reject absolute paths and backslashes
+    rel_path = rel_path.replace('\\', '/').lstrip('/')
+    full = os.path.realpath(os.path.join(base, rel_path))
+    base_real = os.path.realpath(base)
+    if not (full == base_real or full.startswith(base_real + os.sep)):
+        raise ValueError("path escapes base directory")
+    return full
+
 
 class ServerThread(threading.Thread):
 
     def __init__(self, app, host_ip, host_port):
         threading.Thread.__init__(self)
-        self.server = make_server(host_ip, host_port, app)
+        self.server = make_server(host_ip, host_port, app, threaded=True)
         self.ctx = app.app_context()
         self.ctx.push()
 
@@ -57,6 +96,70 @@ if __name__ == '__main__':
         @app.route("/imu_calibration")
         def mob_imu_calibration():
             return render_template('imu_calibration.html', ros_ip=host)
+
+        # -----------------------------------------------------------------
+        # Rosbag management API
+        # -----------------------------------------------------------------
+        @app.route('/rosbag/list')
+        def rosbag_list():
+            base = _load_rosbag_base_dir()
+            items = []
+            if os.path.isdir(base):
+                for root, dirs, files in os.walk(base):
+                    dirs.sort()
+                    for fname in sorted(files):
+                        # include both closed bags and active recordings (.bag.active)
+                        if not (fname.endswith('.bag') or fname.endswith('.bag.active')):
+                            continue
+                        full = os.path.join(root, fname)
+                        try:
+                            st = os.stat(full)
+                        except OSError:
+                            continue
+                        rel = os.path.relpath(full, base)
+                        items.append({
+                            'name': fname,
+                            'path': rel.replace(os.sep, '/'),
+                            'subdir': os.path.relpath(root, base).replace(os.sep, '/') if root != base else '',
+                            'size': st.st_size,
+                            'mtime': int(st.st_mtime),
+                            'active': fname.endswith('.bag.active'),
+                        })
+            # newest first
+            items.sort(key=lambda x: x['mtime'], reverse=True)
+            total = sum(i['size'] for i in items)
+            return jsonify({'base': base, 'items': items, 'total_size': total})
+
+        @app.route('/rosbag/download')
+        def rosbag_download():
+            base = _load_rosbag_base_dir()
+            rel = request.args.get('path', '')
+            try:
+                full = _safe_resolve(rel, base)
+            except ValueError:
+                abort(400)
+            if not os.path.isfile(full):
+                abort(404)
+            return send_file(full, as_attachment=True,
+                             download_name=os.path.basename(full))
+
+        @app.route('/rosbag/delete', methods=['POST', 'DELETE'])
+        def rosbag_delete():
+            base = _load_rosbag_base_dir()
+            rel = request.args.get('path', '') or (request.get_json(silent=True) or {}).get('path', '')
+            try:
+                full = _safe_resolve(rel, base)
+            except ValueError:
+                return jsonify({'ok': False, 'error': 'invalid path'}), 400
+            if not os.path.isfile(full):
+                return jsonify({'ok': False, 'error': 'not found'}), 404
+            if full.endswith('.bag.active'):
+                return jsonify({'ok': False, 'error': 'recording in progress'}), 409
+            try:
+                os.remove(full)
+            except OSError as exc:
+                return jsonify({'ok': False, 'error': str(exc)}), 500
+            return jsonify({'ok': True})
 
         server = ServerThread(app, host, port)
         server.start()

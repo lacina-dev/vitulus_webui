@@ -416,8 +416,167 @@ class MapListItemTemplate {
 
 class ROS {
     constructor() {
-        this.ros = new ROSLIB.Ros({url: "ws://" + location.hostname + ":9090"});
-        console.log("Connected to ROS.");
+        this._url = 'ws://' + location.hostname + ':9090';
+        this._reconnect_timer = null;
+        this._reconnect_delay = 1500;       // start at 1.5s
+        this._reconnect_delay_max = 8000;   // cap at 8s
+        this.state = 'connecting';          // 'connecting' | 'connected' | 'disconnected'
+        this._hb_svc = null;                // heartbeat service, recreated on each connect
+        this._last_msg_at = 0;              // timestamp of last WebSocket data frame received
+        this._hb_active = false;            // active service check in flight
+        this.ros = new ROSLIB.Ros({url: this._url});
+        var self = this;
+
+        var emit = function(name, detail) {
+            try { document.dispatchEvent(new CustomEvent(name, {detail: detail || {}})); } catch (e) {}
+        };
+
+        this.ros.on('connection', function() {
+            console.log('[ROS] connected');
+            self.state = 'connected';
+            self._reconnect_delay = 1500;
+            self._last_msg_at = Date.now();
+            self._hb_active = false;
+            if (self._reconnect_timer) { clearTimeout(self._reconnect_timer); self._reconnect_timer = null; }
+
+            // Hook raw WebSocket onmessage to passively track liveness.
+            // Every rosbridge data frame (topic msg, service response, server ping-ack)
+            // is proof the connection is alive — no service call needed while data flows.
+            if (self.ros.socket) {
+                var orig = self.ros.socket.onmessage;
+                self.ros.socket.onmessage = function(evt) {
+                    self._last_msg_at = Date.now();
+                    if (orig) orig.call(this, evt);
+                };
+            }
+
+            // Recreate heartbeat service with the fresh socket.
+            self._hb_svc = new ROSLIB.Service({
+                ros: self.ros,
+                name: '/rosapi/get_param',
+                serviceType: 'rosapi/GetParam'
+            });
+            emit('rosconnected');
+        });
+        this.ros.on('error', function(error) {
+            console.warn('[ROS] error:', error);
+            emit('roserror', {error: error});
+        });
+        this.ros.on('close', function() {
+            var was = self.state;
+            self.state = 'disconnected';
+            self._hb_svc = null;
+            self._hb_active = false;
+            console.warn('[ROS] disconnected, reconnecting in', self._reconnect_delay, 'ms');
+            if (was !== 'disconnected') emit('rosdisconnected');
+            self._scheduleReconnect();
+        });
+
+        // Two-stage liveness check — co-operating with rosbridge:
+        //
+        // Stage 1 (passive): rosbridge sends data frames for every subscribed topic.
+        //   _last_msg_at is updated on every raw WebSocket message.
+        //   → Zero extra traffic while topics are publishing normally.
+        //
+        // Stage 2 (active): If no data has arrived for >5 s (robot idle or WiFi half-open),
+        //   fire a lightweight rosapi service call. rosbridge is configured with
+        //   websocket_ping_interval=1/timeout=4, so the server already knows we're here;
+        //   we just need the reverse confirm. If no service response within 4 s → dead.
+        //
+        // Detection time: ≤ 5 s (passive silence window) + ≤ 4 s (service timeout) = ≤ 9 s.
+        setInterval(function() {
+            if (self.state !== 'connected' || !self._hb_svc) return;
+            var silence = Date.now() - self._last_msg_at;
+            // Data flowing recently — connection is definitely alive.
+            if (silence < 5000) return;
+            // Data has been silent for >5 s — do active check (once at a time).
+            if (self._hb_active) return;
+            self._hb_active = true;
+            var timed_out = false;
+            var deadline = setTimeout(function() {
+                if (self.state !== 'connected') { self._hb_active = false; return; }
+                timed_out = true;
+                self._hb_active = false;
+                console.warn('[ROS] heartbeat timeout — TCP half-open, forcing disconnect');
+                self.state = 'disconnected';
+                self._hb_svc = null;
+                emit('rosdisconnected');
+                try { self.ros.socket.close(); } catch(e) {}
+                self._scheduleReconnect();
+            }, 4000);
+            self._hb_svc.callService(
+                new ROSLIB.ServiceRequest({name: '/use_sim_time', default: 'false'}),
+                function() { self._hb_active = false; if (!timed_out) clearTimeout(deadline); },
+                function() { self._hb_active = false; if (!timed_out) clearTimeout(deadline); }
+            );
+        }, 3000);
+    }
+
+    _scheduleReconnect() {
+        var self = this;
+        if (self._reconnect_timer) return;
+        self.state = 'connecting';
+        try { document.dispatchEvent(new CustomEvent('rosconnecting')); } catch (e) {}
+        self._reconnect_timer = setTimeout(function() {
+            self._reconnect_timer = null;
+            try { self.ros.connect(self._url); } catch (e) { console.warn('[ROS] connect() threw:', e); }
+            // exponential backoff (1.5 -> 3 -> 6 -> 8)
+            self._reconnect_delay = Math.min(self._reconnect_delay * 2, self._reconnect_delay_max);
+            // safety: if still not connected after the delay, schedule again
+            setTimeout(function() {
+                if (self.state !== 'connected' && !self._reconnect_timer) {
+                    self._scheduleReconnect();
+                }
+            }, self._reconnect_delay + 500);
+        }, self._reconnect_delay);
+    }
+}
+
+
+/**
+ * Visual connection-status indicator (top-right pill).
+ * States: connected (green), connecting (orange), disconnected (red).
+ * Listens to custom DOM events emitted by the ROS class.
+ */
+class ConnectionStatus {
+    constructor(ros) {
+        this.ros = ros;
+        this.el = document.getElementById('conn_status');
+        this.icon = document.getElementById('conn_status_icon');
+        this.text = document.getElementById('conn_status_text');
+        if (!this.el) return;
+        var self = this;
+        document.addEventListener('rosconnected',    function() { self.set('connected'); });
+        document.addEventListener('rosconnecting',   function() { self.set('connecting'); });
+        document.addEventListener('rosdisconnected', function() { self.set('disconnected'); });
+        // Apply current state immediately (page may load already-connected)
+        this.set(ros && ros.state ? ros.state : 'connecting');
+        // Allow click to force an immediate reconnect attempt
+        this.el.style.cursor = 'pointer';
+        this.el.title = 'Click to reconnect';
+        this.el.addEventListener('click', function() {
+            if (self.ros.state !== 'connected') {
+                if (self.ros._reconnect_timer) { clearTimeout(self.ros._reconnect_timer); self.ros._reconnect_timer = null; }
+                self.ros._reconnect_delay = 500;
+                self.ros._scheduleReconnect();
+            }
+        });
+    }
+    set(state) {
+        if (!this.el) return;
+        var conf = {
+            connected:    {color: 'var(--bs-success)', txt: 'ONLINE', icon: 'la la-wifi',    pulse: false},
+            connecting:   {color: 'var(--bs-warning)', txt: 'CONNECTING',   icon: 'la la-wifi',    pulse: true},
+            disconnected: {color: 'var(--bs-danger)',  txt: 'OFFLINE', icon: 'la la-wifi',   pulse: false}
+        };
+        var c = conf[state] || conf.disconnected;
+        this.el.style.color = c.color;
+        if (this.text) this.text.textContent = c.txt;
+        if (this.icon) {
+            this.icon.className = c.icon;
+            this.icon.style.color = c.color;
+            this.icon.style.animation = c.pulse ? 'vitulus-spin 1s linear infinite' : 'none';
+        }
     }
 }
 
@@ -476,12 +635,44 @@ class TfClient {
         this.map_cam_center.copy(viewer.cameraControls.center);
         this.follow_target = 'map';
         this.map_reinit = true;
+        this._was_disconnected = false;
         this.tfClientMap = new ROSLIB.TFClient({
           ros : ros.ros,
           angularThres : 0.00001,
           transThres : 0.00001,
           rate : 20.0,
           fixedFrame : '/map'
+        });
+
+        var self = this;
+        // After a real reconnect (e.g. robot reboot — `rvi`), tf2_web_republisher
+        // has restarted and the previously-issued action goal / service request is
+        // dead. Without this the visualizers keep drawing with the last-cached TFs
+        // → lidar / pointcloud / path / footprint appear shifted from the map.
+        // Re-issuing the goal makes the (new) republisher start streaming fresh
+        // transforms for all subscribed frames.
+        document.addEventListener('rosdisconnected', function() {
+            self._was_disconnected = true;
+        });
+        document.addEventListener('rosconnected', function() {
+            if (!self._was_disconnected) return;     // skip first-time connect
+            self._was_disconnected = false;
+            // Drop the stale topic handle so processResponse re-subscribes to the
+            // new dynamically-named topic published by the fresh republisher.
+            try {
+                if (self.tfClientMap.currentTopic) {
+                    self.tfClientMap.currentTopic.unsubscribe(self.tfClientMap._subscribeCB);
+                    self.tfClientMap.currentTopic = false;
+                }
+            } catch (e) { console.warn('[TfClient] cleanup of stale topic failed:', e); }
+            // Small grace period so rosbridge has finished re-advertising service /
+            // action topics after reconnect, then re-issue.
+            setTimeout(function() {
+                try {
+                    self.tfClientMap.updateGoal();
+                    console.log('[TfClient] re-issued TF goal after reconnect');
+                } catch (e) { console.warn('[TfClient] updateGoal failed:', e); }
+            }, 500);
         });
     }
 
@@ -1186,18 +1377,69 @@ class CameraView {
     constructor(ros) {
         this.width = 160;
         this.height = 120;
+        this.topic = '/d435/color/image_raw';
+        this.host = location.hostname;
+        this.port = 8080;
+        this._reload_cooldown = false; // prevents back-to-back reload storms
         this.camViewer = new MJPEGCANVAS.Viewer({
           divID : 'div_camera_view',
-          host : location.hostname,
-          port: 8080,
+          host : this.host,
+          port: this.port,
           type: 'mjpeg',
           // type: 'ros_compressed',
           quality: 20,
           refreshRate: 6,
           width : this.width,
           height : this.height,
-          topic : '/d435/color/image_raw',
+          topic : this.topic,
         });
+        var self = this;
+        this._ros_was_disconnected = false; // true only after a real disconnect
+        this._attachImageHandlers();
+        // Watchdog: MJPEG is a continuous HTTP multipart stream — onload does
+        // NOT fire repeatedly. Only check whether naturalWidth is 0 (= server
+        // unreachable / stream not started yet). First check after 3s, then
+        // every 8s so we catch failures quickly without hammering the server.
+        setTimeout(function() {
+            setInterval(function() {
+                if (!self.camViewer || !self.camViewer.image) return;
+                if (document.hidden) return;
+                if (self.camViewer.image.naturalWidth === 0) {
+                    self.reloadStream('watchdog');
+                }
+            }, 8000);
+        }, 3000);
+        // Reload on reconnect ONLY when there was a real prior disconnect
+        // (avoids the spurious reload on every fresh page load).
+        document.addEventListener('rosdisconnected', function() {
+            self._ros_was_disconnected = true;
+        });
+        document.addEventListener('rosconnected', function() {
+            if (self._ros_was_disconnected) {
+                self._ros_was_disconnected = false;
+                setTimeout(function() { self.reloadStream('rosconnected'); }, 2500);
+            }
+        });
+    }
+
+    _attachImageHandlers() {
+        var self = this;
+        if (!this.camViewer || !this.camViewer.image) return;
+        this.camViewer.image.onerror = function() {
+            console.warn('[CameraView] stream error, retrying in 3s');
+            setTimeout(function() { self.reloadStream('onerror'); }, 3000);
+        };
+    }
+
+    reloadStream(reason) {
+        if (!this.camViewer || typeof this.camViewer.changeStream !== 'function') return;
+        if (document.hidden) return;
+        if (this._reload_cooldown) return; // already reloading, skip
+        this._reload_cooldown = true;
+        var self = this;
+        setTimeout(function() { self._reload_cooldown = false; }, 6000);
+        try { this.camViewer.changeStream(this.topic); } catch (e) {}
+        this._attachImageHandlers();
     }
 
     calculateAspectRatioFit(srcWidth, srcHeight, maxWidth, maxHeight) {
@@ -1650,6 +1892,8 @@ class MapMenu {
         this.row_menu_program_detail_zones = document.getElementById("row_menu_program_detail_zones");
         this.btn_menu_program_stop = document.getElementById("btn_menu_program_stop");
         this.span_menu_program_status = document.getElementById("span_menu_program_status");
+        this.btn_menu_program_resume = document.getElementById("btn_menu_program_resume");
+        this.span_menu_program_last_result = document.getElementById("span_menu_program_last_result");
 
         this.btn_joy = document.getElementById("btn_joy");
         this.joy_view = document.getElementById("joy_view");
@@ -2216,38 +2460,342 @@ class MapMenu {
 
 class RosLog{
     constructor(ros) {
-        this.LOG_LENGTH = 60;
-        this.log_array = [];
+        this.LOG_COMPACT = 60;       // entries kept in the compact strip
+        this.LOG_BUFFER  = 1500;     // entries kept in memory for the expanded view
+        this.LEVELS = {1: 'DEBUG', 2: 'INFO', 4: 'WARN', 8: 'ERROR', 16: 'FATAL'};
+        this.buffer = [];
+        this.sources = new Set();
+        this.filters = {
+            // by default hide DEBUG noise
+            levels: new Set([2, 4, 8, 16]),
+            sources: new Set(),
+            search: ''
+        };
+        this.expanded = false;
+        this.autoscroll = true;
+        this.viewEl = null;
+        this.contentEl = null;
+        this.toolbarEl = null;
+        this.expandBtn = null;
+        this.collapseBtn = null;
+        this.sourceToggleBtn = null;
+        this.sourcePanelEl   = null;
+        this.sourceListEl    = null;
+        this._source_cb_map  = new Map();
+        this.searchInput = null;
+        this.counterEl = null;
+        this.pauseBtn = null;
+        this.pendingAppend = [];
+        this.scheduled = false;
+        this.shownCount = 0;
+        this.suppressScrollEvent = false;
         this.log_topic = new ROSLIB.Topic({
             ros: ros.ros,
             name: '/rosout_agg',
             messageType: 'rosgraph_msgs/Log'
         });
-
     }
-    process_message(message, div_log){
-        let log_item = '';
-        switch (message.level) {
-            case 1: log_item = '<span style="font-size: 10px;display: block;color: #7a8288;">[DEBUG]';
-            break;
-            case 2: log_item = '<span style="font-size: 10px;display: block;color:rgb(2, 153, 253);">[INFO]';
-            break;
-            case 4: log_item = '<span style="font-size: 10px;display: block;color: #fc7e14;">[WARN]';
-            break;
-            case 8: log_item = '<span style="font-size: 10px;display: block;color: #e83e8c;">[ERROR]';
-            break;
-            case 16: log_item = '<span style="font-size: 10px;display: block;color: #e83e8c;">[FATAL]';
-            break;
-        };
-        log_item += '[' + message.header.stamp.secs + '][<b>' + message.name + '</b>] ' + message.msg + '</span>';
-        this.log_array.push(log_item);
-        if (this.log_array.length > this.LOG_LENGTH){
-            this.log_array.shift();
-        };
-        if (div_log.scrollTop + 150 > div_log.scrollHeight) {
-            div_log.innerHTML = this.log_array.join('');
-            div_log.scrollTop = div_log.scrollHeight;
+
+    attach(viewEl) {
+        this.viewEl = viewEl;
+        this.contentEl   = viewEl.querySelector('#div_log_content');
+        this.toolbarEl   = viewEl.querySelector('#div_log_toolbar');
+        this.expandBtn   = viewEl.querySelector('#btn_log_expand');
+        this.collapseBtn = viewEl.querySelector('#btn_log_collapse');
+        this.sourceToggleBtn = viewEl.querySelector('#btn_log_source_toggle');
+        this.sourcePanelEl   = viewEl.querySelector('#div_log_source_panel');
+        this.sourceListEl    = viewEl.querySelector('#div_log_source_list');
+        const srcAllBtn      = viewEl.querySelector('#btn_log_src_all');
+        this.searchInput  = viewEl.querySelector('#input_log_search');
+        this.counterEl    = viewEl.querySelector('#span_log_counter');
+        this.pauseBtn     = viewEl.querySelector('#btn_log_pause');
+        const clearBtn    = viewEl.querySelector('#btn_log_clear');
+
+        // Level filter buttons (multi-toggle)
+        viewEl.querySelectorAll('.log-level-group [data-level]').forEach((btn) => {
+            const lvl = parseInt(btn.dataset.level, 10);
+            if (this.filters.levels.has(lvl)) btn.classList.add('active');
+            else btn.classList.remove('active');
+            btn.addEventListener('click', (e) => {
+                e.preventDefault();
+                if (this.filters.levels.has(lvl)) {
+                    this.filters.levels.delete(lvl);
+                    btn.classList.remove('active');
+                } else {
+                    this.filters.levels.add(lvl);
+                    btn.classList.add('active');
+                }
+                if (this.expanded) this.render_full();
+            });
+        });
+
+        this.sourceToggleBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const open = this.sourcePanelEl.style.display !== 'none';
+            this.sourcePanelEl.style.display = open ? 'none' : 'flex';
+        });
+        srcAllBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            this.filters.sources.clear();
+            this._source_cb_map.forEach(cb => { cb.checked = false; });
+            this._update_source_label();
+            if (this.expanded) this.render_full();
+        });
+        document.addEventListener('click', (e) => {
+            if (this.sourcePanelEl && this.sourcePanelEl.style.display !== 'none') {
+                const wrap = viewEl.querySelector('.log-source-filter');
+                if (wrap && !wrap.contains(e.target)) {
+                    this.sourcePanelEl.style.display = 'none';
+                }
+            }
+        }, { passive: true });
+
+        let searchTimer = null;
+        this.searchInput.addEventListener('input', () => {
+            clearTimeout(searchTimer);
+            searchTimer = setTimeout(() => {
+                this.filters.search = this.searchInput.value.trim().toLowerCase();
+                if (this.expanded) this.render_full();
+            }, 150);
+        });
+
+        clearBtn.addEventListener('click', () => {
+            this.buffer.length = 0;
+            this.contentEl.innerHTML = '';
+            this.shownCount = 0;
+            this.update_counter();
+        });
+
+        this.pauseBtn.addEventListener('click', () => {
+            this._set_autoscroll(!this.autoscroll);
+            if (this.autoscroll) this.scroll_to_bottom();
+        });
+
+        this.expandBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            this.set_expanded(true);
+        });
+        this.collapseBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            this.set_expanded(false);
+        });
+
+        // Auto-pause when user scrolls up; resume when at bottom
+        this.contentEl.addEventListener('scroll', () => {
+            if (this.suppressScrollEvent) return;
+            const el = this.contentEl;
+            const atBottom = (el.scrollHeight - el.scrollTop - el.clientHeight) < 16;
+            if (!atBottom && this.autoscroll) this._set_autoscroll(false);
+            else if (atBottom && !this.autoscroll) this._set_autoscroll(true);
+        }, { passive: true });
+    }
+
+    _set_autoscroll(on) {
+        this.autoscroll = !!on;
+        if (!this.pauseBtn) return;
+        const span = this.pauseBtn.querySelector('span');
+        if (this.autoscroll) {
+            this.pauseBtn.classList.add('btn-outline-info');
+            this.pauseBtn.classList.remove('btn-info');
+            if (span) span.textContent = 'Live';
+            this.pauseBtn.title = 'Pause autoscroll';
+        } else {
+            this.pauseBtn.classList.remove('btn-outline-info');
+            this.pauseBtn.classList.add('btn-info');
+            if (span) span.textContent = 'Paused';
+            this.pauseBtn.title = 'Resume autoscroll';
         }
+    }
+
+    set_expanded(on) {
+        this.expanded = !!on;
+        if (this.expanded) {
+            this.viewEl.classList.add('log-expanded');
+            this.viewEl.classList.remove('log-compact');
+            this._set_autoscroll(true);
+            this.render_full();
+        } else {
+            this.viewEl.classList.remove('log-expanded');
+            this.viewEl.classList.add('log-compact');
+            this._set_autoscroll(true);
+            this.render_compact();
+            // re-trigger layout so the strip is positioned again
+            if (typeof layout_man !== 'undefined' && layout_man) layout_man.set_layout();
+        }
+        this.scroll_to_bottom();
+    }
+
+    matches(entry) {
+        if (!this.filters.levels.has(entry.level)) return false;
+        if (this.filters.sources.size > 0 && !this.filters.sources.has(entry.name)) return false;
+        if (this.filters.search) {
+            const s = this.filters.search;
+            if (entry.msg.toLowerCase().indexOf(s) === -1 && entry.name.toLowerCase().indexOf(s) === -1) return false;
+        }
+        return true;
+    }
+
+    format_line(entry) {
+        const span = document.createElement('span');
+        span.className = 'log-line lvl-' + entry.level;
+        const t = new Date(entry.t * 1000);
+        const hh = String(t.getHours()).padStart(2, '0');
+        const mm = String(t.getMinutes()).padStart(2, '0');
+        const ss = String(t.getSeconds()).padStart(2, '0');
+        const meta = document.createElement('span');
+        meta.className = 'log-meta';
+        meta.textContent = '[' + (this.LEVELS[entry.level] || '?') + '] ' + hh + ':' + mm + ':' + ss + ' ';
+        const name = document.createElement('span');
+        name.className = 'log-name';
+        name.textContent = '[' + entry.name + '] ';
+        span.appendChild(meta);
+        span.appendChild(name);
+        span.appendChild(document.createTextNode(entry.msg));
+        return span;
+    }
+
+    process_message(message) {
+        const entry = {
+            level: message.level,
+            name:  message.name,
+            msg:   message.msg,
+            t:     message.header.stamp.secs
+        };
+        this.buffer.push(entry);
+        if (this.buffer.length > this.LOG_BUFFER) this.buffer.shift();
+
+        if (!this.sources.has(entry.name)) {
+            this.sources.add(entry.name);
+            this.update_source_list();
+        }
+
+        if (this.expanded) {
+            if (this.matches(entry)) {
+                this.pendingAppend.push(entry);
+                this.schedule_append();
+            }
+        } else if (this.viewEl && this.viewEl.style.display === 'block') {
+            // compact strip — keep original simple behaviour (all levels visible)
+            this.append_compact(entry);
+        }
+        this.update_counter();
+    }
+
+    schedule_append() {
+        if (this.scheduled) return;
+        this.scheduled = true;
+        const fn = () => {
+            this.scheduled = false;
+            if (!this.pendingAppend.length) return;
+            const frag = document.createDocumentFragment();
+            for (const e of this.pendingAppend) frag.appendChild(this.format_line(e));
+            this.shownCount += this.pendingAppend.length;
+            this.pendingAppend.length = 0;
+            this.contentEl.appendChild(frag);
+            // Cap DOM nodes to keep things snappy
+            while (this.contentEl.childElementCount > this.LOG_BUFFER) {
+                this.contentEl.removeChild(this.contentEl.firstChild);
+                this.shownCount = Math.max(0, this.shownCount - 1);
+            }
+            this.update_counter();
+            if (this.autoscroll) this.scroll_to_bottom();
+        };
+        if (typeof requestAnimationFrame === 'function') requestAnimationFrame(fn);
+        else setTimeout(fn, 16);
+    }
+
+    append_compact(entry) {
+        const el = this.contentEl;
+        el.appendChild(this.format_line(entry));
+        while (el.childElementCount > this.LOG_COMPACT) el.removeChild(el.firstChild);
+        this.suppressScrollEvent = true;
+        el.scrollTop = el.scrollHeight;
+        this.suppressScrollEvent = false;
+    }
+
+    render_compact() {
+        if (!this.contentEl) return;
+        const el = this.contentEl;
+        el.innerHTML = '';
+        const start = Math.max(0, this.buffer.length - this.LOG_COMPACT);
+        const frag = document.createDocumentFragment();
+        for (let i = start; i < this.buffer.length; i++) frag.appendChild(this.format_line(this.buffer[i]));
+        el.appendChild(frag);
+        this.shownCount = el.childElementCount;
+        this.update_counter();
+        this.suppressScrollEvent = true;
+        el.scrollTop = el.scrollHeight;
+        this.suppressScrollEvent = false;
+    }
+
+    render_full() {
+        if (!this.contentEl) return;
+        const el = this.contentEl;
+        el.innerHTML = '';
+        const frag = document.createDocumentFragment();
+        let shown = 0;
+        for (const entry of this.buffer) {
+            if (this.matches(entry)) {
+                frag.appendChild(this.format_line(entry));
+                shown++;
+            }
+        }
+        el.appendChild(frag);
+        this.shownCount = shown;
+        this.pendingAppend.length = 0;
+        this.update_counter();
+        this.suppressScrollEvent = true;
+        el.scrollTop = el.scrollHeight;
+        this.suppressScrollEvent = false;
+    }
+
+    update_source_list() {
+        if (!this.sourceListEl) return;
+        const sorted = Array.from(this.sources).sort();
+        for (const n of sorted) {
+            if (this._source_cb_map.has(n)) continue;
+            const lbl = document.createElement('label');
+            const cb = document.createElement('input');
+            cb.type = 'checkbox';
+            cb.checked = this.filters.sources.has(n);
+            cb.addEventListener('change', () => {
+                if (cb.checked) this.filters.sources.add(n);
+                else this.filters.sources.delete(n);
+                this._update_source_label();
+                if (this.expanded) this.render_full();
+            });
+            lbl.appendChild(cb);
+            lbl.appendChild(document.createTextNode('\u00a0' + n));
+            this.sourceListEl.appendChild(lbl);
+            this._source_cb_map.set(n, cb);
+        }
+    }
+
+    _update_source_label() {
+        if (!this.sourceToggleBtn) return;
+        const count = this.filters.sources.size;
+        if (count === 0) {
+            this.sourceToggleBtn.textContent = 'All nodes \u25be';
+        } else if (count === 1) {
+            const name = Array.from(this.filters.sources)[0];
+            const short = name.length > 18 ? name.slice(0, 17) + '\u2026' : name;
+            this.sourceToggleBtn.textContent = short + ' \u25be';
+        } else {
+            this.sourceToggleBtn.textContent = count + '\u00a0nodes \u25be';
+        }
+    }
+
+    update_counter() {
+        if (!this.counterEl) return;
+        if (this.expanded) this.counterEl.textContent = this.shownCount + ' / ' + this.buffer.length;
+        else this.counterEl.textContent = String(this.buffer.length);
+    }
+
+    scroll_to_bottom() {
+        if (!this.contentEl) return;
+        this.suppressScrollEvent = true;
+        this.contentEl.scrollTop = this.contentEl.scrollHeight;
+        this.suppressScrollEvent = false;
     }
 }
 
@@ -2480,15 +3028,16 @@ class LayoutManager {
         this.div_camera_view.style.width = '160px';
         this.camera_view.changeViewerSize_cam_view();
 
-        if (this.div_log_view.style.display === "block"){
+        if (this.div_log_view.style.display === "block" && !this.div_log_view.classList.contains('log-expanded')){
             this.div_camera_view.style.setProperty('margin-top', 'calc(100vh - 268px)');
         }
         else {
             this.div_camera_view.style.setProperty('margin-top', 'calc(100vh - 157px)');
         }
-        this.div_log_view.style.marginLeft = '4px';
-        this.div_log_view.style.setProperty('width', 'calc(100vw - 8px)');
-        this.div_log_view.style.setProperty('width', 'calc(100vw - 8px)');
+        if (!this.div_log_view.classList.contains('log-expanded')) {
+            this.div_log_view.style.marginLeft = '4px';
+            this.div_log_view.style.setProperty('width', 'calc(100vw - 8px)');
+        }
         this.tab_power.style.maxHeight = height - 145 + 'px';
         this.tab_mower.style.maxHeight = height - 145 + 'px'
         this.tab_motors.style.maxHeight = height - 145 + 'px'
@@ -2518,13 +3067,15 @@ class LayoutManager {
         this.camera_view.changeViewerSize_cam_view();
 
         let cam_w = parseInt(this.div_camera_view.style.width.replace('px', ''));
-        if (this.div_camera_view.style.display === "block"){
-            this.div_log_view.style.setProperty('margin-left', (cam_w + 8) + 'px');
-            this.div_log_view.style.setProperty('width', 'calc(100vw - ' + (cam_w + 12) +  'px)');
-        }
-        else {
-            this.div_log_view.style.marginLeft = '4px';
-            this.div_log_view.style.setProperty('width', 'calc(100vw - 8px)');
+        if (!this.div_log_view.classList.contains('log-expanded')) {
+            if (this.div_camera_view.style.display === "block"){
+                this.div_log_view.style.setProperty('margin-left', (cam_w + 8) + 'px');
+                this.div_log_view.style.setProperty('width', 'calc(100vw - ' + (cam_w + 12) +  'px)');
+            }
+            else {
+                this.div_log_view.style.marginLeft = '4px';
+                this.div_log_view.style.setProperty('width', 'calc(100vw - 8px)');
+            }
         }
         this.tab_power.style.maxHeight = height - 100 + 'px';
         this.tab_mower.style.maxHeight = height - 100 + 'px'
@@ -2721,6 +3272,202 @@ class Diag {
             diag_html_content += diag_html_item;
         });
         this.div_diag_all.innerHTML = diag_html_content;
+    }
+}
+
+
+class RosbagControl {
+    /**
+     * Controls all vitulus_rosbag recorder instances via ROSLIB topics.
+     * To add a new recorder, add its topics in the constructor and expose
+     * start/stop/set_fps methods following the d435_* pattern below.
+     */
+    constructor(ros) {
+
+        // --- D435 recorder UI elements ---
+        this.btn_d435_rec_start   = document.getElementById("btn_d435_rec_start");
+        this.btn_d435_rec_stop    = document.getElementById("btn_d435_rec_stop");
+        this.span_d435_rec_status = document.getElementById("span_d435_rec_status");
+        this.input_d435_rec_fps   = document.getElementById("input_d435_rec_fps");
+        this.btn_d435_rec_fps     = document.getElementById("btn_d435_rec_fps");
+        this.span_d435_rec_fps    = document.getElementById("span_d435_rec_fps");
+        this.inputgroup_d435_rec  = document.getElementById("inputgroup_d435_rec");
+
+        // --- D435 recorder ROS topics ---
+        this.d435_record_topic = new ROSLIB.Topic({
+            ros: ros,
+            name: '/vitulus_rosbag/d435/record',
+            messageType: 'std_msgs/Bool'
+        });
+        this.d435_fps_topic = new ROSLIB.Topic({
+            ros: ros,
+            name: '/vitulus_rosbag/d435/set_fps',
+            messageType: 'std_msgs/Float32'
+        });
+        this.d435_status_topic = new ROSLIB.Topic({
+            ros: ros,
+            name: '/vitulus_rosbag/d435/status',
+            messageType: 'std_msgs/String'
+        });
+
+        this.d435_record_topic.advertise();
+        this.d435_fps_topic.advertise();
+    }
+
+    // --- D435 methods ---
+
+    d435_start() {
+        this.d435_record_topic.publish(new ROSLIB.Message({ data: true }));
+    }
+
+    d435_stop() {
+        this.d435_record_topic.publish(new ROSLIB.Message({ data: false }));
+    }
+
+    d435_set_fps(fps) {
+        this.d435_fps_topic.publish(new ROSLIB.Message({ data: fps }));
+        this.span_d435_rec_fps.textContent = fps.toFixed(1) + ' fps';
+    }
+
+    d435_status_data(message) {
+        this.span_d435_rec_status.textContent = message.data;
+        if (message.data.startsWith('recording')) {
+            this.inputgroup_d435_rec.style.setProperty('border', '2px solid var(--bs-success)');
+            this.span_d435_rec_status.className = 'text-success d-flex justify-content-end input-group-text form-control';
+            const fps_match = message.data.match(/fps=(\d+\.?\d*)/);
+            if (fps_match) {
+                this.span_d435_rec_fps.textContent = fps_match[1] + ' fps';
+            }
+        } else {
+            this.inputgroup_d435_rec.style.setProperty('border', '2px solid var(--bs-danger)');
+            this.span_d435_rec_status.className = 'text-info d-flex justify-content-end input-group-text form-control';
+        }
+    }
+}
+
+
+class BagManager {
+    /**
+     * Lists stored rosbag files via the webui backend and offers
+     * download / delete actions. Refreshes on demand only (cheap).
+     */
+    constructor() {
+        this.div_list    = document.getElementById('div_bag_list');
+        this.btn_refresh = document.getElementById('btn_bag_refresh');
+        this.span_total  = document.getElementById('span_bag_total');
+        this.span_name   = document.getElementById('span_modal_remove_bag_name');
+        this.btn_confirm = document.getElementById('btn_modal_remove_bag');
+        this.pending_path = null;
+        this.in_flight = false;
+    }
+
+    init() {
+        if (!this.div_list) return;
+        this.btn_refresh.addEventListener('click', () => this.refresh());
+        this.btn_confirm.addEventListener('click', () => this.confirm_delete());
+        // Refresh automatically when user opens the Rosbag tab
+        const tab_link = document.querySelector('a[href="#tab_rosbag"]');
+        if (tab_link) {
+            tab_link.addEventListener('shown.bs.tab', () => this.refresh());
+        }
+        // Initial fetch (lazy — UI already usable)
+        this.refresh();
+    }
+
+    human_size(n) {
+        if (n < 1024) return n + ' B';
+        const units = ['KB', 'MB', 'GB', 'TB'];
+        let v = n / 1024, i = 0;
+        while (v >= 1024 && i < units.length - 1) { v /= 1024; i++; }
+        return v.toFixed(v >= 10 ? 0 : 1) + ' ' + units[i];
+    }
+
+    human_time(ts) {
+        const d = new Date(ts * 1000);
+        const pad = (x) => String(x).padStart(2, '0');
+        return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate())
+             + ' ' + pad(d.getHours()) + ':' + pad(d.getMinutes());
+    }
+
+    refresh() {
+        if (this.in_flight) return;
+        this.in_flight = true;
+        fetch('/rosbag/list', { cache: 'no-store' })
+            .then(r => r.ok ? r.json() : Promise.reject(r.status))
+            .then(data => this.render(data))
+            .catch(err => {
+                this.div_list.innerHTML = '<div class="bag-empty" style="padding:12px;font-size:12px;color:var(--bs-danger);text-align:center;">Failed to load bag list (' + err + ')</div>';
+                this.span_total.textContent = '';
+            })
+            .finally(() => { this.in_flight = false; });
+    }
+
+    render(data) {
+        const items = data.items || [];
+        if (!items.length) {
+            this.div_list.innerHTML = '<div class="bag-empty" style="padding:12px;font-size:12px;color:#9aa0a6;text-align:center;">No bags recorded yet.</div>';
+            this.span_total.textContent = '0 files';
+            return;
+        }
+        this.span_total.textContent = items.length + ' file' + (items.length === 1 ? '' : 's') + ' · ' + this.human_size(data.total_size || 0);
+
+        const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+        const rows = items.map(it => {
+            const loc = it.subdir ? it.subdir + ' · ' : '';
+            const dl_url = '/rosbag/download?path=' + encodeURIComponent(it.path);
+            const del_attrs = it.active
+                ? 'disabled title="Recording in progress"'
+                : 'data-path="' + esc(it.path) + '" data-name="' + esc(it.name) + '"';
+            const dl_attrs = it.active
+                ? 'disabled title="Recording in progress" href="#" onclick="return false;"'
+                : 'href="' + dl_url + '" download';
+            return '<div class="bag-row' + (it.active ? ' active' : '') + '">' +
+                '<div class="bag-info">' +
+                    '<div class="bag-name">' + esc(it.name) + '</div>' +
+                    '<div class="bag-meta">' + esc(loc) + this.human_size(it.size) + ' · ' + this.human_time(it.mtime) + '</div>' +
+                '</div>' +
+                '<div class="bag-actions">' +
+                    '<a class="btn btn-sm btn-outline-info" ' + dl_attrs + ' title="Download">⬇</a>' +
+                    '<button class="btn btn-sm btn-outline-danger" type="button" ' + del_attrs + ' title="Delete">✕</button>' +
+                '</div>' +
+            '</div>';
+        }).join('');
+        this.div_list.innerHTML = rows;
+
+        this.div_list.querySelectorAll('button[data-path]').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const p = btn.getAttribute('data-path');
+                const n = btn.getAttribute('data-name');
+                this.ask_delete(p, n);
+            });
+        });
+    }
+
+    ask_delete(path, name) {
+        this.pending_path = path;
+        this.span_name.textContent = name;
+        const modal_el = document.getElementById('modal_remove_bag');
+        const modal = bootstrap.Modal.getOrCreateInstance(modal_el);
+        modal.show();
+    }
+
+    confirm_delete() {
+        if (!this.pending_path) return;
+        const path = this.pending_path;
+        this.pending_path = null;
+        const modal_el = document.getElementById('modal_remove_bag');
+        const modal = bootstrap.Modal.getOrCreateInstance(modal_el);
+        fetch('/rosbag/delete?path=' + encodeURIComponent(path), { method: 'POST' })
+            .then(r => r.json().catch(() => ({})).then(j => ({ ok: r.ok, j })))
+            .then(res => {
+                modal.hide();
+                if (!res.ok) alert('Delete failed: ' + (res.j && res.j.error ? res.j.error : 'unknown'));
+                this.refresh();
+            })
+            .catch(err => {
+                modal.hide();
+                alert('Delete failed: ' + err);
+            });
     }
 }
 
@@ -3186,6 +3933,11 @@ class Programs {
             name: '/web_plan/program_select',
             messageType: 'std_msgs/String'
         });
+        this.topic_program_resume = new ROSLIB.Topic({
+            ros: ros,
+            name: '/web_plan/program_select_resume',
+            messageType: 'std_msgs/String'
+        });
         this.program_list = [];
         this.selected_program = null;
         this.init();
@@ -3195,6 +3947,7 @@ class Programs {
         this.reload_planner_data_Topic.advertise();
         this.program_to_show_marker_Topic.advertise();
         this.topic_program_select.advertise();
+        this.topic_program_resume.advertise();
         this.smach_stop_Topic.advertise();
         this.reload_planner_data();
     }
@@ -3236,6 +3989,7 @@ class Programs {
         const map_env = program.map_name.split('***env*')[1];
         this.map_menu.span_menu_program_env.innerText = map_env;
         this.map_menu.span_menu_program_map.innerText = map_name;
+        this.map_menu.span_menu_program_last_result.innerText = program.last_result;
         this.map_menu.row_menu_program_detail_zones.innerHTML = "";
         program.zone_list.forEach((zone) => {
             const zone_item= new ProgramZoneItemTemplate(zone);
@@ -3273,6 +4027,14 @@ class Programs {
             data: program_name,
         });
         this.topic_program_select.publish(msg);
+        // console.log(msg);
+    }
+
+    resumeProgram(program_name) {
+        const msg = new ROSLIB.Message({
+            data: program_name,
+        });
+        this.topic_program_resume.publish(msg);
         // console.log(msg);
     }
 
@@ -3320,6 +4082,9 @@ class Programs {
 
 window.onload = function () {
     ros = new ROS();
+
+    // Visual connection-status indicator (top-right pill).
+    conn_status = new ConnectionStatus(ros);
 
      /**
      *  Camera view
@@ -3420,6 +4185,29 @@ window.onload = function () {
     lidar_control.icon_status_topic.subscribe(function (message) {
         lidar_control.status_data(message);
     });
+
+    /// Rosbag
+    rosbag_control = new RosbagControl(ros.ros);
+    rosbag_control.btn_d435_rec_start.onclick = function() {
+        rosbag_control.d435_start();
+    };
+    rosbag_control.btn_d435_rec_stop.onclick = function() {
+        rosbag_control.d435_stop();
+    };
+    rosbag_control.btn_d435_rec_fps.onclick = function() {
+        const fps = parseFloat(rosbag_control.input_d435_rec_fps.value);
+        if (!isNaN(fps) && fps > 0) {
+            rosbag_control.d435_set_fps(fps);
+            rosbag_control.input_d435_rec_fps.value = "";
+        }
+    };
+    rosbag_control.d435_status_topic.subscribe(function(message) {
+        rosbag_control.d435_status_data(message);
+    });
+
+    /// Rosbag — stored bag management (HTTP, not ROS)
+    bag_manager = new BagManager();
+    bag_manager.init();
 
     /**
      *  Status bar
@@ -3601,6 +4389,10 @@ window.onload = function () {
     map_menu.btn_menu_program_stop.onclick = function () {
         programs.stopProgram();
     };
+
+    map_menu.btn_menu_program_resume.onclick = function () {
+        programs.resumeProgram(programs.selected_program.name);
+    }
 
 
 
@@ -3790,18 +4582,20 @@ window.onload = function () {
      */
 
     ros_log = new RosLog(ros);
+    ros_log.attach(map_menu.div_log_view);
     ros_log.log_topic.subscribe(function (message) {
-        ros_log.process_message(message, map_menu.div_log_view);
+        ros_log.process_message(message);
     });
     map_menu.btn_log.onclick = function () {
         if (map_menu.div_log_view.style.display === "block"){
+            // hide entirely (also collapses if expanded)
+            if (ros_log.expanded) ros_log.set_expanded(false);
             map_menu.div_log_view.style.display = "none";
             layout_man.set_layout();
-
         }
         else {
             map_menu.div_log_view.style.display = "block";
-            map_menu.div_log_view.scrollTop = map_menu.div_log_view.scrollHeight;
+            ros_log.render_compact();
             layout_man.set_layout();
         }
     };
