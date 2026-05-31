@@ -272,7 +272,26 @@ class Dock {
 
         this.map_enabled_status_subscriber.subscribe(this.handleMapEnabledStatus.bind(this));
 
+        // Subscriber for dock confirmed status (icon color)
+        this.dock_icon_in_dock = document.getElementById("dock_icon_in_dock");
+        this.is_in_dock_confirmed_subscriber = new ROSLIB.Topic({
+            ros: ros,
+            name: '/dock_manager/is_in_dock_confirmed',
+            messageType: 'std_msgs/Bool'
+        });
+        this.is_in_dock_confirmed_subscriber.subscribe(this.handleIsInDockConfirmed.bind(this));
+
         this.initializeButtons();
+    }
+
+    handleIsInDockConfirmed(message) {
+        if (this.dock_icon_in_dock) {
+            if (message.data) {
+                this.dock_icon_in_dock.style.color = 'var(--bs-success)';
+            } else {
+                this.dock_icon_in_dock.style.color = 'var(--bs-secondary)';
+            }
+        }
     }
 
     setupImageViewers() {

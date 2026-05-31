@@ -172,6 +172,24 @@
                             <header class="visible" id="header_program_template_add_zone" style="background: #333333;padding-top: 3px;padding-bottom: 8px;padding-right: 3px;margin-left: 1px;">
                                 <div style="margin-top: 3px;margin-bottom: 1px;display: block;margin-left: 6px;background: #465765;padding-left: 7px;padding-bottom: 3px;border-radius: 4px;"><span style="font-size: 13px;">Zones:&nbsp;</span><span id="span_program_template_zones" style="color: var(--bs-gray-600);font-size: 12px;"><span style="background: var(--bs-gray-dark);padding: 2px;border-radius: 5px;padding-right: 4px;padding-left: 4px;margin-left: 2px;"><span style="margin-right: 3px;"><i class="fa fa-remove text-danger" onclick="removeProgramTemplateZone(&#39;${zone_name}&#39;)"></i></span><span>${zone_name}</span></span></span></div>
                             </header>
+                            <header style="background: #37434d;padding: 6px 8px;margin-left: 1px;">
+                                <div class="d-flex align-items-end flex-wrap" style="gap: 10px;">
+                                    <div><span style="font-size: 12px;">RPM</span><br><input class="bg-dark border border-secondary text-light" id="inp_template_rpm" type="number" min="0" max="9999" style="width: 72px;height: 26px;padding-left: 4px;font-size: 13px;border-radius: 3px;"></div>
+                                    <div><span style="font-size: 12px;">Cut height</span><br>
+                                        <div class="d-flex"><input class="bg-dark border border-secondary text-light" id="inp_template_cut_height" type="number" min="0" max="999" style="width: 58px;height: 26px;padding-left: 4px;font-size: 13px;border-radius: 3px 0 0 3px;"><span class="border border-secondary d-flex align-items-center" style="background:#2b3440;padding: 0 4px;font-size: 12px;border-radius: 0 3px 3px 0;">mm</span></div>
+                                    </div>
+                                    <div><span style="font-size: 12px;">Speed</span><br>
+                                        <div class="btn-group btn-group-sm" role="group">
+                                            <button class="btn btn-sm btn-outline-secondary" id="btn_template_speed_slow" type="button">Slow</button>
+                                            <button class="btn btn-sm btn-secondary" id="btn_template_speed_mid" type="button">Mid</button>
+                                            <button class="btn btn-sm btn-outline-secondary" id="btn_template_speed_fast" type="button">Fast</button>
+                                        </div>
+                                    </div>
+                                    <div><span style="font-size: 12px;">Override zone</span><br>
+                                        <div class="form-check d-flex align-items-center" style="height: 26px;"><input class="form-check-input" type="checkbox" id="chk_template_override_zone"></div>
+                                    </div>
+                                </div>
+                            </header>
                         </div>
                         <div id="div_program_list" style="margin-top: 3px;border-color: rgb(37,46,54);background: #252e36;">
                             <div id="div_program" style="border-bottom: 1px solid #444444;padding-right: 4px;padding-left: 6px;padding-bottom: 2px;padding-top: 2px;">

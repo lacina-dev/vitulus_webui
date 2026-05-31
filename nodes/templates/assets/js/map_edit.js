@@ -761,15 +761,33 @@ window.onload = function() {
     var span_program_template_zones = document.getElementById("span_program_template_zones");
     var btn_program_template_cancel = document.getElementById("btn_program_template_cancel");
 
+    var inp_template_rpm = document.getElementById("inp_template_rpm");
+    var inp_template_cut_height = document.getElementById("inp_template_cut_height");
+    var btn_template_speed_slow = document.getElementById("btn_template_speed_slow");
+    var btn_template_speed_mid = document.getElementById("btn_template_speed_mid");
+    var btn_template_speed_fast = document.getElementById("btn_template_speed_fast");
+    var chk_template_override_zone = document.getElementById("chk_template_override_zone");
+
     // Init program template
     var program_template_style_attr = div_program_template.getAttribute('style');
     div_program_template.setAttribute('style', 'display:none !important');
     div_program_list.innerHTML = "";
     let selected_program_msg = new ROSLIB.Message({});
+    let current_program_list = [];
 
-    // New program template show in initial state
-    btn_program_new.onclick = function () {
-        div_program_template.setAttribute('style', 'display:block !important');
+    function _setTemplatSpeedButtons(speed) {
+        const active = 'btn btn-sm btn-secondary';
+        const inactive = 'btn btn-sm btn-outline-secondary';
+        btn_template_speed_slow.className = speed === 'slow' ? active : inactive;
+        btn_template_speed_mid.className  = speed === 'mid'  ? active : inactive;
+        btn_template_speed_fast.className = speed === 'fast' ? active : inactive;
+    }
+
+    btn_template_speed_slow.onclick = function() { _setTemplatSpeedButtons('slow'); };
+    btn_template_speed_mid.onclick  = function() { _setTemplatSpeedButtons('mid');  };
+    btn_template_speed_fast.onclick = function() { _setTemplatSpeedButtons('fast'); };
+
+    function _resetTemplateForm() {
         input_program_add_zone.innerHTML = '';
         for (let i in current_zone_list) {
             var option = document.createElement("option");
@@ -777,61 +795,44 @@ window.onload = function() {
             option.innerHTML = current_zone_list[i].name;
             input_program_add_zone.appendChild(option);
         }
+    }
+
+    function _updateZoneDisplay() {
+        let zones_el = "";
+        for (let i in selected_program_msg.zone_list) {
+            const zn = selected_program_msg.zone_list[i].name;
+            zones_el += `<span style="background: var(--bs-gray-dark);padding: 2px;border-radius: 5px;padding-right: 4px;padding-left: 4px;margin-left: 2px;"><span style="margin-right: 3px;"><i class="fa fa-remove text-danger" onclick="removeProgramTemplateZone('${zn}')"></i></span><span>${zn}</span></span>`;
+        }
+        span_program_template_zones.innerHTML = zones_el;
+    }
+
+    // New program template show in initial state
+    btn_program_new.onclick = function () {
+        div_program_template.setAttribute('style', 'display:block !important');
+        input_program_template_name.value = "";
+        _resetTemplateForm();
         selected_program_msg = new ROSLIB.Message({
-            area: 0,
-            fri: false,
-            last_duration_minutes: 0,
-            last_result: "",
-            length: 0,
-            map_name: "",
-            mon: false,
-            name: "",
-            sat: false,
-            start_hour: 0,
-            start_minute: 0,
-            sun: false,
-            thu: false,
-            tue: false,
-            wed: false,
-            zone_list: [],
+            area: 0, last_duration_minutes: 0, last_result: "",
+            length: 0, map_name: "", name: "", zone_list: [],
+            rpm: 0, cut_height: 0, speed: "mid", override_zone: false,
         });
+        inp_template_rpm.value = 0;
+        inp_template_cut_height.value = 0;
+        _setTemplatSpeedButtons('mid');
+        chk_template_override_zone.checked = false;
         span_program_template_zones.innerHTML = "";
     }
 
     // Add selected zone to program
     btn_program_add_zone.onclick = function () {
-        console.log("Add zone to program");
         selected_program_msg.zone_list.push(current_zone_list[input_program_add_zone.value]);
-        zones_el = "";
-        for (let i in selected_program_msg.zone_list) {
-            // console.log(selected_program_msg.zone_list[i]);
-            const zone_name = selected_program_msg.zone_list[i].name;
-            zones_el += `
-                <span style="background: var(--bs-gray-dark);padding: 2px;border-radius: 5px;padding-right: 4px;padding-left: 4px;margin-left: 2px;"><span style="margin-right: 3px;"><i class="fa fa-remove text-danger" onclick="removeProgramTemplateZone(&#39;${zone_name}&#39;)"></i></span><span>${zone_name}</span></span>
-            `;
-        }
-        span_program_template_zones.innerHTML = zones_el;
-        // console.log(selected_program_msg);
+        _updateZoneDisplay();
     }
 
     // Remove zone from program template
     this.removeProgramTemplateZone = function (zone_name) {
-        console.log("Remove zone from program template");
-        for (let i in selected_program_msg.zone_list) {
-            if (selected_program_msg.zone_list[i].name === zone_name) {
-                selected_program_msg.zone_list.splice(i, 1);
-            }
-        }
-        zones = "";
-        for (let i in selected_program_msg.zone_list) {
-            // console.log(selected_program_msg.zone_list[i]);
-            const zone_name = selected_program_msg.zone_list[i].name;
-            zones += `
-                <span style="background: var(--bs-gray-dark);padding: 2px;border-radius: 5px;padding-right: 4px;padding-left: 4px;margin-left: 2px;"><span style="margin-right: 3px;"><i class="fa fa-remove text-danger" onclick="removeProgramTemplateZone(&#39;${zone_name}&#39;)"></i></span><span>${zone_name}</span></span>
-            `;
-        }
-        span_program_template_zones.innerHTML = zones;
-        // console.log(selected_program_msg);
+        selected_program_msg.zone_list = selected_program_msg.zone_list.filter(z => z.name !== zone_name);
+        _updateZoneDisplay();
     }
 
     // Cancel program template
@@ -863,11 +864,17 @@ window.onload = function() {
         if (ready) {
             selected_program_msg.name = input_program_template_name.value + ' (' + active_map_file_name.split("***env*")[0] + ')';
             selected_program_msg.map_name = active_map_file_name;
+            selected_program_msg.area = 0;
+            selected_program_msg.length = 0;
             for (let i in selected_program_msg.zone_list) {
                 selected_program_msg.area += selected_program_msg.zone_list[i].area;
                 selected_program_msg.length += selected_program_msg.zone_list[i].length;
             }
-            // console.log(selected_program_msg);
+            selected_program_msg.rpm = parseInt(inp_template_rpm.value) || 0;
+            selected_program_msg.cut_height = parseInt(inp_template_cut_height.value) || 0;
+            selected_program_msg.speed = btn_template_speed_slow.classList.contains('btn-secondary') ? 'slow'
+                : btn_template_speed_fast.classList.contains('btn-secondary') ? 'fast' : 'mid';
+            selected_program_msg.override_zone = chk_template_override_zone.checked;
             topic_new_program.publish(selected_program_msg);
             input_program_template_name.value = "";
             div_program_template.setAttribute('style', 'display:none !important');
@@ -882,34 +889,39 @@ window.onload = function() {
         messageType: 'vitulus_msgs/PlannerProgramList'
     });
     programListTopic.subscribe(function (message) {
+        current_program_list = message.program_list;
         var html_program_list = '';
         for (let program in message.program_list) {
-            let program_name = message.program_list[program].name;
-            let program_duration = message.program_list[program].last_duration_minutes;
-            let program_area = message.program_list[program].area;
-            let program_length = message.program_list[program].length;
-            let program_map = message.program_list[program].map_name.split("***env*")[0];
-            let program_env = message.program_list[program].map_name.split("***env*")[1];
+            const p = message.program_list[program];
+            const program_name = p.name;
+            const program_area = p.area;
+            const program_length = p.length;
+            const program_map = p.map_name.split("***env*")[0];
+            const program_env = p.map_name.split("***env*")[1];
+            const program_rpm = p.rpm || 0;
+            const program_cut_height = p.cut_height || 0;
+            const program_speed = p.speed || 'mid';
             let program_zones = "";
-            for (let zone in message.program_list[program].zone_list) {
-                program_zones += '<span>' + message.program_list[program].zone_list[zone].name + '</span>, ';
+            for (let zone in p.zone_list) {
+                program_zones += '<span>' + p.zone_list[zone].name + '</span>, ';
             }
             program_zones = program_zones.slice(0, -2);
             html_program_list += `
-                <div id="div_program" style="border-bottom: 1px solid #444444;padding-right: 4px;padding-left: 6px;padding-bottom: 2px;padding-top: 2px;">
+                <div style="border-bottom: 1px solid #444444;padding-right: 4px;padding-left: 6px;padding-bottom: 2px;padding-top: 2px;">
                     <div><span class="text-info" style="margin-right: 6px;width: 155px;font-size: 13.2px;overflow: hidden;display: inline-flex;">${program_name}</span><span class="text-nowrap" style="margin-right: 4px;font-size: 13.2px;width: auto;overflow: hidden;max-width: 62px;display: inline-flex;">${program_length} m</span><span class="text-nowrap" style="margin-right: 4px;font-size: 13.2px;overflow: hidden;max-width: 62px;display: inline-flex;">${program_area} m2</span>
                         <div class="d-xxl-flex align-items-xxl-center float-end" style="display: inline-flex;height: 24px;"><span class="text-nowrap" style="margin-right: 4px;font-size: 13.2px;overflow: hidden;max-width: 98px;display: inline-flex;">${program_map}</span><span class="text-nowrap" style="margin-right: 4px;font-size: 13.2px;overflow: hidden;max-width: 62px;display: inline-flex;">${program_env}</span></div>
                     </div>
-                    <div style="margin-top: 3px;margin-bottom: 1px;"><span style="font-size: 13px;">Zones: </span><span style="color: var(--bs-gray-600);font-size: 12px;">${program_zones}</span>
-                        <div class="btn-group btn-group-sm float-end" role="group"><button class="btn btn-outline-success d-inline-flex btn-sm-s" type="button" onclick="runProgram(&#39;${program_name}&#39;)">Run</button><button class="btn btn-outline-danger d-inline-flex btn-sm-s" type="button" onclick="removeProgram(&#39;${program_name}&#39;)">Remove</button></div>
+                    <div style="margin-top: 2px;margin-bottom: 1px;"><span style="font-size: 12px;color:var(--bs-gray-500);">Zones: </span><span style="color: var(--bs-gray-600);font-size: 12px;">${program_zones}</span></div>
+                    <div style="margin-top: 1px;margin-bottom: 2px;">
+                        <span style="font-size: 12px;color:var(--bs-gray-500);">RPM: </span><span style="font-size: 12px;color:var(--bs-gray-400);margin-right:8px;">${program_rpm}</span>
+                        <span style="font-size: 12px;color:var(--bs-gray-500);">Cut: </span><span style="font-size: 12px;color:var(--bs-gray-400);margin-right:8px;">${program_cut_height} mm</span>
+                        <span style="font-size: 12px;color:var(--bs-gray-500);">Speed: </span><span style="font-size: 12px;color:var(--bs-gray-400);">${program_speed}</span>
+                        <div class="btn-group btn-group-sm float-end" role="group"><button class="btn btn-outline-info d-inline-flex btn-sm-s" type="button" onclick="editProgram('${program_name}')">Edit</button><button class="btn btn-outline-success d-inline-flex btn-sm-s" type="button" onclick="runProgram('${program_name}')">Run</button><button class="btn btn-outline-danger d-inline-flex btn-sm-s" type="button" onclick="removeProgram('${program_name}')">Remove</button></div>
                     </div>
                 </div>
             `;
-            div_program_list.innerHTML = html_program_list;
         }
-        if (message.program_list.length === 0) {
-            div_program_list.innerHTML = "";
-        }
+        div_program_list.innerHTML = html_program_list;
     });
 
     // Publish selected program to run
@@ -941,6 +953,32 @@ window.onload = function() {
             data: name,
         });
         topic_remove_program.publish(msg);
+    }
+
+    this.editProgram = function (program_name) {
+        const prog = current_program_list.find(p => p.name === program_name);
+        if (!prog) return;
+        div_program_template.setAttribute('style', 'display:block !important');
+        // Strip map suffix: 'ProgramName (mapname)' -> 'ProgramName'
+        input_program_template_name.value = prog.name.replace(/ \([^)]+\)$/, '');
+        selected_program_msg = new ROSLIB.Message({
+            area: 0,
+            last_duration_minutes: prog.last_duration_minutes,
+            last_result: prog.last_result,
+            length: 0,
+            map_name: prog.map_name,
+            name: prog.name,
+            zone_list: prog.zone_list ? prog.zone_list.slice() : [],
+            rpm: prog.rpm || 0,
+            cut_height: prog.cut_height || 0,
+            speed: prog.speed || 'mid',
+            override_zone: prog.override_zone || false,
+        });
+        inp_template_rpm.value = prog.rpm || 0;
+        inp_template_cut_height.value = prog.cut_height || 0;
+        _setTemplatSpeedButtons(prog.speed || 'mid');
+        chk_template_override_zone.checked = prog.override_zone || false;
+        _updateZoneDisplay();
     }
 
 

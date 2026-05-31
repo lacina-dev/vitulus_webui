@@ -69,6 +69,7 @@ install(DIRECTORY launch
 
 catkin_install_python(PROGRAMS
   nodes/webnode
+  nodes/status_logger
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 

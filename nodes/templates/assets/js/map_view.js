@@ -1846,7 +1846,6 @@ class MapMenu {
         this.div_menu_map.style.display = "none";
         this.btn_menu_map_new_indoor = document.getElementById("btn_menu_map_new_indoor");
         this.btn_menu_map_new_outdoor = document.getElementById("btn_menu_map_new_outdoor");
-        this.btn_menu_map_pose_dock= document.getElementById("btn_menu_map_pose_dock");
 
         this.btn_menu_map_new_save = document.getElementById("btn_menu_map_new_save");
         this.input_menu_map_new = document.getElementById("input_menu_map_new");
@@ -1891,9 +1890,17 @@ class MapMenu {
         this.span_menu_program_env = document.getElementById("span_menu_program_env");
         this.row_menu_program_detail_zones = document.getElementById("row_menu_program_detail_zones");
         this.btn_menu_program_stop = document.getElementById("btn_menu_program_stop");
+        this.btn_menu_program_reset = document.getElementById("btn_menu_program_reset");
         this.span_menu_program_status = document.getElementById("span_menu_program_status");
         this.btn_menu_program_resume = document.getElementById("btn_menu_program_resume");
         this.span_menu_program_last_result = document.getElementById("span_menu_program_last_result");
+        this.inp_program_rpm = document.getElementById("inp_program_rpm");
+        this.inp_program_cut_height = document.getElementById("inp_program_cut_height");
+        this.btn_program_speed_slow = document.getElementById("btn_program_speed_slow");
+        this.btn_program_speed_mid = document.getElementById("btn_program_speed_mid");
+        this.btn_program_speed_fast = document.getElementById("btn_program_speed_fast");
+        this.chk_program_override_zone = document.getElementById("chk_program_override_zone");
+        this.btn_program_save_settings = document.getElementById("btn_program_save_settings");
 
         this.btn_joy = document.getElementById("btn_joy");
         this.joy_view = document.getElementById("joy_view");
@@ -2472,6 +2479,7 @@ class RosLog{
             search: ''
         };
         this.expanded = false;
+        this.active = true;          // whether this view currently owns the shared DOM
         this.autoscroll = true;
         this.viewEl = null;
         this.contentEl = null;
@@ -2509,7 +2517,6 @@ class RosLog{
         this.searchInput  = viewEl.querySelector('#input_log_search');
         this.counterEl    = viewEl.querySelector('#span_log_counter');
         this.pauseBtn     = viewEl.querySelector('#btn_log_pause');
-        const clearBtn    = viewEl.querySelector('#btn_log_clear');
 
         // Level filter buttons (multi-toggle)
         viewEl.querySelectorAll('.log-level-group [data-level]').forEach((btn) => {
@@ -2559,35 +2566,15 @@ class RosLog{
             }, 150);
         });
 
-        clearBtn.addEventListener('click', () => {
-            this.buffer.length = 0;
-            this.contentEl.innerHTML = '';
-            this.shownCount = 0;
-            this.update_counter();
-        });
+        // Shared controls (clear / pause / expand / collapse / scroll-autoscroll)
+        // are wired by LogPanel so they operate on whichever view is active.
+    }
 
-        this.pauseBtn.addEventListener('click', () => {
-            this._set_autoscroll(!this.autoscroll);
-            if (this.autoscroll) this.scroll_to_bottom();
-        });
-
-        this.expandBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            this.set_expanded(true);
-        });
-        this.collapseBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            this.set_expanded(false);
-        });
-
-        // Auto-pause when user scrolls up; resume when at bottom
-        this.contentEl.addEventListener('scroll', () => {
-            if (this.suppressScrollEvent) return;
-            const el = this.contentEl;
-            const atBottom = (el.scrollHeight - el.scrollTop - el.clientHeight) < 16;
-            if (!atBottom && this.autoscroll) this._set_autoscroll(false);
-            else if (atBottom && !this.autoscroll) this._set_autoscroll(true);
-        }, { passive: true });
+    clear() {
+        this.buffer.length = 0;
+        if (this.contentEl) this.contentEl.innerHTML = '';
+        this.shownCount = 0;
+        this.update_counter();
     }
 
     _set_autoscroll(on) {
@@ -2669,16 +2656,18 @@ class RosLog{
             this.update_source_list();
         }
 
-        if (this.expanded) {
-            if (this.matches(entry)) {
-                this.pendingAppend.push(entry);
-                this.schedule_append();
+        if (this.active) {
+            if (this.expanded) {
+                if (this.matches(entry)) {
+                    this.pendingAppend.push(entry);
+                    this.schedule_append();
+                }
+            } else if (this.viewEl && this.viewEl.style.display === 'block') {
+                // compact strip — keep original simple behaviour (all levels visible)
+                this.append_compact(entry);
             }
-        } else if (this.viewEl && this.viewEl.style.display === 'block') {
-            // compact strip — keep original simple behaviour (all levels visible)
-            this.append_compact(entry);
+            this.update_counter();
         }
-        this.update_counter();
     }
 
     schedule_append() {
@@ -2800,6 +2789,317 @@ class RosLog{
 }
 
 
+// Cached status-message view: shows the persistent log produced by the
+// `status_logger` ROS node (the /nextion/log_info strip). History + live
+// updates arrive over a single latched topic carrying a JSON array; entries
+// are de-duplicated by their monotonically increasing `seq`. Shares the same
+// DOM (#div_log_content) as RosLog — only one of them is `active` at a time.
+class StatusLog {
+    constructor(ros) {
+        this.LOG_COMPACT = 60;
+        this.LOG_BUFFER  = 1500;
+        this.buffer = [];
+        this.lastSeq = -1;
+        this.active = false;
+        this.expanded = false;
+        this.autoscroll = true;
+        this.viewEl = null;
+        this.contentEl = null;
+        this.counterEl = null;
+        this.pauseBtn = null;
+        this.shownCount = 0;
+        this.pendingAppend = [];
+        this.scheduled = false;
+        this.suppressScrollEvent = false;
+        this.history_topic = new ROSLIB.Topic({
+            ros: ros.ros,
+            name: '/status_logger/history',
+            messageType: 'std_msgs/String'
+        });
+    }
+
+    attach(viewEl) {
+        this.viewEl = viewEl;
+        this.contentEl = viewEl.querySelector('#div_log_content');
+        this.counterEl = viewEl.querySelector('#span_log_counter');
+        this.pauseBtn  = viewEl.querySelector('#btn_log_pause');
+    }
+
+    subscribe() {
+        this.history_topic.subscribe((message) => this.process_history(message));
+    }
+
+    process_history(message) {
+        let arr;
+        try { arr = JSON.parse(message.data); } catch (e) { return; }
+        if (!Array.isArray(arr)) return;
+
+        // Detect a logger restart/reset (seq numbers went backwards) and rebuild.
+        let maxSeq = -1;
+        for (const e of arr) if (typeof e.seq === 'number' && e.seq > maxSeq) maxSeq = e.seq;
+        if (arr.length && maxSeq < this.lastSeq) {
+            this.buffer.length = 0;
+            this.lastSeq = -1;
+            this.shownCount = 0;
+            this.pendingAppend.length = 0;
+            if (this.active && this.contentEl) this.contentEl.innerHTML = '';
+        }
+
+        let added = 0;
+        for (const e of arr) {
+            const seq = (typeof e.seq === 'number') ? e.seq : null;
+            if (seq !== null && seq <= this.lastSeq) continue;
+            const entry = { seq: seq, t: e.t, msg: (e.msg != null ? e.msg : '') };
+            this.buffer.push(entry);
+            if (this.buffer.length > this.LOG_BUFFER) this.buffer.shift();
+            if (seq !== null) this.lastSeq = Math.max(this.lastSeq, seq);
+            if (this.active) {
+                if (this.expanded) this.pendingAppend.push(entry);
+                else if (this.viewEl && this.viewEl.style.display === 'block') this.append_compact(entry);
+            }
+            added++;
+        }
+        if (added && this.active) {
+            if (this.expanded) this.schedule_append();
+            this.update_counter();
+        }
+    }
+
+    format_line(entry) {
+        const span = document.createElement('span');
+        span.className = 'log-line status';
+        const t = entry.t ? new Date(entry.t * 1000) : new Date();
+        const p = (n) => String(n).padStart(2, '0');
+        if (this.expanded) {
+            const d = document.createElement('span');
+            d.className = 'log-date';
+            d.textContent = t.getFullYear() + '-' + p(t.getMonth() + 1) + '-' + p(t.getDate()) + ' ';
+            span.appendChild(d);
+        }
+        const meta = document.createElement('span');
+        meta.className = 'log-meta';
+        meta.textContent = p(t.getHours()) + ':' + p(t.getMinutes()) + ':' + p(t.getSeconds()) + ' ';
+        span.appendChild(meta);
+        span.appendChild(document.createTextNode(entry.msg));
+        span.title = t.toLocaleString();
+        return span;
+    }
+
+    append_compact(entry) {
+        const el = this.contentEl;
+        el.appendChild(this.format_line(entry));
+        while (el.childElementCount > this.LOG_COMPACT) el.removeChild(el.firstChild);
+        this.suppressScrollEvent = true;
+        el.scrollTop = el.scrollHeight;
+        this.suppressScrollEvent = false;
+    }
+
+    schedule_append() {
+        if (this.scheduled) return;
+        this.scheduled = true;
+        const fn = () => {
+            this.scheduled = false;
+            if (!this.pendingAppend.length) return;
+            const frag = document.createDocumentFragment();
+            for (const e of this.pendingAppend) frag.appendChild(this.format_line(e));
+            this.shownCount += this.pendingAppend.length;
+            this.pendingAppend.length = 0;
+            this.contentEl.appendChild(frag);
+            while (this.contentEl.childElementCount > this.LOG_BUFFER) {
+                this.contentEl.removeChild(this.contentEl.firstChild);
+                this.shownCount = Math.max(0, this.shownCount - 1);
+            }
+            this.update_counter();
+            if (this.autoscroll) this.scroll_to_bottom();
+        };
+        if (typeof requestAnimationFrame === 'function') requestAnimationFrame(fn);
+        else setTimeout(fn, 16);
+    }
+
+    render_compact() {
+        if (!this.contentEl) return;
+        const el = this.contentEl;
+        el.innerHTML = '';
+        const start = Math.max(0, this.buffer.length - this.LOG_COMPACT);
+        const frag = document.createDocumentFragment();
+        for (let i = start; i < this.buffer.length; i++) frag.appendChild(this.format_line(this.buffer[i]));
+        el.appendChild(frag);
+        this.shownCount = el.childElementCount;
+        this.update_counter();
+        this.suppressScrollEvent = true;
+        el.scrollTop = el.scrollHeight;
+        this.suppressScrollEvent = false;
+    }
+
+    render_full() {
+        if (!this.contentEl) return;
+        const el = this.contentEl;
+        el.innerHTML = '';
+        const frag = document.createDocumentFragment();
+        for (const entry of this.buffer) frag.appendChild(this.format_line(entry));
+        el.appendChild(frag);
+        this.shownCount = this.buffer.length;
+        this.pendingAppend.length = 0;
+        this.update_counter();
+        this.suppressScrollEvent = true;
+        el.scrollTop = el.scrollHeight;
+        this.suppressScrollEvent = false;
+    }
+
+    update_counter() {
+        if (!this.counterEl) return;
+        if (this.expanded) this.counterEl.textContent = this.shownCount + ' / ' + this.buffer.length;
+        else this.counterEl.textContent = String(this.buffer.length);
+    }
+
+    clear() {
+        this.buffer.length = 0;
+        this.lastSeq = -1;
+        if (this.contentEl) this.contentEl.innerHTML = '';
+        this.shownCount = 0;
+        this.update_counter();
+    }
+
+    _set_autoscroll(on) {
+        this.autoscroll = !!on;
+        if (!this.pauseBtn) return;
+        const span = this.pauseBtn.querySelector('span');
+        if (this.autoscroll) {
+            this.pauseBtn.classList.add('btn-outline-info');
+            this.pauseBtn.classList.remove('btn-info');
+            if (span) span.textContent = 'Live';
+            this.pauseBtn.title = 'Pause autoscroll';
+        } else {
+            this.pauseBtn.classList.remove('btn-outline-info');
+            this.pauseBtn.classList.add('btn-info');
+            if (span) span.textContent = 'Paused';
+            this.pauseBtn.title = 'Resume autoscroll';
+        }
+    }
+
+    set_expanded(on) {
+        this.expanded = !!on;
+        if (this.expanded) {
+            this.viewEl.classList.add('log-expanded');
+            this.viewEl.classList.remove('log-compact');
+            this._set_autoscroll(true);
+            this.render_full();
+        } else {
+            this.viewEl.classList.remove('log-expanded');
+            this.viewEl.classList.add('log-compact');
+            this._set_autoscroll(true);
+            this.render_compact();
+            if (typeof layout_man !== 'undefined' && layout_man) layout_man.set_layout();
+        }
+        this.scroll_to_bottom();
+    }
+
+    scroll_to_bottom() {
+        if (!this.contentEl) return;
+        this.suppressScrollEvent = true;
+        this.contentEl.scrollTop = this.contentEl.scrollHeight;
+        this.suppressScrollEvent = false;
+    }
+}
+
+
+// Coordinates the two bottom-log views (RosLog = /rosout, StatusLog = cached
+// status messages) over a single shared toolbar + content area. Owns the
+// controls that act on whichever view is currently selected.
+class LogPanel {
+    constructor(ros) {
+        this.rosLog = new RosLog(ros);
+        this.statusLog = new StatusLog(ros);
+        this.mode = 'rosout';
+        this.expanded = false;
+        this.viewEl = null;
+        this.contentEl = null;
+        this.rosoutOnlyEls = [];
+        this.modeBtns = [];
+    }
+
+    get active() { return this.mode === 'status' ? this.statusLog : this.rosLog; }
+
+    attach(viewEl) {
+        this.viewEl = viewEl;
+        this.rosLog.attach(viewEl);
+        this.statusLog.attach(viewEl);
+        this.rosLog.active = true;
+        this.statusLog.active = false;
+
+        this.contentEl   = viewEl.querySelector('#div_log_content');
+        const pauseBtn    = viewEl.querySelector('#btn_log_pause');
+        const clearBtn    = viewEl.querySelector('#btn_log_clear');
+        const expandBtn   = viewEl.querySelector('#btn_log_expand');
+        const collapseBtn = viewEl.querySelector('#btn_log_collapse');
+        this.rosoutOnlyEls = Array.from(viewEl.querySelectorAll('.log-rosout-only'));
+        this.modeBtns      = Array.from(viewEl.querySelectorAll('.log-mode-group [data-logmode]'));
+
+        this.modeBtns.forEach((btn) => {
+            btn.addEventListener('click', (e) => {
+                e.preventDefault();
+                this.set_mode(btn.dataset.logmode);
+            });
+        });
+
+        pauseBtn.addEventListener('click', () => {
+            const a = this.active;
+            a._set_autoscroll(!a.autoscroll);
+            if (a.autoscroll) a.scroll_to_bottom();
+        });
+        clearBtn.addEventListener('click', () => { this.active.clear(); });
+        expandBtn.addEventListener('click', (e) => { e.stopPropagation(); this.set_expanded(true); });
+        collapseBtn.addEventListener('click', (e) => { e.stopPropagation(); this.set_expanded(false); });
+
+        this.contentEl.addEventListener('scroll', () => {
+            const a = this.active;
+            if (a.suppressScrollEvent) return;
+            const el = this.contentEl;
+            const atBottom = (el.scrollHeight - el.scrollTop - el.clientHeight) < 16;
+            if (!atBottom && a.autoscroll) a._set_autoscroll(false);
+            else if (atBottom && !a.autoscroll) a._set_autoscroll(true);
+        }, { passive: true });
+    }
+
+    _apply_mode_visibility() {
+        const showRosout = (this.mode === 'rosout');
+        this.rosoutOnlyEls.forEach((el) => { el.style.display = showRosout ? '' : 'none'; });
+        this.modeBtns.forEach((b) => b.classList.toggle('active', b.dataset.logmode === this.mode));
+    }
+
+    set_mode(mode) {
+        if (mode !== 'rosout' && mode !== 'status') return;
+        if (mode === this.mode) return;
+        const prev = this.active;
+        prev.active = false;
+        prev.pendingAppend.length = 0;
+        this.mode = mode;
+        const next = this.active;
+        next.active = true;
+        next.expanded = this.expanded;
+        this._apply_mode_visibility();
+        next._set_autoscroll(true);
+        if (this.expanded) next.render_full();
+        else next.render_compact();
+        next.scroll_to_bottom();
+    }
+
+    set_expanded(on) {
+        this.expanded = !!on;
+        this.rosLog.expanded = this.expanded;
+        this.statusLog.expanded = this.expanded;
+        this.active.set_expanded(this.expanded);
+    }
+
+    // Called when the whole log panel becomes visible.
+    render_open() {
+        this._apply_mode_visibility();
+        if (this.expanded) this.active.render_full();
+        else this.active.render_compact();
+    }
+}
+
+
 class MoveBaseControl {
     constructor(ros, joy_teleop) {
         this.joy_teleop = joy_teleop;
@@ -2818,6 +3118,13 @@ class MoveBaseControl {
             messageType: 'actionlib_msgs/GoalID'
         });
         this.speedTopic = new ROSLIB.Topic({
+            ros : ros,
+            name : '/navi_manager/speed',
+            messageType : 'std_msgs/String'
+        });
+        // Subscribe to the same topic so the buttons reflect the current speed
+        // even when it is changed elsewhere (smach program, another browser).
+        this.speedStatusTopic = new ROSLIB.Topic({
             ros : ros,
             name : '/navi_manager/speed',
             messageType : 'std_msgs/String'
@@ -2848,6 +3155,26 @@ class MoveBaseControl {
     init() {
         this.cancelGoalTopic.advertise();
         this.speedTopic.advertise();
+        this.speedStatusTopic.subscribe((msg) => this.update_speed_buttons(msg.data));
+    }
+    update_speed_buttons(speed) {
+        // speed is the canonical /navi_manager/speed value: SLOW | MEDIUM | FAST.
+        // Highlight the active button (blue) and reset the others (white).
+        // Purely visual — does NOT publish, so there is no feedback loop.
+        const white = "#ffffff";
+        const blue = "#446de5";
+        let low = white, moderate = white, fast = white, label = '';
+        if (speed === 'SLOW') { low = blue; label = 'SLOW'; }
+        else if (speed === 'MEDIUM') { moderate = blue; label = 'MODERATE'; }
+        else if (speed === 'FAST') { fast = blue; label = 'FAST'; }
+        else { return; }  // unknown value, leave UI untouched
+        this.btn_menu_speed_low.style.color = low;
+        this.btn_menu_speed_moderate.style.color = moderate;
+        this.btn_menu_speed_fast.style.color = fast;
+        this.btn_menu_speed_low_sm.style.color = low;
+        this.btn_menu_speed_moderate_sm.style.color = moderate;
+        this.btn_menu_speed_fast_sm.style.color = fast;
+        this.span_status_speed.innerText = label;
     }
     pub_cancel_goal() {
         const cancelGoalMsg = new ROSLIB.Message({});
@@ -3479,6 +3806,11 @@ class Mower {
         this.span_mower_direction = document.getElementById("span_mower_direction");
         this.span_mower_cut_height = document.getElementById("span_mower_cut_height");
         this.span_mower_rpm = document.getElementById("span_mower_rpm");
+        this.div_mower_info_panel = document.getElementById("div_mower_info_panel");
+        this.span_mower_panel_status = document.getElementById("span_mower_panel_status");
+        this.span_mower_panel_rpm = document.getElementById("span_mower_panel_rpm");
+        this.span_mower_panel_height = document.getElementById("span_mower_panel_height");
+        this.span_mower_panel_temp = document.getElementById("span_mower_panel_temp");
         this.btn_mower_on = document.getElementById("btn_mower_on");
         this.btn_mower_off = document.getElementById("btn_mower_off");
         this.btn_mower_left = document.getElementById("btn_mower_left");
@@ -3596,6 +3928,31 @@ class Mower {
         this.span_mower_cut_height.textContent = message.current_height + "/" + message.max_height + " cm";
         this.span_mower_rpm.textContent = message.moto_rpm + "/" + message.setpoint_rpm + " rpm";
         this.span_mower_temp.textContent = parseInt(message.temp) + "`C";
+
+        // Update mower info panel visibility and values
+        if (this.div_mower_info_panel) {
+            if (message.status === 'UNK' || message.status === 'OFF') {
+                this.div_mower_info_panel.style.display = 'none';
+            } else {
+                this.div_mower_info_panel.style.display = 'inline-flex';
+                this.span_mower_panel_rpm.textContent = message.moto_rpm + " rpm";
+                this.span_mower_panel_height.textContent = message.current_height + " cm";
+                this.span_mower_panel_temp.textContent = parseInt(message.temp) + "°C";
+
+                // Status text and color
+                let statusText = message.status;
+                let statusColor = 'var(--bs-warning)';
+                if (message.status === 'CALIBRATING') statusText = 'CALIB';
+                if (message.status === 'CHANGE_HEIGHT') statusText = 'HEIGHT';
+                if (message.status === 'READY' || message.status === 'RUN') {
+                    statusColor = 'var(--bs-success)';
+                } else if (message.status === 'ERR' || message.status === 'BLOCKED' || message.status === 'TEMP') {
+                    statusColor = 'var(--bs-danger)';
+                }
+                this.span_mower_panel_status.textContent = statusText;
+                this.span_mower_panel_status.style.color = statusColor;
+            }
+        }
     }
 
     pub_mower_set_power(value) {
@@ -3697,6 +4054,20 @@ class PowerModule {
         this.input_standby_cutoff = document.getElementById("input_standby_cutoff");
         this.input_pcb_temp = document.getElementById("input_pcb_temp");
         this.input_ext_temp = document.getElementById("input_ext_temp");
+        this.btn_sleep_time_save = document.getElementById("btn_sleep_time_save");
+        this.btn_sleep_timed = document.getElementById("btn_sleep_timed");
+        this.btn_sleep_until_charged = document.getElementById("btn_sleep_until_charged");
+        this.btn_standby_delay = document.getElementById("btn_standby_delay");
+        this.input_sleep_time_min = document.getElementById("input_sleep_time_min");
+        this.input_standby_delay = document.getElementById("input_standby_delay");
+        this.btn_sleep_charged_offset = document.getElementById("btn_sleep_charged_offset");
+        this.input_sleep_charged_offset = document.getElementById("input_sleep_charged_offset");
+        this.btn_standby_timeout_discharging = document.getElementById("btn_standby_timeout_discharging");
+        this.input_standby_timeout_discharging = document.getElementById("input_standby_timeout_discharging");
+        this.span_sleep_time_min = document.getElementById("span_sleep_time_min");
+        this.span_standby_delay = document.getElementById("span_standby_delay");
+        this.span_sleep_charged_offset = document.getElementById("span_sleep_charged_offset");
+        this.span_standby_timeout_discharging = document.getElementById("span_standby_timeout_discharging");
 
         this.power_status_topic = new ROSLIB.Topic({
             ros: ros.ros,
@@ -3743,6 +4114,36 @@ class PowerModule {
             name : '/pm/set_motor_switch',
             messageType : 'std_msgs/Bool'
         });
+        this.set_sleep_time_topic = new ROSLIB.Topic({
+            ros : ros.ros,
+            name : '/pm/set_sleep_time',
+            messageType : 'std_msgs/UInt64'
+        });
+        this.set_robot_sleep_topic = new ROSLIB.Topic({
+            ros : ros.ros,
+            name : '/pm/set_robot_sleep',
+            messageType : 'std_msgs/Bool'
+        });
+        this.set_sleep_until_charged_topic = new ROSLIB.Topic({
+            ros : ros.ros,
+            name : '/pm/set_sleep_until_charged',
+            messageType : 'std_msgs/Bool'
+        });
+        this.set_sleep_wait_before_standby_topic = new ROSLIB.Topic({
+            ros : ros.ros,
+            name : '/pm/set_sleep_wait_before_standby',
+            messageType : 'std_msgs/UInt64'
+        });
+        this.set_sleep_wait_charged_offset_topic = new ROSLIB.Topic({
+            ros : ros.ros,
+            name : '/pm/set_sleep_wait_charged_offset',
+            messageType : 'std_msgs/UInt64'
+        });
+        this.set_standby_timeout_discharging_topic = new ROSLIB.Topic({
+            ros : ros.ros,
+            name : '/pm/set_standby_timeout_discharging',
+            messageType : 'std_msgs/UInt64'
+        });
 
         this.init();
     }
@@ -3756,6 +4157,12 @@ class PowerModule {
         this.set_temp2_setpoint_topic.advertise();
         this.set_bat_out_switch_topic.advertise();
         this.set_motor_switch_topic.advertise();
+        this.set_sleep_time_topic.advertise();
+        this.set_robot_sleep_topic.advertise();
+        this.set_sleep_until_charged_topic.advertise();
+        this.set_sleep_wait_before_standby_topic.advertise();
+        this.set_sleep_wait_charged_offset_topic.advertise();
+        this.set_standby_timeout_discharging_topic.advertise();
     }
 
     status_data(message){
@@ -3829,6 +4236,10 @@ class PowerModule {
         this.span_standby_cutoff.innerHTML = message.precharge_current_setpoint_standby;
         this.span_pcb_temp.innerHTML = message.temp2_setpoint;
         this.span_ext_temp.innerHTML = message.temp_setpoint;
+        this.span_sleep_time_min.innerHTML = Math.round(message.sleep_time_interval / 60000);
+        this.span_standby_delay.innerHTML = Math.round(message.sleep_wait_standby / 60000);
+        this.span_sleep_charged_offset.innerHTML = Math.round(message.sleep_wait_charged / 60000);
+        this.span_standby_timeout_discharging.innerHTML = Math.round(message.standby_timeout / 60000);
     }
 
     pub_set_charge_current_running(value) {
@@ -3886,6 +4297,34 @@ class PowerModule {
         });
         this.set_motor_switch_topic.publish(msg);
     }
+
+    pub_set_sleep_time(minutes) {
+        this.set_sleep_time_topic.publish(new ROSLIB.Message({ data: minutes * 60000 }));
+    }
+
+    pub_start_sleep() {
+        this.set_robot_sleep_topic.publish(new ROSLIB.Message({ data: true }));
+    }
+
+    pub_sleep_until_charged() {
+        this.set_sleep_until_charged_topic.publish(new ROSLIB.Message({ data: true }));
+    }
+
+    pub_wake() {
+        this.set_robot_sleep_topic.publish(new ROSLIB.Message({ data: false }));
+    }
+
+    pub_set_standby_delay(minutes) {
+        this.set_sleep_wait_before_standby_topic.publish(new ROSLIB.Message({ data: minutes * 60000 }));
+    }
+
+    pub_set_charged_offset(minutes) {
+        this.set_sleep_wait_charged_offset_topic.publish(new ROSLIB.Message({ data: minutes * 60000 }));
+    }
+
+    pub_set_standby_timeout_discharging(minutes) {
+        this.set_standby_timeout_discharging_topic.publish(new ROSLIB.Message({ data: minutes * 60000 }));
+    }
 }
 
 
@@ -3906,6 +4345,11 @@ class Programs {
         this.smach_stop_Topic = new ROSLIB.Topic({
             ros : ros,
             name : '/mower_smach/stop',
+            messageType : 'std_msgs/Bool'
+        });
+        this.smach_reset_Topic = new ROSLIB.Topic({
+            ros : ros,
+            name : '/mower_smach/reset',
             messageType : 'std_msgs/Bool'
         });
         this.smach_status_Topic = new ROSLIB.Topic({
@@ -3938,6 +4382,11 @@ class Programs {
             name: '/web_plan/program_select_resume',
             messageType: 'std_msgs/String'
         });
+        this.topic_program_new = new ROSLIB.Topic({
+            ros: ros,
+            name: '/web_plan/program_new',
+            messageType: 'vitulus_msgs/PlannerProgram'
+        });
         this.program_list = [];
         this.selected_program = null;
         this.init();
@@ -3948,7 +4397,9 @@ class Programs {
         this.program_to_show_marker_Topic.advertise();
         this.topic_program_select.advertise();
         this.topic_program_resume.advertise();
+        this.topic_program_new.advertise();
         this.smach_stop_Topic.advertise();
+        this.smach_reset_Topic.advertise();
         this.reload_planner_data();
     }
     reload_planner_data(){
@@ -3990,6 +4441,10 @@ class Programs {
         this.map_menu.span_menu_program_env.innerText = map_env;
         this.map_menu.span_menu_program_map.innerText = map_name;
         this.map_menu.span_menu_program_last_result.innerText = program.last_result;
+        this.map_menu.inp_program_rpm.value = program.rpm !== undefined ? program.rpm : 0;
+        this.map_menu.inp_program_cut_height.value = program.cut_height !== undefined ? program.cut_height : 0;
+        this._setSpeedButtons(program.speed || 'mid');
+        this.map_menu.chk_program_override_zone.checked = program.override_zone || false;
         this.map_menu.row_menu_program_detail_zones.innerHTML = "";
         program.zone_list.forEach((zone) => {
             const zone_item= new ProgramZoneItemTemplate(zone);
@@ -4002,6 +4457,32 @@ class Programs {
         });
 
         this.map_menu.div_menu_program_detail_row.style.display = "flex";
+    }
+    _setSpeedButtons(speed){
+        const active = 'btn btn-sm btn-secondary';
+        const inactive = 'btn btn-sm btn-outline-secondary';
+        this.map_menu.btn_program_speed_slow.className = speed === 'slow' ? active : inactive;
+        this.map_menu.btn_program_speed_mid.className = speed === 'mid' ? active : inactive;
+        this.map_menu.btn_program_speed_fast.className = speed === 'fast' ? active : inactive;
+    }
+    saveProgram(){
+        const prg = this.selected_program;
+        if (!prg) return;
+        const speed = this.map_menu.btn_program_speed_slow.classList.contains('btn-secondary') ? 'slow'
+            : this.map_menu.btn_program_speed_fast.classList.contains('btn-secondary') ? 'fast' : 'mid';
+        const updated = Object.assign({}, prg, {
+            rpm: parseInt(this.map_menu.inp_program_rpm.value) || 0,
+            cut_height: parseInt(this.map_menu.inp_program_cut_height.value) || 0,
+            speed: speed,
+            override_zone: this.map_menu.chk_program_override_zone.checked,
+        });
+        // Update local cache immediately so switching away and back shows correct values
+        const idx = this.program_list_msg.program_list.findIndex(p => p.name === prg.name);
+        if (idx !== -1) {
+            this.program_list_msg.program_list[idx] = updated;
+        }
+        this.selected_program = updated;
+        this.topic_program_new.publish(new ROSLIB.Message(updated));
     }
     show_program_in_map(){
         if (this.map_menu.btn_menu_program_show.innerText === 'Show'){
@@ -4043,6 +4524,15 @@ class Programs {
             data: true,
         });
         this.smach_stop_Topic.publish(msg);
+    }
+
+    resetSmach() {
+        // Clears TERMINAL_ERROR / STOPPED in mower_smach back to Ready.
+        // Not the same as Resume (which re-runs an unfinished program).
+        const msg = new ROSLIB.Message({
+            data: true,
+        });
+        this.smach_reset_Topic.publish(msg);
     }
 }
 
@@ -4291,6 +4781,10 @@ window.onload = function () {
     programs = new Programs(ros.ros, map_menu, paths_visualization);
     programs.reload_planner_data();
 
+    /**
+     *  Calendar Manager (scheduler calendar events)
+     */
+    calendarManager = new CalendarManager(ros.ros, programs);
 
 
     /**
@@ -4313,10 +4807,6 @@ window.onload = function () {
 
     map_menu.btn_marker_cancel_navigation.onclick = function () {
         map_menu.cancel_goal_publish();
-    };
-
-    map_menu.btn_menu_map_pose_dock.onclick = function () {
-        map_menu.dock_pose_publish();
     };
 
     /**
@@ -4390,11 +4880,26 @@ window.onload = function () {
         programs.stopProgram();
     };
 
+    map_menu.btn_menu_program_reset.onclick = function () {
+        programs.resetSmach();
+    };
+
     map_menu.btn_menu_program_resume.onclick = function () {
         programs.resumeProgram(programs.selected_program.name);
     }
 
-
+    map_menu.btn_program_speed_slow.onclick = function () {
+        programs._setSpeedButtons('slow');
+    };
+    map_menu.btn_program_speed_mid.onclick = function () {
+        programs._setSpeedButtons('mid');
+    };
+    map_menu.btn_program_speed_fast.onclick = function () {
+        programs._setSpeedButtons('fast');
+    };
+    map_menu.btn_program_save_settings.onclick = function () {
+        programs.saveProgram();
+    };
 
     /**
      *  Paths submenu
@@ -4581,21 +5086,24 @@ window.onload = function () {
      *  Log
      */
 
-    ros_log = new RosLog(ros);
-    ros_log.attach(map_menu.div_log_view);
+    log_panel = new LogPanel(ros);
+    log_panel.attach(map_menu.div_log_view);
+    ros_log = log_panel.rosLog;        // /rosout view (kept as global for the subscription below)
+    status_log = log_panel.statusLog;  // cached status-message view
     ros_log.log_topic.subscribe(function (message) {
         ros_log.process_message(message);
     });
+    status_log.subscribe();
     map_menu.btn_log.onclick = function () {
         if (map_menu.div_log_view.style.display === "block"){
             // hide entirely (also collapses if expanded)
-            if (ros_log.expanded) ros_log.set_expanded(false);
+            if (log_panel.expanded) log_panel.set_expanded(false);
             map_menu.div_log_view.style.display = "none";
             layout_man.set_layout();
         }
         else {
             map_menu.div_log_view.style.display = "block";
-            ros_log.render_compact();
+            log_panel.render_open();
             layout_man.set_layout();
         }
     };
@@ -4694,8 +5202,22 @@ window.onload = function () {
      */
 
     power_module = new PowerModule(ros);
+    // Battery % next to the dock bolt; colour mirrors the top monitoring battery
+    // icon (device_state_publisher buckets): FULL/75 green, 50 yellow, 25/EMPTY red.
+    var span_batt_pct = document.getElementById("span_batt_pct");
+    function update_dock_battery_pct(message) {
+        if (!span_batt_pct) return;
+        var cap = message.battery_capacity;
+        span_batt_pct.textContent = cap + '%';
+        var color;
+        if (cap > 50) color = 'var(--bs-success)';      // FULL, 75
+        else if (cap > 25) color = 'var(--bs-warning)'; // 50
+        else color = 'var(--bs-danger)';                // 25, EMPTY
+        span_batt_pct.style.setProperty('color', color);
+    }
     power_module.power_status_topic.subscribe(function(message) {
         power_module.status_data(message);
+        update_dock_battery_pct(message);
     });
 
     power_module.btn_run_charge.onclick = function() {
@@ -4732,6 +5254,25 @@ window.onload = function () {
     power_module.btn_motor_off_pm.onclick = function() {power_module.pub_set_motor_switch(value = false)};
     power_module.btn_mower_on_pm.onclick = function() {power_module.pub_set_bat_out_switch(value = true)};
     power_module.btn_mower_off_pm.onclick = function() {power_module.pub_set_bat_out_switch(value = false)};
+
+    power_module.btn_sleep_time_save.onclick = function() {
+        const min = parseInt(power_module.input_sleep_time_min.value, 10);
+        if (min > 0) { power_module.pub_set_sleep_time(min); }
+    };
+    power_module.btn_sleep_timed.onclick = function() { power_module.pub_start_sleep(); };
+    power_module.btn_sleep_until_charged.onclick = function() { power_module.pub_sleep_until_charged(); };
+    power_module.btn_standby_delay.onclick = function() {
+        const sec = parseInt(power_module.input_standby_delay.value, 10);
+        if (!isNaN(sec)) { power_module.pub_set_standby_delay(sec); }
+    };
+    power_module.btn_sleep_charged_offset.onclick = function() {
+        const sec = parseInt(power_module.input_sleep_charged_offset.value, 10);
+        if (!isNaN(sec)) { power_module.pub_set_charged_offset(sec); }
+    };
+    power_module.btn_standby_timeout_discharging.onclick = function() {
+        const sec = parseInt(power_module.input_standby_timeout_discharging.value, 10);
+        if (!isNaN(sec)) { power_module.pub_set_standby_timeout_discharging(sec); }
+    };
 
 
 
