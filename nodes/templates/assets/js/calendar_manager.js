@@ -29,8 +29,24 @@ class CalendarManager {
             name: '/scheduler/status',
             messageType: 'std_msgs/String'
         });
+        this.nextRunSub = new ROSLIB.Topic({
+            ros: ros,
+            name: '/scheduler/next_run',
+            messageType: 'std_msgs/String'
+        });
+        this.inhibitPub = new ROSLIB.Topic({
+            ros: ros,
+            name: '/scheduler/inhibit',
+            messageType: 'std_msgs/Bool'
+        });
+        this.inhibitStatusSub = new ROSLIB.Topic({
+            ros: ros,
+            name: '/scheduler/inhibit_status',
+            messageType: 'std_msgs/Bool'
+        });
 
         this.calendarPub.advertise();
+        this.inhibitPub.advertise();
 
         // Subscribe to current calendar from master_controller
         this.calendarSub.subscribe((msg) => {
@@ -46,6 +62,25 @@ class CalendarManager {
         this.statusSub.subscribe((msg) => {
             const el = document.getElementById('span_scheduler_status');
             if (el) el.textContent = msg.data || '';
+        });
+
+        // Subscribe to next-run info
+        this.nextRunSub.subscribe((msg) => {
+            const el = document.getElementById('span_scheduler_next');
+            if (el) {
+                const v = msg.data || '';
+                el.textContent = (v && v !== 'None') ? ('Next: ' + v) : '';
+            }
+        });
+
+        // Subscribe to inhibit status (reflect, don't echo back)
+        this.inhibitStatusSub.subscribe((msg) => {
+            const el = document.getElementById('chk_scheduler_inhibit');
+            if (el) {
+                this._inhibitFromRos = true;
+                el.checked = !!msg.data;
+                this._inhibitFromRos = false;
+            }
         });
 
         // DOM references
@@ -87,6 +122,15 @@ class CalendarManager {
                 this._setDayBtnActive(btn, !active);
             });
         });
+
+        // Inhibit toggle -> publish to master_controller
+        const inhibitEl = document.getElementById('chk_scheduler_inhibit');
+        if (inhibitEl) {
+            inhibitEl.addEventListener('change', () => {
+                if (this._inhibitFromRos) return;  // skip ROS-driven updates
+                this.inhibitPub.publish(new ROSLIB.Message({ data: inhibitEl.checked }));
+            });
+        }
     }
 
     // ---- rendering ----

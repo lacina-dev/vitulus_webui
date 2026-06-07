@@ -602,6 +602,11 @@
                                     <span style="font-size: 12px;font-weight: 600;color: var(--bs-info);">Calendar</span>
                                     <button class="btn btn-sm btn-outline-info" id="btn_calendar_add" type="button" style="font-size: 11px;padding: 2px 8px;">+ Add event</button>
                                     <span id="span_scheduler_status" style="font-size: 11px;color: #9aa0a6;margin-left: 8px;"></span>
+                                    <span id="span_scheduler_next" style="font-size: 11px;color: #6fae6f;margin-left: 8px;"></span>
+                                    <div class="form-check form-switch" style="margin:0;margin-left:auto;">
+                                        <input class="form-check-input" type="checkbox" id="chk_scheduler_inhibit" style="cursor:pointer;">
+                                        <label class="form-check-label" for="chk_scheduler_inhibit" style="font-size:11px;color:#9aa0a6;">Inhibit</label>
+                                    </div>
                                 </div>
                             </div>
                             <div id="div_calendar_events" style="max-height: calc(100vh - 360px);overflow-y: auto;"></div>
