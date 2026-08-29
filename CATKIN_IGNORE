@@ -1,0 +1,3 @@
+Retired 2026-08-01 (stack audit): dead package, not in the production launch chain.
+Production chain: vitulus.service -> vitulus/launch/vitulus_start.launch.
+Delete this file to re-enable catkin builds of this package.
